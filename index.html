@@ -65,6 +65,7 @@
   .sort-ind{opacity:.6;font-size:.9em;margin-left:6px}
   tbody tr:nth-child(even) td{background:#fcfcfc}
   tbody tr:hover td{background:#f3f7ff}
+  /* Sticky første kolonne (lys modus) */
   tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 #eee}
 
   .legend{font-size:.9rem;color:#666;margin-top:6px}
@@ -82,6 +83,8 @@
   html.dark thead th{background:#0f172a;border-bottom-color:#1f2a44}
   html.dark tbody td{border-top-color:#15213b}
   html.dark tbody tr:hover td{background:#0d1a34}
+  /* Sticky første kolonne (dark) – FIX */
+  html.dark tbody td:first-child, html.dark thead th:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
 </style>
 </head>
@@ -142,7 +145,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </section>
-  <div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: egen blå skala, **alltid svart tekst**. NAVN og NESTE 6 i bold.</div>
+  <div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: blå skala – svart tekst i lys modus, auto-kontrast i mørk modus. NAVN og NESTE 6 i bold.</div>
 
   <!-- FOOTER -->
   <footer class="footer-wrap" id="about">
@@ -211,6 +214,9 @@
   function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];}
   function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
 
+  // Dark mode helper
+  const isDarkMode = ()=> document.documentElement.classList.contains('dark');
+
   // ======== HEADER ========
   function renderHeader(){
     const tr=document.createElement('tr');
@@ -271,14 +277,17 @@
     return `background:${rgbToCss(rgb)};color:${text}`;
   }
 
-  // **NESTE 6 – alltid SVART tekst**
+  // NESTE 6 – svart i lys modus, auto-kontrast i mørk modus
   function colorNeste6(val,min,max, invert=false){
     if(!isNumericLike(val))return '';
     const x=toNumber(val);
     if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
     let t=(x-min)/(max-min); if(invert)t=1-t;
     const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-    return `background:hsl(${hue} ${sat}% ${light}%);color:#000`;
+
+    // Lys modus: alltid svart (som ønsket). Dark modus: automatisk kontrast.
+    const textColor = isDarkMode() ? (light < 65 ? '#fff' : '#000') : '#000';
+    return `background:hsl(${hue} ${sat}% ${light}%);color:${textColor}`;
   }
 
   function computeGroupRange(rows, cols){
@@ -336,14 +345,28 @@
     };
   }
 
-  // ======== KPI ========
-  function updateKPIs(rows){ kpiCount.textContent=`${fmtInt(rows.length)} spillere`; }
+  // ======== HEADER + BODY ========
+  function renderHeader(){
+    const tr=document.createElement('tr');
+    VISIBLE_COLUMNS.forEach(col=>{
+      const th=document.createElement('th');
+      const btn=document.createElement('button');
+      btn.textContent=col;
+      btn.addEventListener('click',()=>{ if (sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; } render(); });
+      th.appendChild(btn);
+      if (sortCol===col){ const s=document.createElement('span'); s.className='sort-ind'; s.textContent=sortDir===1?'▲':'▼'; th.appendChild(s); }
+      tr.appendChild(th);
+    });
+    thead.innerHTML=''; thead.appendChild(tr);
+  }
 
-  // ======== RENDER ========
+  // KPI
+  function updateKPIs(rows){ kpiCount.textContent = `${fmtInt(rows.length)} spillere`; }
+
   function render(){
     renderHeader();
-    let rows=DATA.filter(rowMatches);
-    if(sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
+    let rows = DATA.filter(rowMatches);
+    if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
     const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
     const neste6Range = condfmtToggle.checked && VISIBLE_COLUMNS.includes(NESTE6_COLUMN)
@@ -351,26 +374,24 @@
 
     tbody.innerHTML='';
     const frag=document.createDocumentFragment();
-    for(const row of rows){
+    for (const row of rows){
       const tr=document.createElement('tr');
       tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
         let style='';
-        if(condfmtToggle.checked){
-          if(GROUP_COLUMNS.includes(c) && groupRange){
+        if (condfmtToggle.checked){
+          if (GROUP_COLUMNS.includes(c) && groupRange){
             style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-          } else if(c===NESTE6_COLUMN && neste6Range){
+          } else if (c === NESTE6_COLUMN && neste6Range){
             style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
           }
         }
-        let val=row[c]??'';
-        // Posisjon-badge
-        if(detectedPositionCol && c===detectedPositionCol){
-          const pos=String(val);
+        let val = row[c] ?? '';
+        if (detectedPositionCol && c === detectedPositionCol){
+          const pos = String(val);
           const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
-          val=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${bg};font-weight:600">${pos}</span>`;
+          val = `<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${bg};font-weight:600">${pos}</span>`;
         }
-        // Bold for NAVN og NESTE 6
-        if((detectedNameCol && c===detectedNameCol) || c===NESTE6_COLUMN) val=`<strong>${val}</strong>`;
+        if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
         return `<td style="${style}">${val}</td>`;
       }).join('');
       frag.appendChild(tr);
@@ -418,7 +439,7 @@
       const data=res.data||[];
       RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
 
-      // beregn synlige kolonner (skjul etter bokstav og navn)
+      // synlige kolonner (skjul etter bokstav/eksplisitt)
       const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
       const hideName=new Set(HIDE_COLUMNS);
       VISIBLE_COLUMNS=[];
@@ -428,7 +449,8 @@
       detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
       detectedNameCol=detectInsensitive(RAW_COLUMNS, NAME_PREF);
 
-      DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o;});
+      // data
+      DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
       buildPositionChips(DATA, detectedPositionCol);
       setupPriceCompact();
@@ -452,7 +474,7 @@
     render();
   });
 
-  // Mørk modus
+  // Mørk modus – husk valg
   (function(){
     const key='eh_dark2';
     const tgl=document.getElementById('darkToggle');
@@ -463,6 +485,7 @@
     tgl.addEventListener('change',()=>{
       document.documentElement.classList.toggle('dark', tgl.checked);
       localStorage.setItem(key, tgl.checked ? '1':'0');
+      render(); // re-render for å oppdatere kontrast på NESTE 6 i dark mode
     });
   })();
 </script>
