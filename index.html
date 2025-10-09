@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Eliteheimen – runde 23</title>
-<meta name="description" content="Interaktiv spilleroversikt med posisjonsfilter, pris-slider og visuell fargekoding." />
+<title>Eliteheimen</title>
+<meta name="description" content="Eliteheimen – interaktiv spilleroversikt for Fantasy Eliteserien." />
 
 <!-- Fonter og favicon -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -24,14 +24,8 @@
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     margin: 20px; color: var(--text); background: #fafafa;
   }
-  h1 { font-size: 1.6rem; margin: 0 0 .5rem; }
 
   /* Hero / header */
-  .announce {
-    display:flex; gap:.5rem; align-items:center; justify-content:center;
-    font-size:.9rem; padding:.5rem .75rem; border-radius:999px;
-    background:#ecfeff; color:#065f46; border:1px solid #a5f3fc; width:fit-content; margin: 0 0 .8rem;
-  }
   .hero {
     position: relative; overflow: hidden; border-radius: var(--radius);
     padding: 18px; margin-bottom: 12px; color: #fff;
@@ -49,8 +43,7 @@
     background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
   }
   .brand img { width:48px; height:48px; border-radius: 12px; object-fit: cover; background:#fff; }
-  .brand h1 { margin:0; font-size: 1.35rem; font-weight: 800; letter-spacing: .2px; }
-  .tagline { margin:.1rem 0 0; color:#dbeafe; font-size:.95rem; }
+  .brand h1 { margin:0; font-size: 1.5rem; font-weight: 800; letter-spacing: .2px; }
 
   .quicknav { margin-top: 8px; display:flex; gap:8px; flex-wrap: wrap; }
   .qbtn {
@@ -98,10 +91,8 @@
   tbody td { border-top: 1px solid #f0f0f0; padding: 6px 8px; vertical-align: top; white-space: nowrap; text-align: center; }
   thead th button { background: transparent; border: none; font: inherit; cursor: pointer; }
   .sort-ind { opacity: .6; font-size: .9em; margin-left: 6px; }
-  /* Striping + hover */
   tbody tr:nth-child(even) td { background: #fcfcfc; }
   tbody tr:hover td { background: #f3f7ff; }
-  /* Sticky første kolonne */
   tbody td:first-child, thead th:first-child {
     position: sticky; left: 0; z-index: 1; background: #fff;
     box-shadow: 1px 0 0 #eee;
@@ -115,7 +106,7 @@
   .footer-wrap a { color:#64748b; text-decoration:none; }
   .footer-wrap a:hover { color:#0ea5e9; }
 
-  /* Dark mode (på html.dark) */
+  /* Dark mode */
   html.dark body { background:#0b1220; color:#e5e7eb; }
   html.dark .card { background:#0f172a; color:#e5e7eb; border-color:#1f2a44; }
   html.dark .controls input[type="search"], html.dark button, html.dark .pill { background:#0f172a; color:#e5e7eb; border-color:#1f2a44; }
@@ -131,32 +122,25 @@
 <body>
 
   <!-- HERO -->
-  <div class="announce">⭐ Nyhet: Interaktiv tabell med posisjonsfilter og pris-slider</div>
   <section class="hero" id="top">
     <div class="hero-inner">
       <div class="brand">
         <img src="logo.png" alt="Eliteheimen logo" />
-        <div>
-          <h1>Eliteheimen – runde 23</h1>
-          <p class="tagline">Oppdag form, pris og verdi — raskt og visuelt.</p>
-        </div>
+        <div><h1>Eliteheimen</h1></div>
       </div>
       <div class="toolbar">
         <nav class="quicknav" aria-label="Hurtignavigasjon">
           <a class="qbtn" href="#filters">Filtre</a>
           <a class="qbtn" href="#table">Tabell</a>
-          <a class="qbtn" href="#about">Om</a>
         </nav>
         <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
       </div>
     </div>
   </section>
 
-  <!-- KPI-KORT -->
-  <section class="cards" id="highlights">
+  <!-- KPI-KORT (kun spillere vist) -->
+  <section class="cards">
     <div class="card"><h3>Spillere vist</h3><p id="kpi-count">–</p></div>
-    <div class="card"><h3>Snitt pris</h3><p id="kpi-price">–</p></div>
-    <div class="card"><h3>Snitt NESTE 6</h3><p id="kpi-n6">–</p></div>
   </section>
 
   <!-- KONTROLLER -->
@@ -177,7 +161,7 @@
       <div id="pos-chips" class="row" style="margin:0;"></div>
     </div>
 
-    <!-- Pris – kompakt -->
+    <!-- Pris – kompakt slider (viser bare hvis pris-kolonne finnes) -->
     <div id="price-compact" class="price-compact" style="display:none;">
       <strong>Pris ≤</strong>
       <input id="priceCapRange" type="range" step="1" />
@@ -250,8 +234,6 @@
 
   // KPI
   const kpiCount = document.getElementById('kpi-count');
-  const kpiPrice = document.getElementById('kpi-price');
-  const kpiN6 = document.getElementById('kpi-n6');
 
   // State
   let RAW_COLUMNS = [];
@@ -287,9 +269,7 @@
     const i = lower.indexOf(wantedLower);
     return i >= 0 ? columns[i] : "";
   }
-  function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
   const fmtInt = n => new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
-  const fmt1 = n => n==null ? "–" : new Intl.NumberFormat('no-NO',{maximumFractionDigits:1}).format(n);
 
   // ======== HEADER (sortering) ========
   function renderHeader(){
@@ -392,19 +372,7 @@
 
   // ======== KPI ========
   function updateKPIs(rows){
-    const count = rows.length;
-    let avgPrice = null, avgN6 = null;
-    if (detectedPriceCol){
-      const nums = rows.map(r=>toNumber(r[detectedPriceCol])).filter(n=>isFinite(n));
-      avgPrice = avg(nums);
-    }
-    if (VISIBLE_COLUMNS.includes(NESTE6_COLUMN)){
-      const nums = rows.map(r=>toNumber(r[NESTE6_COLUMN])).filter(n=>isFinite(n));
-      avgN6 = avg(nums);
-    }
-    kpiCount.textContent = `${fmtInt(count)} spillere`;
-    kpiPrice.textContent = avgPrice==null ? "–" : `${fmtInt(avgPrice)} kr`;
-    kpiN6.textContent = fmt1(avgN6);
+    kpiCount.textContent = `${fmtInt(rows.length)} spillere`;
   }
 
   // ======== HEADER + BODY ========
