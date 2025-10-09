@@ -307,12 +307,28 @@
   }
 
   // ======== BETINGET FORMATERING ========
-  function colorGroup(val, min, max, invert=false){
-    if (!isNumericLike(val)) return '';
-    const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
-    let t=(x-min)/(max-min); if (invert) t=1-t;
-    const hue=0 + t*120; // 0=rød, 120=grønn
-    return `background: hsl(${hue} 80% 92%)`;
+function colorGroup(val, min, max, invert=false){
+  // R23–R28: rød → grønn med kraftig kontrast
+  if (!isNumericLike(val)) return '';
+  const x = toNumber(val);
+  if(!isFinite(x) || !isFinite(min) || !isFinite(max) || max <= min) return '';
+
+  let t = (x - min) / (max - min);
+  if (invert) t = 1 - t;
+
+  // 0 = rød, 120 = grønn
+  const hue = 0 + t * 120;
+
+  // Høy metning og stort lyshets-spenn
+  const sat = 92;              // var 80
+  const light = 96 - t * 36;   // var ~92 fast → nå 96 → 60
+
+  // Sett tekstfarge automatisk for kontrast
+  const text = light <= 70 ? '#fff' : 'inherit';
+
+  return `background: hsl(${hue} ${sat}% ${light}%); color: ${text}`;
+}
+
   }
   function colorNeste6(val, min, max, invert=false){
     if (!isNumericLike(val)) return '';
