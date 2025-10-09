@@ -69,8 +69,10 @@
   thead th button:hover{text-decoration:underline}
   .sort-ind{opacity:1;font-size:.9em;margin-left:6px;color:#475569}
   tbody td{border-top:1px solid #f0f0f0;padding:4px 6px;white-space:nowrap;text-align:center}
-  tbody tr:nth-child(even) td{background:#fcfcfc}
-  tbody tr:hover td{background:#f3f7ff}
+/* Lys modus – behold betinget bakgrunn hvis cellen har inline background */
+tbody tr:nth-child(even) td:not([style*="background"]) { background:#fcfcfc; }
+tbody tr:hover td:not([style*="background"])        { background:#f3f7ff; }
+  
   /* Sticky første kolonne (NAVN flyttes først i JS) */
   tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:3;background:#fff;box-shadow:1px 0 0 #eee}
   .pos-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;color:#111827}
@@ -91,8 +93,9 @@
   html.dark thead th{background:#0b1325 !important;color:#f1f5f9 !important;border-bottom-color:#223356 !important;box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
   html.dark thead th:first-child{background:#0b1325 !important;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
   html.dark tbody td{border-top-color:#1a2743;background:transparent}
-  html.dark tbody tr:nth-child(even) td{background:#0e172a}
-  html.dark tbody tr:hover td{background:#122038}
+/* Mørk modus – samme grep */
+html.dark tbody tr:nth-child(even) td:not([style*="background"]) { background:#0e172a; }
+html.dark tbody tr:hover td:not([style*="background"])            { background:#122038; }
   html.dark tbody td:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
 
