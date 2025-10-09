@@ -142,6 +142,55 @@ html.dark .table-wrap thead th {
   text-shadow: 0 1px 0 rgba(0,0,0,.35);
 }
 
+/* ——— Kompakt topp/hero ——— */
+.hero { padding:14px; margin-bottom:10px; }
+.brand img { width:40px; height:40px; border-radius:10px; }
+.brand h1 { font-size:1.35rem; }
+
+/* ——— Filterbar ——— */
+.filterbar{
+  position:sticky; top:10px; z-index:5;
+  background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+  box-shadow:0 6px 20px rgba(2,8,23,.06);
+  padding:8px 10px; margin:8px 0 10px;
+}
+.filterbar-row{
+  display:grid; align-items:center; grid-auto-flow:column; grid-template-columns:auto 1fr auto auto auto auto auto;
+  gap:10px;
+}
+.filterbar .label{ color:#64748b; font-size:.85rem; white-space:nowrap; }
+.filterbar input[type="search"]{
+  height:36px; border:1px solid #d1d5db; border-radius:10px; padding:0 12px;
+}
+.filterbar .pill.kpi-mini{
+  background:#f8fafc; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; white-space:nowrap;
+}
+.row.microgap{ gap:6px; }
+.gap{ width:6px; } /* liten spacer */
+
+/* Posisjons-chips litt strammere */
+.chip{ padding:4px 10px; }
+.chip[aria-pressed="true"]{ background:#e5effe; outline:2px solid #93c5fd; }
+
+/* Pris – kompakt */
+.price-compact{ display:inline-flex; align-items:center; gap:8px; }
+.price-compact input[type="range"]{ width:180px; height:4px; }
+
+/* Tabell: mindre luft til toppen */
+.table-wrap{ margin-top:8px; }
+
+/* ——— Dark mode varianter ——— */
+html.dark .filterbar{
+  background:#0f172a; border-color:#1f2a44; box-shadow:0 6px 24px rgba(0,0,0,.35);
+}
+html.dark .filterbar input[type="search"]{
+  background:#0b1325; color:#e5e7eb; border-color:#1f2a44;
+}
+html.dark .pill.kpi-mini{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
+html.dark .label{ color:#94a3b8; }
+html.dark .chip{ background:#111827; color:#e5e7eb; }
+html.dark .chip[aria-pressed="true"]{ background:#1f2937; outline-color:#334155; }
+
 </style>
 </head>
 <body>
@@ -356,8 +405,12 @@ function buildPositionChips(data, col){
 }
 
 /* HEADER + BODY */
-function updateKPIs(rows){ kpiCount.textContent = `${fmtInt(rows.length)} spillere`; }
-
+function updateKPIs(rows){
+  const text = `${fmtInt(rows.length)} spillere`;
+  const mini = document.getElementById('kpi-count-mini');
+  if (mini) mini.textContent = text;
+  if (typeof kpiCount !== 'undefined' && kpiCount) kpiCount.textContent = text; // beholder støtte om kortet viser
+}
 function render(){
   renderHeader();
   let rows=DATA.filter(rowMatches);
