@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen – runde 23</title>
-<meta name="description" content="Interaktiv tabell som henter CSV fra en URL (søk, filtrering og sortering)." />
+<meta name="description" content="Interaktiv tabell som henter CSV fra en URL, med skjulte kolonner og enkel posisjonsfiltrering." />
 <style>
   :root { --radius: 12px; }
   * { box-sizing: border-box; }
@@ -15,13 +15,16 @@
   input[type="search"], input[type="text"] { padding: 10px 12px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
   input[type="search"]:focus, input[type="text"]:focus { border-color: #888; }
   button { padding: 8px 12px; border: 1px solid #ddd; border-radius: var(--radius); background: #fff; cursor: pointer; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .chip { border: 1px solid #ddd; border-radius: 999px; padding: 6px 10px; background: #fff; cursor: pointer; user-select: none; }
+  .chip[aria-pressed="true"] { outline: 2px solid #444; }
+  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 6px 10px; background: #fff; }
   .table-wrap { overflow: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); }
   table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
   thead th { position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e5e5e5; text-align: left; padding: 10px; white-space: nowrap; }
   thead tr.filter-row th { background: #fff; border-bottom: 1px solid #eee; }
   thead tr.filter-row input { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.9rem; }
   tbody td { border-top: 1px solid #f0f0f0; padding: 8px 10px; vertical-align: top; white-space: nowrap; }
-  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 6px 10px; background: #fff; }
   .sort-ind { opacity: 0.6; font-size: 0.9em; margin-left: 6px; }
   .footer { margin-top: 16px; font-size: 0.9rem; color: #666; }
   .error { color: #b00020; }
@@ -30,29 +33,40 @@
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Interaktiv tabell med søk, per-kolonne filtrering og sortering. Data hentes fra GitHub.</div>
+  <div class="sub">Viser kun relevante kolonner og gir enkel filtrering etter posisjon.</div>
 
-  <div class="controls" role="region" aria-label="Kontroller">
-    <input id="q" type="search" placeholder="Søk i alle kolonner…" aria-label="Globalt søk" />
+  <div class="controls">
+    <input id="q" type="search" placeholder="Søk i synlige kolonner…" />
     <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
     <button id="reset" type="button">Nullstill filtre</button>
   </div>
 
+  <div class="row">
+    <strong>Posisjoner:</strong>
+    <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
+    <div id="pos-chips" class="row" style="margin:0;"></div>
+  </div>
+
   <div id="status" aria-live="polite" class="sr-only"></div>
   <div class="table-wrap">
-    <table id="tbl" aria-describedby="q">
+    <table id="tbl">
       <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
 
   <div class="footer">
-    Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>. Denne siden kan legges rett på GitHub Pages, Netlify eller Vercel.
+    Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
   const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
+
+  // Skjul kolonner F, H, J, L, N, P, R
+  const HIDE_COLUMNS = ["F", "H", "J", "L", "N", "P", "R"];
+  let POSITION_COLUMN = ""; // auto-detect posisjon
+
   const thead = document.getElementById('thead');
   const tbody = document.getElementById('tbody');
   const q = document.getElementById('q');
@@ -60,157 +74,106 @@
   const totalEl = document.getElementById('total');
   const resetBtn = document.getElementById('reset');
   const statusEl = document.getElementById('status');
+  const posChipsWrap = document.getElementById('pos-chips');
+  const posAllBtn = document.getElementById('pos-all');
 
-  let DATA = [];
-  let COLUMNS = [];
-  let sortCol = null;
-  let sortDir = 1;
-  let colFilters = {};
+  let RAW_COLUMNS = [], VISIBLE_COLUMNS = [], DATA = [];
+  let sortCol = null, sortDir = 1, colFilters = {};
+  let activePositions = new Set(), detectedPositionCol = "";
 
-  function setStatus(msg) {
-    statusEl.textContent = msg || '';
-  }
+  function setStatus(msg) { statusEl.textContent = msg || ''; }
+  function isNumericLike(v){ if(v==null)return false; if(typeof v=="number")return true; v=String(v).replace(',','.'); return !isNaN(Number(v)); }
+  function cmp(a,b){ if(isNumericLike(a)&&isNumericLike(b))return Number(a)-Number(b); return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'}); }
 
-  function isNumericLike(val) {
-    if (val === null || val === undefined) return false;
-    if (typeof val === 'number') return true;
-    if (typeof val !== 'string') return false;
-    const v = val.replace(',', '.').trim();
-    return v !== '' && !isNaN(Number(v));
-  }
-
-  function cmp(a, b) {
-    const an = isNumericLike(a);
-    const bn = isNumericLike(b);
-    if (an && bn) {
-      return Number(String(a).replace(',', '.')) - Number(String(b).replace(',', '.'));
-    }
-    return String(a).localeCompare(String(b), 'no', { numeric: true, sensitivity: 'base' });
-  }
-
-  function renderHeader() {
-    const tr = document.createElement('tr');
-    COLUMNS.forEach(col => {
-      const th = document.createElement('th');
-      const btn = document.createElement('button');
-      btn.textContent = col;
-      btn.style.background = 'transparent';
-      btn.style.border = 'none';
-      btn.style.font = 'inherit';
-      btn.style.cursor = 'pointer';
-      btn.addEventListener('click', () => {
-        if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
-        render();
-      });
+  function renderHeader(){
+    const tr=document.createElement('tr');
+    VISIBLE_COLUMNS.forEach(col=>{
+      const th=document.createElement('th');
+      const btn=document.createElement('button');
+      btn.textContent=col;btn.style.background='transparent';btn.style.border='none';btn.style.font='inherit';btn.style.cursor='pointer';
+      btn.onclick=()=>{ if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;} render(); };
       th.appendChild(btn);
-      if (sortCol === col) {
-        const s = document.createElement('span');
-        s.className = 'sort-ind';
-        s.textContent = sortDir === 1 ? '▲' : '▼';
-        th.appendChild(s);
-      }
+      if(sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
       tr.appendChild(th);
     });
-
-    const fr = document.createElement('tr');
-    fr.className = 'filter-row';
-    COLUMNS.forEach(col => {
-      const th = document.createElement('th');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Filtrer…';
-      input.value = colFilters[col] || '';
-      input.addEventListener('input', e => { colFilters[col] = e.target.value; render(); });
-      th.appendChild(input);
-      fr.appendChild(th);
+    const fr=document.createElement('tr');fr.className='filter-row';
+    VISIBLE_COLUMNS.forEach(col=>{
+      const th=document.createElement('th');const input=document.createElement('input');
+      input.type='text';input.placeholder='Filtrer…';input.value=colFilters[col]||'';
+      input.oninput=e=>{colFilters[col]=e.target.value;render();};
+      th.appendChild(input);fr.appendChild(th);
     });
-
-    thead.innerHTML = '';
-    thead.appendChild(tr);
-    thead.appendChild(fr);
+    thead.innerHTML='';thead.append(tr,fr);
   }
 
-  function applyFilters(data) {
-    const query = (q.value || '').toLowerCase();
-    return data.filter(row => {
-      if (query) {
-        const inGlobal = Object.values(row).some(v => String(v).toLowerCase().includes(query));
-        if (!inGlobal) return false;
-      }
-      for (const [col, val] of Object.entries(colFilters)) {
-        const needle = (val || '').toLowerCase().trim();
-        if (needle) {
-          const hay = String(row[col] ?? '').toLowerCase();
-          if (!hay.includes(needle)) return false;
-        }
-      }
-      return true;
-    });
+  function recordMatchesFilters(row){
+    const query=(q.value||'').toLowerCase();
+    if(query&&!VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query)))return false;
+    for(const [col,val] of Object.entries(colFilters)){
+      if(val&&(String(row[col]??'').toLowerCase().indexOf(val.toLowerCase())===-1))return false;
+    }
+    if(detectedPositionCol&&activePositions.size>0){
+      const pv=String(row[detectedPositionCol]??'').trim();
+      if(!activePositions.has(pv))return false;
+    }
+    return true;
   }
 
-  function render() {
+  function render(){
     renderHeader();
-    let filtered = applyFilters(DATA);
-    if (sortCol) filtered.sort((a, b) => sortDir * cmp(a[sortCol], b[sortCol]));
-
-    tbody.innerHTML = '';
-    const frag = document.createDocumentFragment();
-    for (const row of filtered) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = COLUMNS.map(c => `<td>${row[c] ?? ''}</td>`).join('');
-      frag.appendChild(tr);
+    let filtered=DATA.filter(recordMatchesFilters);
+    if(sortCol)filtered.sort((a,b)=>sortDir*cmp(a[sortCol],b[sortCol]));
+    tbody.innerHTML='';
+    for(const row of filtered){
+      const tr=document.createElement('tr');
+      tr.innerHTML=VISIBLE_COLUMNS.map(c=>`<td>${row[c]??''}</td>`).join('');
+      tbody.appendChild(tr);
     }
-    tbody.appendChild(frag);
-    shownEl.textContent = String(filtered.length);
-    totalEl.textContent = String(DATA.length);
+    shownEl.textContent=filtered.length; totalEl.textContent=DATA.length;
   }
 
-  function normalizeRecords(recs) {
-    return recs.map(r => {
-      const o = {};
-      COLUMNS.forEach(c => o[c] = r[c] ?? '');
-      return o;
-    });
+  function detectPositionColumn(cols){
+    if(POSITION_COLUMN&&cols.includes(POSITION_COLUMN))return POSITION_COLUMN;
+    const cand=["Posisjon","Position","Pos","POS","Role","Rolle"];
+    return cand.find(c=>cols.includes(c))||"";
   }
 
-  setStatus('Laster data…');
-  Papa.parse(CSV_URL, {
-    download: true,
-    header: true,
-    dynamicTyping: true,
-    skipEmptyLines: 'greedy',
-    complete: (res) => {
-      setStatus('');
-      if (res.errors && res.errors.length) {
-        console.warn('CSV parse errors:', res.errors);
-      }
-      let data = res.data || [];
-      if (res.meta && res.meta.fields && res.meta.fields.length) {
-        COLUMNS = res.meta.fields;
-      } else if (data.length) {
-        COLUMNS = Object.keys(data[0]);
-      } else {
-        COLUMNS = [];
-      }
-      colFilters = Object.fromEntries(COLUMNS.map(c => [c, '']));
-      DATA = normalizeRecords(data);
-      render();
+  function buildPositionChips(data,col){
+    posChipsWrap.innerHTML=''; posAllBtn.setAttribute('aria-pressed',activePositions.size===0?'true':'false');
+    if(!col){posAllBtn.disabled=true;return;} posAllBtn.disabled=false;
+    const values=[...new Set(data.map(r=>String(r[col]??'').trim()).filter(Boolean))];
+    const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
+    values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);if(ia!==-1&&ib!==-1)return ia-ib;if(ia!==-1)return-1;if(ib!==-1)return 1;return a.localeCompare(b);});
+    for(const v of values){
+      const btn=document.createElement('button');
+      btn.className='chip'; btn.textContent=v; btn.setAttribute('aria-pressed',activePositions.has(v)?'true':'false');
+      btn.onclick=()=>{
+        posAllBtn.setAttribute('aria-pressed','false');
+        if(activePositions.has(v))activePositions.delete(v);else activePositions.add(v);
+        if(activePositions.size===0)posAllBtn.setAttribute('aria-pressed','true');
+        render();
+      };
+      posChipsWrap.appendChild(btn);
+    }
+    posAllBtn.onclick=()=>{activePositions.clear();posAllBtn.setAttribute('aria-pressed','true');render();};
+  }
+
+  Papa.parse(CSV_URL,{
+    download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
+    complete:(res)=>{
+      const data=res.data||[];RAW_COLUMNS=res.meta.fields||Object.keys(data[0]);
+      const hide=new Set(HIDE_COLUMNS);VISIBLE_COLUMNS=RAW_COLUMNS.filter(c=>!hide.has(c));
+      detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
+      colFilters=Object.fromEntries(VISIBLE_COLUMNS.map(c=>[c,'']));
+      DATA=data.map(r=>{const o={};RAW_COLUMNS.forEach(c=>o[c]=r[c]??'');return o;});
+      buildPositionChips(DATA,detectedPositionCol);
+      totalEl.textContent=DATA.length; render();
     },
-    error: (err) => {
-      setStatus('Kunne ikke laste CSV. Se konsollen.');
-      console.error(err);
-      thead.innerHTML = '<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>';
-    }
+    error:(err)=>{setStatus('Feil ved lasting av CSV');console.error(err);}
   });
 
-  q.addEventListener('input', render);
-  resetBtn.addEventListener('click', () => {
-    q.value = '';
-    sortCol = null;
-    sortDir = 1;
-    colFilters = Object.fromEntries(COLUMNS.map(c => [c, '']));
-    render();
-  });
+  q.oninput=render;
+  resetBtn.onclick=()=>{q.value='';sortCol=null;sortDir=1;activePositions.clear();colFilters=Object.fromEntries(VISIBLE_COLUMNS.map(c=>[c,'']));render();};
 </script>
 </body>
 </html>
