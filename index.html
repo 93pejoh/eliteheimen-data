@@ -4,83 +4,210 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen – runde 23</title>
-<meta name="description" content="Tabell med posisjonsfilter, kompakt pris-slider, sortering, bold NAVN og målrettet betinget formatering." />
+<meta name="description" content="Interaktiv spilleroversikt med posisjonsfilter, pris-slider og visuell fargekoding." />
+
+<!-- Fonter og favicon -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="icon" href="logo.png">
+
 <style>
-  :root { --radius: 12px; }
+  :root {
+    --radius: 14px;
+    --surface: #ffffff;
+    --text: #0f172a;
+    --muted: #667085;
+    --border: #e5e7eb;
+  }
   * { box-sizing: border-box; }
-  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, Noto Sans, sans-serif; margin: 24px; }
-  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
-  .sub { color: #555; margin-bottom: 1rem; }
-  .controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  html, body { height: 100%; }
+  body {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 20px; color: var(--text); background: #fafafa;
+  }
+  h1 { font-size: 1.6rem; margin: 0 0 .5rem; }
+
+  /* Hero / header */
+  .announce {
+    display:flex; gap:.5rem; align-items:center; justify-content:center;
+    font-size:.9rem; padding:.5rem .75rem; border-radius:999px;
+    background:#ecfeff; color:#065f46; border:1px solid #a5f3fc; width:fit-content; margin: 0 0 .8rem;
+  }
+  .hero {
+    position: relative; overflow: hidden; border-radius: var(--radius);
+    padding: 18px; margin-bottom: 12px; color: #fff;
+    background:
+      radial-gradient(80% 120% at 10% -10%, rgba(14,165,233,.25), transparent 40%),
+      radial-gradient(80% 120% at 110% 10%, rgba(34,197,94,.25), transparent 40%),
+      linear-gradient(180deg, #0b1220, #111827);
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .hero-inner { display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .brand {
+    display:flex; gap:12px; align-items:center;
+    backdrop-filter: blur(6px);
+    border-radius: 999px; padding:8px 12px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  }
+  .brand img { width:48px; height:48px; border-radius: 12px; object-fit: cover; background:#fff; }
+  .brand h1 { margin:0; font-size: 1.35rem; font-weight: 800; letter-spacing: .2px; }
+  .tagline { margin:.1rem 0 0; color:#dbeafe; font-size:.95rem; }
+
+  .quicknav { margin-top: 8px; display:flex; gap:8px; flex-wrap: wrap; }
+  .qbtn {
+    padding:8px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06); color:#e5e7eb; text-decoration:none; font-weight:600;
+  }
+  .qbtn:hover { border-color: rgba(255,255,255,.35); }
+
+  .toolbar { display:flex; gap:8px; align-items:center; }
+  .toggle {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+    border:1px solid #3b4152; cursor:pointer; user-select:none; background:rgba(255,255,255,.06); color:#e5e7eb;
+  }
+
+  /* KPI-kort */
+  .cards { display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); margin: 10px 0 14px; }
+  .card {
+    background: var(--surface); color: var(--text); border:1px solid #eef2f7; border-radius: var(--radius);
+    padding: 12px 14px; box-shadow: 0 1px 0 rgba(15,23,42,.04);
+  }
+  .card h3 { margin:0 0 .25rem; font-size:.95rem; color:#111827; }
+  .card p { margin:0; color: var(--muted); font-size:.92rem; }
+
+  /* Kontroller & filter */
+  .controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; margin: 8px 0; }
   input[type="search"] { padding: 8px 10px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
   input[type="search"]:focus { border-color: #888; }
   button { padding: 6px 10px; border: 1px solid #ddd; border-radius: var(--radius); background: #fff; cursor: pointer; }
   label.switch { display: inline-flex; align-items: center; gap: 6px; user-select: none; }
   .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 4px 10px; background: #fff; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 8px; }
-  .chip { border: 1px solid #ddd; border-radius: 999px; padding: 4px 10px; background: #fff; cursor: pointer; user-select: none; }
-  .chip[aria-pressed="true"] { outline: 2px solid #444; }
-  .table-wrap { overflow: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); }
+  .chip { border: none; border-radius: 999px; padding: 4px 10px; background: #f2f4f7; cursor: pointer; user-select: none; }
+  .chip[aria-pressed="true"] { background: #dbeafe; outline: 2px solid #93c5fd; }
+  .chip:active { transform: scale(0.98); }
+
+  /* Pris – kompakt slider */
+  .price-compact { display: inline-flex; align-items: center; gap: 8px; margin: 2px 0 8px; }
+  .price-compact input[type="range"] { width: 220px; height: 4px; }
+  .muted { color: #666; font-size: .88rem; }
+
+  /* Tabell */
+  .table-wrap { overflow: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); background:#fff; }
   table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
   thead th { position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e5e5e5; padding: 8px; white-space: nowrap; text-align: center; }
   tbody td { border-top: 1px solid #f0f0f0; padding: 6px 8px; vertical-align: top; white-space: nowrap; text-align: center; }
   thead th button { background: transparent; border: none; font: inherit; cursor: pointer; }
   .sort-ind { opacity: .6; font-size: .9em; margin-left: 6px; }
-  .legend { font-size: .9rem; color: #666; margin-top: 6px; }
-  .footer { margin-top: 12px; font-size: .9rem; color: #666; }
-  .error { color: #b00020; }
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  /* Striping + hover */
+  tbody tr:nth-child(even) td { background: #fcfcfc; }
+  tbody tr:hover td { background: #f3f7ff; }
+  /* Sticky første kolonne */
+  tbody td:first-child, thead th:first-child {
+    position: sticky; left: 0; z-index: 1; background: #fff;
+    box-shadow: 1px 0 0 #eee;
+  }
 
-  /* Kompakt pris-slider */
-  .price-compact { display: inline-flex; align-items: center; gap: 8px; margin: 2px 0 8px; }
-  .price-compact input[type="range"] { width: 200px; height: 4px; }
-  .muted { color: #666; font-size: .88rem; }
+  .legend { font-size: .9rem; color: #666; margin-top: 6px; }
+  .footer-wrap {
+    margin-top: 18px; padding-top: 12px; border-top: 1px solid #e5e7eb; color: #64748b;
+    display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  }
+  .footer-wrap a { color:#64748b; text-decoration:none; }
+  .footer-wrap a:hover { color:#0ea5e9; }
+
+  /* Dark mode (på html.dark) */
+  html.dark body { background:#0b1220; color:#e5e7eb; }
+  html.dark .card { background:#0f172a; color:#e5e7eb; border-color:#1f2a44; }
+  html.dark .controls input[type="search"], html.dark button, html.dark .pill { background:#0f172a; color:#e5e7eb; border-color:#1f2a44; }
+  html.dark .chip { background:#111827; color:#e5e7eb; }
+  html.dark .chip[aria-pressed="true"] { background:#1f2937; outline-color:#334155; }
+  html.dark .table-wrap { border-color:#1f2a44; background:#0f172a; }
+  html.dark thead th { background:#0f172a; border-bottom-color:#1f2a44; }
+  html.dark tbody td { border-top-color:#15213b; }
+  html.dark tbody tr:hover td { background:#0d1a34; }
+  html.dark .legend, html.dark .footer-wrap { color:#a3adc2; }
 </style>
 </head>
 <body>
-  <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Bold NAVN, posisjonsfilter, <b>kompakt pris-slider (≤ grense)</b>, rød→grønn (R23–R28), sterk blå (NESTE 6), alt midtstilt.</div>
 
-  <!-- Rad 1: Globalt søk, teller, betinget formatering, nullstill -->
-  <div class="controls" role="region" aria-label="Kontroller">
-    <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
-    <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
-    <label class="switch" title="Skru av/på fargelegging">
-      <input type="checkbox" id="condfmt" checked /> Betinget formatering
-    </label>
-    <button id="reset" type="button">Nullstill</button>
-  </div>
+  <!-- HERO -->
+  <div class="announce">⭐ Nyhet: Interaktiv tabell med posisjonsfilter og pris-slider</div>
+  <section class="hero" id="top">
+    <div class="hero-inner">
+      <div class="brand">
+        <img src="logo.png" alt="Eliteheimen logo" />
+        <div>
+          <h1>Eliteheimen – runde 23</h1>
+          <p class="tagline">Oppdag form, pris og verdi — raskt og visuelt.</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <nav class="quicknav" aria-label="Hurtignavigasjon">
+          <a class="qbtn" href="#filters">Filtre</a>
+          <a class="qbtn" href="#table">Tabell</a>
+          <a class="qbtn" href="#about">Om</a>
+        </nav>
+        <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
+      </div>
+    </div>
+  </section>
 
-  <!-- Posisjonsfilter -->
-  <div class="row" role="region" aria-label="Posisjonsfilter">
-    <strong>Posisjoner:</strong>
-    <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
-    <div id="pos-chips" class="row" style="margin:0;"></div>
-  </div>
+  <!-- KPI-KORT -->
+  <section class="cards" id="highlights">
+    <div class="card"><h3>Spillere vist</h3><p id="kpi-count">–</p></div>
+    <div class="card"><h3>Snitt pris</h3><p id="kpi-price">–</p></div>
+    <div class="card"><h3>Snitt NESTE 6</h3><p id="kpi-n6">–</p></div>
+  </section>
 
-  <!-- Kompakt prisfilter (viser bare hvis pris-kolonne finnes) -->
-  <div id="price-compact" class="price-compact" style="display:none;">
-    <strong>Pris ≤</strong>
-    <input id="priceCapRange" type="range" step="1" />
-    <span class="muted" id="priceCapLabel"></span>
-  </div>
+  <!-- KONTROLLER -->
+  <section id="filters">
+    <div class="controls" role="region" aria-label="Kontroller">
+      <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
+      <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
+      <label class="switch" title="Skru av/på fargelegging">
+        <input type="checkbox" id="condfmt" checked /> Betinget formatering
+      </label>
+      <button id="reset" type="button">Nullstill</button>
+    </div>
 
-  <div id="status" aria-live="polite" class="sr-only"></div>
-  <div class="table-wrap">
+    <!-- Posisjonsfilter -->
+    <div class="row" role="region" aria-label="Posisjonsfilter">
+      <strong>Posisjoner:</strong>
+      <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
+      <div id="pos-chips" class="row" style="margin:0;"></div>
+    </div>
+
+    <!-- Pris – kompakt -->
+    <div id="price-compact" class="price-compact" style="display:none;">
+      <strong>Pris ≤</strong>
+      <input id="priceCapRange" type="range" step="1" />
+      <span class="muted" id="priceCapLabel"></span>
+    </div>
+  </section>
+
+  <!-- TABELL -->
+  <section id="table" class="table-wrap" aria-labelledby="top">
     <table id="tbl" aria-describedby="q">
       <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
     </table>
-  </div>
-  <div class="legend">R23–R28: rød → grønn (felles). NESTE 6: lys → mørk blå (egen skala). NAVN og NESTE 6 i bold. Prisfilter viser rader ≤ valgt grense.</div>
+  </section>
+  <div class="legend">R23–R28: rød → grønn (felles skala). NESTE 6: lys → mørk blå (egen skala). NAVN og NESTE 6 i bold.</div>
 
-  <div class="footer">
-    Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
-  </div>
+  <!-- FOOTER -->
+  <footer class="footer-wrap" id="about">
+    <div>© 2025 Eliteheimen. Data fra GitHub-repoet.</div>
+    <div>
+      <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
+      &nbsp;•&nbsp;
+      <a href="#top">Til toppen ↑</a>
+    </div>
+  </footer>
 
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-  // ===================== KONFIG =====================
+  // ======== KONFIG ========
   const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
 
   // Skjul kolonner etter Excel-bokstav:
@@ -97,31 +224,34 @@
 
   // Betinget formatering:
   const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles rød→grønn
-  const NESTE6_COLUMN = "NESTE 6";                               // eksakt, egen blå skala (og bold)
+  const NESTE6_COLUMN = "NESTE 6";                              // eksakt, egen blå skala (og bold)
 
   // (Valgfritt) Inverter skala for disse (lavere er bedre):
   const INVERT_COLOR_COLUMNS = []; // f.eks. ["R23"]
 
-  // Pris-kolonne (overstyr her hvis du vil låse navnet):
-  let PRICE_COLUMN = ""; // tom = autodetekter (Pris, Price, Kostnad, Cost, etc.)
-  // ==================================================
+  // Pris-kolonne (overstyr for å låse navnet, ellers autodetekter):
+  let PRICE_COLUMN = "";
 
-  // Elementer
+  // ======== ELEMENTER ========
   const thead = document.getElementById('thead');
   const tbody = document.getElementById('tbody');
   const q = document.getElementById('q');
   const shown = document.getElementById('shown');
   const total = document.getElementById('total');
   const resetBtn = document.getElementById('reset');
-  const statusEl = document.getElementById('status');
   const posChipsWrap = document.getElementById('pos-chips');
   const posAllBtn = document.getElementById('pos-all');
   const condfmtToggle = document.getElementById('condfmt');
 
-  // Pris compact UI
+  // Pris – kompakt
   const priceCompactWrap = document.getElementById('price-compact');
   const priceCapRange = document.getElementById('priceCapRange');
   const priceCapLabel = document.getElementById('priceCapLabel');
+
+  // KPI
+  const kpiCount = document.getElementById('kpi-count');
+  const kpiPrice = document.getElementById('kpi-price');
+  const kpiN6 = document.getElementById('kpi-n6');
 
   // State
   let RAW_COLUMNS = [];
@@ -135,21 +265,14 @@
   let detectedPriceCol = ""; // faktisk PRIS-kolonne
   let priceGlobalMin = null, priceGlobalMax = null, priceCapVal = null;
 
-  function setStatus(msg){ statusEl.textContent = msg || ''; }
-
-  // ===== utils =====
-  function letterToIndex(letter){
-    const s = letter.trim().toUpperCase();
-    let n = 0; for (let i=0;i<s.length;i++) n = n*26 + (s.charCodeAt(i)-64);
-    return n-1;
-  }
+  // ======== UTILS ========
+  function letterToIndex(letter){ const s=letter.trim().toUpperCase(); let n=0; for(let i=0;i<s.length;i++) n=n*26+(s.charCodeAt(i)-64); return n-1; }
   function isNumericLike(val){
     if (val===null || val===undefined) return false;
     if (typeof val==='number') return true;
     const t=String(val).trim();
     if (t==='') return false;
     if (t.endsWith('%')) return !isNaN(Number(t.slice(0,-1).replace(',','.')));
-    // fjern kr og mellomrom
     return !isNaN(Number(t.replace(/\s/g,'').replace('kr','').replace('KR','').replace(',','.')));
   }
   function toNumber(val){
@@ -164,8 +287,11 @@
     const i = lower.indexOf(wantedLower);
     return i >= 0 ? columns[i] : "";
   }
+  function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
+  const fmtInt = n => new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
+  const fmt1 = n => n==null ? "–" : new Intl.NumberFormat('no-NO',{maximumFractionDigits:1}).format(n);
 
-  // ===== header (kun sortering) =====
+  // ======== HEADER (sortering) ========
   function renderHeader(){
     const tr=document.createElement('tr');
     VISIBLE_COLUMNS.forEach(col=>{
@@ -180,46 +306,7 @@
     thead.innerHTML=''; thead.appendChild(tr);
   }
 
-  // ===== pris =====
-  function detectPriceColumn(columns){
-    if (PRICE_COLUMN && columns.includes(PRICE_COLUMN)) return PRICE_COLUMN;
-    const prefs = ["pris","price","kostnad","cost"];
-    const lower = columns.map(c => c.toLowerCase());
-    for (let i=0;i<lower.length;i++) if (prefs.includes(lower[i])) return columns[i];
-    return "";
-  }
-  function computePriceRange(rows, col){
-    let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      const v=r[col];
-      if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
-    }
-    return any ? {min, max} : null;
-  }
-  function setupPriceCompact(){
-    if (!detectedPriceCol) { priceCompactWrap.style.display='none'; return; }
-    const r = computePriceRange(DATA, detectedPriceCol);
-    if (!r) { priceCompactWrap.style.display='none'; return; }
-    priceGlobalMin = Math.floor(r.min);
-    priceGlobalMax = Math.ceil(r.max);
-    // Start med maks (dvs. vis alt; dra venstre for å begrense)
-    priceCapVal = priceGlobalMax;
-
-    priceCapRange.min = priceGlobalMin;
-    priceCapRange.max = priceGlobalMax;
-    priceCapRange.value = priceCapVal;
-    priceCapLabel.textContent = new Intl.NumberFormat('no-NO', {maximumFractionDigits:0}).format(priceCapVal);
-
-    priceCompactWrap.style.display = 'inline-flex';
-
-    priceCapRange.addEventListener('input', () => {
-      priceCapVal = Number(priceCapRange.value);
-      priceCapLabel.textContent = new Intl.NumberFormat('no-NO', {maximumFractionDigits:0}).format(priceCapVal);
-      render();
-    });
-  }
-
-  // ===== filtrering =====
+  // ======== FILTRERING ========
   function rowMatches(row){
     const query=(q.value||'').toLowerCase();
     if (query){
@@ -239,7 +326,7 @@
     return true;
   }
 
-  // ===== betinget formatering =====
+  // ======== BETINGET FORMATERING ========
   function colorGroup(val, min, max, invert=false){
     if (!isNumericLike(val)) return '';
     const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
@@ -251,29 +338,25 @@
     if (!isNumericLike(val)) return '';
     const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
     let t=(x-min)/(max-min); if (invert) t=1-t;
-    const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
+    const hue=210, sat=90, light=92 - t*32; // lys → mørk blå, sterk kontrast
     return `background: hsl(${hue} ${sat}% ${light}%)`;
   }
   function computeGroupRange(rows, cols){
     let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      for (const c of cols){
-        const v=r[c];
-        if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
-      }
-    }
+    for (const r of rows){ for (const c of cols){ const v=r[c];
+      if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
+    } }
     return any && max>min ? {min,max} : null;
   }
   function computeSingleRange(rows, col){
     let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      const v=r[col];
+    for (const r of rows){ const v=r[col];
       if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
     }
     return any && max>min ? {min,max} : null;
   }
 
-  // ===== posisjoner =====
+  // ======== POSISJON ========
   function detectPositionColumn(columns){
     if (POSITION_COLUMN && columns.includes(POSITION_COLUMN)) return POSITION_COLUMN;
     const cands=["posisjon","position","pos","rolle","role"];
@@ -284,7 +367,6 @@
   function buildPositionChips(data, colName){
     posChipsWrap.innerHTML='';
     posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
-
     if (!colName){ posAllBtn.disabled=true; return; }
     posAllBtn.disabled=false;
 
@@ -308,7 +390,24 @@
     posAllBtn.onclick=()=>{ activePositions.clear(); posAllBtn.setAttribute('aria-pressed','true'); [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false')); render(); };
   }
 
-  // ===== render =====
+  // ======== KPI ========
+  function updateKPIs(rows){
+    const count = rows.length;
+    let avgPrice = null, avgN6 = null;
+    if (detectedPriceCol){
+      const nums = rows.map(r=>toNumber(r[detectedPriceCol])).filter(n=>isFinite(n));
+      avgPrice = avg(nums);
+    }
+    if (VISIBLE_COLUMNS.includes(NESTE6_COLUMN)){
+      const nums = rows.map(r=>toNumber(r[NESTE6_COLUMN])).filter(n=>isFinite(n));
+      avgN6 = avg(nums);
+    }
+    kpiCount.textContent = `${fmtInt(count)} spillere`;
+    kpiPrice.textContent = avgPrice==null ? "–" : `${fmtInt(avgPrice)} kr`;
+    kpiN6.textContent = fmt1(avgN6);
+  }
+
+  // ======== HEADER + BODY ========
   function render(){
     renderHeader();
     let rows = DATA.filter(rowMatches);
@@ -332,6 +431,13 @@
           }
         }
         let val = row[c] ?? '';
+        // Badges for posisjon
+        if (detectedPositionCol && c === detectedPositionCol){
+          const pos = String(val);
+          const bg = pos === "K" ? "#E0F2FE" : pos === "F" ? "#DCFCE7" : pos === "M" ? "#FEF9C3" : pos === "A" ? "#FFE4E6" : "#F2F4F7";
+          val = `<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${bg};font-weight:600">${pos}</span>`;
+        }
+        // Bold for NAVN og NESTE 6
         if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) {
           val = `<strong>${val}</strong>`;
         }
@@ -342,16 +448,54 @@
     tbody.appendChild(frag);
     shown.textContent=String(rows.length);
     total.textContent=String(DATA.length);
+    updateKPIs(rows);
   }
 
-  // ===== init =====
+  // ======== PRIS ========
+  function detectPriceColumn(columns){
+    if (PRICE_COLUMN && columns.includes(PRICE_COLUMN)) return PRICE_COLUMN;
+    const prefs = ["pris","price","kostnad","cost"];
+    const lower = columns.map(c => c.toLowerCase());
+    for (let i=0;i<lower.length;i++) if (prefs.includes(lower[i])) return columns[i];
+    return "";
+  }
+  function computePriceRange(rows, col){
+    let min=Infinity, max=-Infinity, any=false;
+    for (const r of rows){ const v=r[col];
+      if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
+    }
+    return any ? {min, max} : null;
+  }
+  function setupPriceCompact(){
+    if (!detectedPriceCol) { priceCompactWrap.style.display='none'; return; }
+    const r = computePriceRange(DATA, detectedPriceCol);
+    if (!r) { priceCompactWrap.style.display='none'; return; }
+    priceGlobalMin = Math.floor(r.min);
+    priceGlobalMax = Math.ceil(r.max);
+    // Start med maks (vis alt)
+    priceCapVal = priceGlobalMax;
+
+    priceCapRange.min = priceGlobalMin;
+    priceCapRange.max = priceGlobalMax;
+    priceCapRange.value = priceCapVal;
+    priceCapLabel.textContent = fmtInt(priceCapVal);
+
+    priceCompactWrap.style.display = 'inline-flex';
+
+    priceCapRange.addEventListener('input', () => {
+      priceCapVal = Number(priceCapRange.value);
+      priceCapLabel.textContent = fmtInt(priceCapVal);
+      render();
+    });
+  }
+
+  // ======== INIT ========
   Papa.parse(CSV_URL, {
     download:true, header:true, dynamicTyping:true, skipEmptyLines:'greedy',
     complete:(res)=>{
       const data=res.data||[];
       RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length) ? res.meta.fields : (data[0] ? Object.keys(data[0]) : []);
 
-      // kolonner å vise
       const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
       const hideName=new Set(HIDE_COLUMNS);
       VISIBLE_COLUMNS=[];
@@ -372,7 +516,7 @@
     error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
   });
 
-  // ===== handlers =====
+  // ======== HANDLERS ========
   q.addEventListener('input', render);
   condfmtToggle.addEventListener('change', render);
   resetBtn.addEventListener('click',()=>{
@@ -380,12 +524,26 @@
     if (detectedPriceCol && priceGlobalMax!=null){
       priceCapVal = priceGlobalMax;
       priceCapRange.value = priceCapVal;
-      priceCapLabel.textContent = new Intl.NumberFormat('no-NO', {maximumFractionDigits:0}).format(priceCapVal);
+      priceCapLabel.textContent = fmtInt(priceCapVal);
     }
     posAllBtn.setAttribute('aria-pressed','true');
     [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
     render();
   });
+
+  // Mørk modus – husk preferanse
+  (function(){
+    const key = 'eh_dark2';
+    const tgl = document.getElementById('darkToggle');
+    if (!tgl) return;
+    const saved = localStorage.getItem(key);
+    if (saved === '1') document.documentElement.classList.add('dark');
+    tgl.checked = saved === '1';
+    tgl.addEventListener('change', ()=>{
+      document.documentElement.classList.toggle('dark', tgl.checked);
+      localStorage.setItem(key, tgl.checked ? '1' : '0');
+    });
+  })();
 </script>
 </body>
 </html>
