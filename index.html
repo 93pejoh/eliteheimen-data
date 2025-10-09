@@ -191,6 +191,53 @@ html.dark .label{ color:#94a3b8; }
 html.dark .chip{ background:#111827; color:#e5e7eb; }
 html.dark .chip[aria-pressed="true"]{ background:#1f2937; outline-color:#334155; }
 
+/* === Kompakt layout: mindre whitespace === */
+
+/* Rammer og basis */
+body{ margin:14px; }
+.table-wrap{ margin-top:6px; border-radius:10px; }
+table{ font-size:.92rem; line-height:1.25; }
+
+/* Hero strammere */
+.hero{ padding:10px; margin-bottom:6px; border-radius:12px; }
+.brand img{ width:36px; height:36px; border-radius:8px; }
+.brand h1{ font-size:1.2rem; }
+
+/* Filterbar strammere */
+.filterbar{ padding:6px 8px; margin:6px 0; border-radius:10px; }
+.filterbar-row{ gap:8px; }
+.filterbar input[type="search"]{ height:32px; padding:0 10px; }
+.filterbar .pill.kpi-mini{ padding:4px 8px; }
+.label{ font-size:.8rem; }
+.row.microgap{ gap:4px; }
+.chip{ padding:2px 8px; }
+.price-compact{ gap:6px; }
+.price-compact input[type="range"]{ width:150px; height:3px; }
+.muted{ font-size:.82rem; }
+
+/* Tabell: tettere celler/headers */
+thead th{ padding:6px 6px; }
+tbody td{ padding:4px 6px; }
+thead th button{ padding:0; } /* fjern ekstra knapp-padding */
+.pos-badge{ padding:2px 8px; }
+
+/* Legend/fotlinje litt tettere */
+.legend{ margin-top:4px; }
+.footer-wrap{ margin-top:12px; padding-top:8px; }
+
+/* Dark mode – samme innstramming */
+html.dark .filterbar{ box-shadow:0 4px 18px rgba(0,0,0,.3); }
+
+/* Ekstra: komprimer ytterligere på små skjermer */
+@media (max-width: 900px){
+  body{ margin:10px; }
+  .brand h1{ font-size:1.1rem; }
+  .filterbar input[type="search"]{ height:30px; }
+  table{ font-size:.9rem; }
+  thead th{ padding:5px 6px; }
+  tbody td{ padding:4px 5px; }
+}
+  
 </style>
 </head>
 <body>
