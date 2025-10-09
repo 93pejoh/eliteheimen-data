@@ -69,10 +69,11 @@
   thead th button:hover{text-decoration:underline}
   .sort-ind{opacity:1;font-size:.9em;margin-left:6px;color:#475569}
   tbody td{border-top:1px solid #f0f0f0;padding:4px 6px;white-space:nowrap;text-align:center}
-/* Lys modus – behold betinget bakgrunn hvis cellen har inline background */
-tbody tr:nth-child(even) td:not([style*="background"]) { background:#fcfcfc; }
-tbody tr:hover td:not([style*="background"])        { background:#f3f7ff; }
-  
+
+  /* Zebra/hover – ikke overstyr celler som allerede har bakgrunn */
+  tbody tr:nth-child(even) td:not([style*="background"]) { background:#fcfcfc; }
+  tbody tr:hover td:not([style*="background"])            { background:#f3f7ff; }
+
   /* Sticky første kolonne (NAVN flyttes først i JS) */
   tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:3;background:#fff;box-shadow:1px 0 0 #eee}
   .pos-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;color:#111827}
@@ -93,9 +94,9 @@ tbody tr:hover td:not([style*="background"])        { background:#f3f7ff; }
   html.dark thead th{background:#0b1325 !important;color:#f1f5f9 !important;border-bottom-color:#223356 !important;box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
   html.dark thead th:first-child{background:#0b1325 !important;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
   html.dark tbody td{border-top-color:#1a2743;background:transparent}
-/* Mørk modus – samme grep */
-html.dark tbody tr:nth-child(even) td:not([style*="background"]) { background:#0e172a; }
-html.dark tbody tr:hover td:not([style*="background"])            { background:#122038; }
+  /* Dark zebra/hover – ikke overstyr celler med egen bakgrunn */
+  html.dark tbody tr:nth-child(even) td:not([style*="background"]) { background:#0e172a; }
+  html.dark tbody tr:hover td:not([style*="background"])            { background:#122038; }
   html.dark tbody td:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
 
@@ -139,7 +140,7 @@ html.dark tbody tr:hover td:not([style*="background"])            { background:#
     font-size: 0.9rem;
     opacity: 0.85;
     color: #e7e7e7;
-    margin-left: auto; /* skyver teksten til høyre side */
+    margin-left: auto;
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -247,7 +248,7 @@ const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
 function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
 function lerp(a,b,t){return a+(b-a)*t;}
-function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t))];}
+function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];}
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
 
 /* Header */
@@ -303,7 +304,8 @@ function colorGroup(val, min, max){
     rgb=lerpRgb(hexToRgb(GROUP_MID),hexToRgb(GROUP_HIGH),Math.max(0,Math.min(1,t)));
   }
   const text=luminance(rgb)<0.55?'#fff':'#000';
-  return `background:${rgbToCss(rgb)};color:${text}`;
+  /* Viktig: !important så zebra/hover ikke overstyrer */
+  return `background:${rgbToCss(rgb)} !important;color:${text} !important;`;
 }
 function colorNeste6(val,min,max){
   if(!isNumericLike(val))return '';
@@ -311,7 +313,8 @@ function colorNeste6(val,min,max){
   if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
   let t=(x-min)/(max-min);
   const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-  return `background:hsl(${hue} ${sat}% ${light}%);color:#000;`;
+  /* Viktig: !important så zebra/hover ikke overstyrer */
+  return `background:hsl(${hue} ${sat}% ${light}% ) !important;color:#000 !important;`;
 }
 function computeGroupRange(rows, cols){
   let min=Infinity, max=-Infinity, any=false;
