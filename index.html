@@ -4,12 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen</title>
-<meta name="data-last-updated" content="2025-10-09T20:38:00+02:00">
 <meta name="description" content="Eliteheimen – interaktiv spilleroversikt for Fantasy Eliteserien." />
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="logo.png">
 
+<div id="last-updated"></div>
+  
 <style>
   :root { --radius:14px; --surface:#fff; --text:#0f172a; --muted:#667085; --border:#e5e7eb; }
   *{box-sizing:border-box}
@@ -130,6 +131,23 @@
   color: #000 !important;
   background: #fff !important;
 }
+
+#last-updated {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  color: #e7e7e7;
+  margin-left: auto; /* skyver teksten til høyre side */
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#last-updated::before {
+  content: "⏱️";
+  font-size: 1rem;
+  opacity: 0.9;
+}
+  
 </style>
 </head>
 <body>
@@ -506,6 +524,19 @@ q.addEventListener('input', render);
       const sec = h.closest('section'); (sec || h.parentElement).remove();
     }
   });
+})();
+<script>
+(() => {
+  const meta = document.querySelector('meta[name="data-last-updated"]');
+  let last = meta?.content ? new Date(meta.content) : new Date(document.lastModified);
+
+  const fmt = new Intl.DateTimeFormat('nb-NO', {
+    dateStyle: 'long',
+    timeStyle: 'short'
+  });
+
+  const el = document.getElementById('last-updated');
+  if (el) el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
 })();
 </script>
 </body>
