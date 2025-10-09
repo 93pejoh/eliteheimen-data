@@ -435,7 +435,8 @@ function render(){
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
       if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
-      return `<td>${val}</td>`;
+      const cellStyle = style ? ` style="${style}"` : "";
+return `<td${cellStyle}>${val}</td>`;
     }).join('');
     frag.appendChild(tr);
   }
