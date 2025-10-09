@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen – runde 23</title>
-<meta name="description" content="Tabell med posisjonsfilter, sortering og målrettet betinget formatering." />
+<meta name="description" content="Tabell med posisjonsfilter, sortering, bold NAVN og målrettet betinget formatering." />
 <style>
   :root { --radius: 12px; }
   * { box-sizing: border-box; }
@@ -34,7 +34,7 @@
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Posisjonsfilter, sortering og målrettet fargelegging (R23–R28 sammen; “Neste 6” egen skala).</div>
+  <div class="sub">Bold NAVN, posisjonsfilter og målrettet fargelegging (R23–R28 felles skala • “Neste 6” egen blå skala).</div>
 
   <!-- Rad 1: Globalt søk, teller, betinget formatering, nullstill -->
   <div class="controls" role="region" aria-label="Kontroller">
@@ -60,7 +60,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </div>
-  <div class="legend">Fargeskala: lav verdi → lys rød, høy verdi → lys grønn. R23–R28 deler skala; “Neste 6” har egen.</div>
+  <div class="legend">R23–R28: rød → grønn (felles). Neste 6: lys → mørkere blå (egen skala).</div>
 
   <div class="footer">
     Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
@@ -80,15 +80,15 @@
   // Posisjonskolonne (tom = autodetekter case-insensitive):
   let POSITION_COLUMN = "";
 
-  // Betinget formatering: grupper
-  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles skala
-  const NESTE6_COLUMN = "Neste 6";                              // isolert skala
+  // Bold for NAVN-kolonnen (case-insensitive match):
+  const NAME_PREF = "navn"; // vil matche NAVN, Navn, navn
+
+  // Betinget formatering:
+  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles rød→grønn
+  const NESTE6_COLUMN = "Neste 6";                               // egen blå skala
 
   // (Valgfritt) Inverter skala for disse (lavere er bedre):
-  const INVERT_COLOR_COLUMNS = []; // f.eks. ["Pris", "R23"]
-
-  // Søk bare i synlige kolonner
-  const SEARCH_VISIBLE_ONLY = true;
+  const INVERT_COLOR_COLUMNS = []; // f.eks. ["R23"]
   // ==================================================
 
   const thead = document.getElementById('thead');
@@ -109,6 +109,7 @@
   let sortDir = 1;
   let activePositions = new Set(); // tom = alle
   let detectedPositionCol = ""; // faktisk brukt navn
+  let detectedNameCol = ""; // faktisk navn-kolonne
 
   function setStatus(msg){ statusEl.textContent = msg || ''; }
 
@@ -130,6 +131,12 @@
   }
   function cmp(a,b){ const an=isNumericLike(a), bn=isNumericLike(b); if(an&&bn) return toNumber(a)-toNumber(b); return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'}); }
 
+  function detectByNameInsensitive(columns, wantedLower){
+    const lower = columns.map(c => c.toLowerCase());
+    const i = lower.indexOf(wantedLower);
+    return i >= 0 ? columns[i] : "";
+  }
+
   // ===== header (kun sortering) =====
   function renderHeader(){
     const tr=document.createElement('tr');
@@ -137,7 +144,7 @@
       const th=document.createElement('th');
       const btn=document.createElement('button');
       btn.textContent=col;
-      btn.addEventListener('click',()=>{ if(sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; } render(); });
+      btn.addEventListener('click',()=>{ if (sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; } render(); });
       th.appendChild(btn);
       if (sortCol===col){ const s=document.createElement('span'); s.className='sort-ind'; s.textContent=sortDir===1?'▲':'▼'; th.appendChild(s); }
       tr.appendChild(th);
@@ -149,7 +156,7 @@
   function rowMatches(row){
     const query=(q.value||'').toLowerCase();
     if (query){
-      const cols = SEARCH_VISIBLE_ONLY ? VISIBLE_COLUMNS : RAW_COLUMNS;
+      const cols = VISIBLE_COLUMNS; // søk i synlige
       const hit = cols.some(c => String(row[c]??'').toLowerCase().includes(query));
       if (!hit) return false;
     }
@@ -161,40 +168,42 @@
   }
 
   // ===== betinget formatering =====
-  function valueColor(val, min, max, invert=false){
+  function colorGroup(val, min, max, invert=false){
+    // rød→grønn for R23–R28
     if (!isNumericLike(val)) return '';
-    const x=toNumber(val); if(!isFinite(x) || !isFinite(min) || !isFinite(max) || max<=min) return '';
+    const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
     let t=(x-min)/(max-min); if (invert) t=1-t;
-    const hue = 0 + t*120; // 0=rød → 120=grønn
+    const hue=0 + t*120; // 0=rød, 120=grønn
     return `background: hsl(${hue} 80% 92%)`;
   }
+  function colorNeste6(val, min, max, invert=false){
+    // lys → mørkere blå for Neste 6
+    if (!isNumericLike(val)) return '';
+    const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
+    let t=(x-min)/(max-min); if (invert) t=1-t;
+    const hue=210;              // blå
+    const light = 96 - t*22;    // 96% (lys) → 74% (mørkere)
+    const sat = 75;             // metning
+    return `background: hsl(${hue} ${sat}% ${light}%)`;
+  }
 
-  // Finn felles min/max over R23–R28 på de synlige radene
   function computeGroupRange(rows, cols){
     let min=Infinity, max=-Infinity, any=false;
     for (const r of rows){
       for (const c of cols){
         const v=r[c];
-        if (isNumericLike(v)){
-          const num=toNumber(v);
-          if (isFinite(num)){ any=true; if (num<min) min=num; if (num>max) max=num; }
-        }
+        if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
       }
     }
-    return any && max>min ? {min, max} : null;
+    return any && max>min ? {min,max} : null;
   }
-
-  // Finn min/max for “Neste 6” på de synlige radene
   function computeSingleRange(rows, col){
     let min=Infinity, max=-Infinity, any=false;
     for (const r of rows){
       const v=r[col];
-      if (isNumericLike(v)){
-        const num=toNumber(v);
-        if (isFinite(num)){ any=true; if (num<min) min=num; if (num>max) max=num; }
-      }
+      if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
     }
-    return any && max>min ? {min, max} : null;
+    return any && max>min ? {min,max} : null;
   }
 
   // ===== render =====
@@ -203,11 +212,9 @@
     let rows = DATA.filter(rowMatches);
     if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
-    // Ranges basert på synlige rader
     const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
     const neste6Range = condfmtToggle.checked ? computeSingleRange(rows, NESTE6_COLUMN) : null;
 
-    // bygg tabell
     tbody.innerHTML='';
     const frag=document.createDocumentFragment();
     for (const row of rows){
@@ -216,12 +223,15 @@
         let style='';
         if (condfmtToggle.checked){
           if (GROUP_COLUMNS.includes(c) && groupRange){
-            style = valueColor(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
+            style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
           } else if (c===NESTE6_COLUMN && neste6Range){
-            style = valueColor(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
+            style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
           }
         }
-        const val=row[c]??'';
+        let val = row[c] ?? '';
+        if (detectedNameCol && c === detectedNameCol) {
+          val = `<strong>${val}</strong>`;
+        }
         return `<td style="${style}">${val}</td>`;
       }).join('');
       frag.appendChild(tr);
@@ -282,6 +292,8 @@
       RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c); });
 
       detectedPositionCol = detectPositionColumn(RAW_COLUMNS);
+      detectedNameCol = detectByNameInsensitive(RAW_COLUMNS, NAME_PREF);
+
       DATA = data.map(r=>{ const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o; });
 
       buildPositionChips(DATA, detectedPositionCol);
