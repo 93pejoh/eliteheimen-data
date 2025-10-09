@@ -486,6 +486,28 @@
       document.documentElement.classList.toggle('dark', tgl.checked);
       localStorage.setItem(key, tgl.checked ? '1':'0');
       render(); // re-render for å oppdatere kontrast på NESTE 6 i dark mode
+      /* --- Dark mode: bedre tabellkontrast --- */
+html.dark tbody td { 
+  border-top-color: #1a2743;           /* mørkere grid-linje */
+  background: transparent;             /* la celler med farger skinne gjennom */
+}
+
+/* zebra-striping i dark mode – subtil, ikke lys */
+html.dark tbody tr:nth-child(even) td { 
+  background: #0e172a;                 /* dempet mørk blå */
+}
+
+/* hover i dark mode – litt lysere enn stripen, men ikke grå/hvit */
+html.dark tbody tr:hover td { 
+  background: #122038; 
+}
+
+/* sticky første kolonne må matche tabellbakgrunnen i dark mode */
+html.dark tbody td:first-child, 
+html.dark thead th:first-child {
+  background: #0f172a;
+  box-shadow: 1px 0 0 #1f2a44;
+}
     });
   })();
 </script>
