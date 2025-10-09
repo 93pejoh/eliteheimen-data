@@ -310,16 +310,15 @@ html.dark .pos-badge {
   }
 
   // NESTE 6 – svart i lys modus, auto-kontrast i mørk modus
-  function colorNeste6(val,min,max, invert=false){
-    if(!isNumericLike(val))return '';
-    const x=toNumber(val);
-    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-    let t=(x-min)/(max-min); if(invert)t=1-t;
-    const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-    const textColor = isDarkMode() ? (light < 65 ? '#fff' : '#000') : '#000';
-    return `background:hsl(${hue} ${sat}% ${light}%);color:${textColor}`;
-  }
-
+  function colorNeste6(val, min, max, invert = false) {
+  if (!isNumericLike(val)) return '';
+  const x = toNumber(val);
+  if (!isFinite(x) || !isFinite(min) || !isFinite(max) || max <= min) return '';
+  let t = (x - min) / (max - min);
+  if (invert) t = 1 - t;
+  const hue = 210, sat = 90, light = 92 - t * 32; // lys → mørk blå
+  return `background:hsl(${hue} ${sat}% ${light}%);color:#000;`; // alltid svart tekst
+}
   function computeGroupRange(rows, cols){
     let min=Infinity, max=-Infinity, any=false;
     for(const r of rows){for(const c of cols){const v=r[c];
