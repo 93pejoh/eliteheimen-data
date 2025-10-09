@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen – runde 23</title>
-<meta name="description" content="Interaktiv tabell som henter CSV fra en URL, med skjulte kolonner og enkel posisjonsfiltrering." />
+<meta name="description" content="Interaktiv tabell som henter CSV fra en URL, skjuler valgte kolonner (etter Excel-bokstav) og har enkel posisjonsfiltrering." />
 <style>
   :root { --radius: 12px; }
   * { box-sizing: border-box; }
@@ -33,15 +33,17 @@
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Viser kun relevante kolonner og gir enkel filtrering etter posisjon.</div>
+  <div class="sub">Skjuler valgte kolonner (etter Excel-bokstaver) og gir enkel posisjonsfiltrering. Data hentes fra GitHub.</div>
 
-  <div class="controls">
-    <input id="q" type="search" placeholder="Søk i synlige kolonner…" />
+  <!-- Rad 1: Globalt søk, teller, nullstill -->
+  <div class="controls" role="region" aria-label="Kontroller">
+    <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
     <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
     <button id="reset" type="button">Nullstill filtre</button>
   </div>
 
-  <div class="row">
+  <!-- Rad 2: Posisjonsfilter -->
+  <div class="row" role="region" aria-label="Posisjonsfilter">
     <strong>Posisjoner:</strong>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
     <div id="pos-chips" class="row" style="margin:0;"></div>
@@ -49,7 +51,7 @@
 
   <div id="status" aria-live="polite" class="sr-only"></div>
   <div class="table-wrap">
-    <table id="tbl">
+    <table id="tbl" aria-describedby="q">
       <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -61,11 +63,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
+  // ===================== KONFIG =====================
   const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
 
-  // Skjul kolonner F, H, J, L, N, P, R
-  const HIDE_COLUMNS = ["F", "H", "J", "L", "N", "P", "R"];
-  let POSITION_COLUMN = ""; // auto-detect posisjon
+  // Skjul disse kolonnene etter Excel-bokstaver (1=A, 2=B, ...):
+  // Du ba om: F, H, J, L, N, P, R  (UPPM + alle *_MIN-kolonnene)
+  const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
+
+  // (Valgfritt) Skjul også etter eksakt kolonnenavn:
+  const HIDE_COLUMNS = [];
+
+  // (Valgfritt) Om du vil overstyre navnet på posisjonskolonnen:
+  let POSITION_COLUMN = ""; // tom = autodetekter (case-insensitive)
+
+  // Søk bare i synlige kolonner (true) eller i alle (false):
+  const SEARCH_VISIBLE_ONLY = true;
+  // ==================================================
 
   const thead = document.getElementById('thead');
   const tbody = document.getElementById('tbody');
@@ -77,103 +90,251 @@
   const posChipsWrap = document.getElementById('pos-chips');
   const posAllBtn = document.getElementById('pos-all');
 
-  let RAW_COLUMNS = [], VISIBLE_COLUMNS = [], DATA = [];
-  let sortCol = null, sortDir = 1, colFilters = {};
-  let activePositions = new Set(), detectedPositionCol = "";
+  let RAW_COLUMNS = [];
+  let VISIBLE_COLUMNS = [];
+  let DATA = [];
+  let sortCol = null;
+  let sortDir = 1;
+  let colFilters = {};
+  let activePositions = new Set(); // tom = "alle"
+  let detectedPositionCol = ""; // faktisk brukt navn
 
   function setStatus(msg) { statusEl.textContent = msg || ''; }
-  function isNumericLike(v){ if(v==null)return false; if(typeof v=="number")return true; v=String(v).replace(',','.'); return !isNaN(Number(v)); }
-  function cmp(a,b){ if(isNumericLike(a)&&isNumericLike(b))return Number(a)-Number(b); return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'}); }
 
-  function renderHeader(){
-    const tr=document.createElement('tr');
-    VISIBLE_COLUMNS.forEach(col=>{
-      const th=document.createElement('th');
-      const btn=document.createElement('button');
-      btn.textContent=col;btn.style.background='transparent';btn.style.border='none';btn.style.font='inherit';btn.style.cursor='pointer';
-      btn.onclick=()=>{ if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;} render(); };
-      th.appendChild(btn);
-      if(sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
-      tr.appendChild(th);
-    });
-    const fr=document.createElement('tr');fr.className='filter-row';
-    VISIBLE_COLUMNS.forEach(col=>{
-      const th=document.createElement('th');const input=document.createElement('input');
-      input.type='text';input.placeholder='Filtrer…';input.value=colFilters[col]||'';
-      input.oninput=e=>{colFilters[col]=e.target.value;render();};
-      th.appendChild(input);fr.appendChild(th);
-    });
-    thead.innerHTML='';thead.append(tr,fr);
+  // --- verktøy ---
+  function letterToIndex(letter) {
+    // Excel A=0, B=1, ..., Z=25, AA=26, AB=27, ...
+    const s = letter.trim().toUpperCase();
+    let n = 0;
+    for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+    return n - 1; // 0-basert
+  }
+  function isNumericLike(val) {
+    if (val === null || val === undefined) return false;
+    if (typeof val === 'number') return true;
+    if (typeof val !== 'string') return false;
+    const v = val.replace(',', '.').trim();
+    return v !== '' && !isNaN(Number(v));
+  }
+  function cmp(a, b) {
+    const an = isNumericLike(a);
+    const bn = isNumericLike(b);
+    if (an && bn) return Number(String(a).replace(',', '.')) - Number(String(b).replace(',', '.'));
+    return String(a).localeCompare(String(b), 'no', { numeric: true, sensitivity: 'base' });
   }
 
-  function recordMatchesFilters(row){
-    const query=(q.value||'').toLowerCase();
-    if(query&&!VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query)))return false;
-    for(const [col,val] of Object.entries(colFilters)){
-      if(val&&(String(row[col]??'').toLowerCase().indexOf(val.toLowerCase())===-1))return false;
+  // --- header og filter ---
+  function renderHeader() {
+    const tr = document.createElement('tr');
+    VISIBLE_COLUMNS.forEach(col => {
+      const th = document.createElement('th');
+      const btn = document.createElement('button');
+      btn.textContent = col;
+      btn.style.background = 'transparent';
+      btn.style.border = 'none';
+      btn.style.font = 'inherit';
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', () => {
+        if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
+        render();
+      });
+      th.appendChild(btn);
+      if (sortCol === col) {
+        const s = document.createElement('span');
+        s.className = 'sort-ind';
+        s.textContent = sortDir === 1 ? '▲' : '▼';
+        th.appendChild(s);
+      }
+      tr.appendChild(th);
+    });
+
+    const fr = document.createElement('tr');
+    fr.className = 'filter-row';
+    VISIBLE_COLUMNS.forEach(col => {
+      const th = document.createElement('th');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Filtrer…';
+      input.value = colFilters[col] || '';
+      input.addEventListener('input', e => { colFilters[col] = e.target.value; render(); });
+      th.appendChild(input);
+      fr.appendChild(th);
+    });
+
+    thead.innerHTML = '';
+    thead.appendChild(tr);
+    thead.appendChild(fr);
+  }
+
+  // --- filtreringslogikk ---
+  function recordMatchesFilters(row) {
+    // Globalt søk
+    const query = (q.value || '').toLowerCase();
+    if (query) {
+      const colsToSearch = SEARCH_VISIBLE_ONLY ? VISIBLE_COLUMNS : RAW_COLUMNS;
+      const inGlobal = colsToSearch.some(c => String(row[c] ?? '').toLowerCase().includes(query));
+      if (!inGlobal) return false;
     }
-    if(detectedPositionCol&&activePositions.size>0){
-      const pv=String(row[detectedPositionCol]??'').trim();
-      if(!activePositions.has(pv))return false;
+    // Per-kolonne (bare synlige)
+    for (const [col, val] of Object.entries(colFilters)) {
+      const needle = (val || '').toLowerCase().trim();
+      if (needle) {
+        const hay = String(row[col] ?? '').toLowerCase();
+        if (!hay.includes(needle)) return false;
+      }
+    }
+    // Posisjon
+    if (detectedPositionCol && activePositions.size > 0) {
+      const pv = String(row[detectedPositionCol] ?? '').trim();
+      if (!activePositions.has(pv)) return false;
     }
     return true;
   }
 
-  function render(){
+  function render() {
     renderHeader();
-    let filtered=DATA.filter(recordMatchesFilters);
-    if(sortCol)filtered.sort((a,b)=>sortDir*cmp(a[sortCol],b[sortCol]));
-    tbody.innerHTML='';
-    for(const row of filtered){
-      const tr=document.createElement('tr');
-      tr.innerHTML=VISIBLE_COLUMNS.map(c=>`<td>${row[c]??''}</td>`).join('');
-      tbody.appendChild(tr);
+    let filtered = DATA.filter(recordMatchesFilters);
+    if (sortCol) filtered.sort((a, b) => sortDir * cmp(a[sortCol], b[sortCol]));
+
+    tbody.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for (const row of filtered) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = VISIBLE_COLUMNS.map(c => `<td>${row[c] ?? ''}</td>`).join('');
+      frag.appendChild(tr);
     }
-    shownEl.textContent=filtered.length; totalEl.textContent=DATA.length;
+    tbody.appendChild(frag);
+    shownEl.textContent = String(filtered.length);
+    totalEl.textContent = String(DATA.length);
   }
 
-  function detectPositionColumn(cols){
-    if(POSITION_COLUMN&&cols.includes(POSITION_COLUMN))return POSITION_COLUMN;
-    const cand=["Posisjon","Position","Pos","POS","Role","Rolle"];
-    return cand.find(c=>cols.includes(c))||"";
+  function normalizeRecords(recs) {
+    return recs.map(r => {
+      const o = {};
+      RAW_COLUMNS.forEach(c => o[c] = r[c] ?? '');
+      return o;
+    });
   }
 
-  function buildPositionChips(data,col){
-    posChipsWrap.innerHTML=''; posAllBtn.setAttribute('aria-pressed',activePositions.size===0?'true':'false');
-    if(!col){posAllBtn.disabled=true;return;} posAllBtn.disabled=false;
-    const values=[...new Set(data.map(r=>String(r[col]??'').trim()).filter(Boolean))];
-    const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
-    values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);if(ia!==-1&&ib!==-1)return ia-ib;if(ia!==-1)return-1;if(ib!==-1)return 1;return a.localeCompare(b);});
-    for(const v of values){
-      const btn=document.createElement('button');
-      btn.className='chip'; btn.textContent=v; btn.setAttribute('aria-pressed',activePositions.has(v)?'true':'false');
-      btn.onclick=()=>{
-        posAllBtn.setAttribute('aria-pressed','false');
-        if(activePositions.has(v))activePositions.delete(v);else activePositions.add(v);
-        if(activePositions.size===0)posAllBtn.setAttribute('aria-pressed','true');
+  function detectPositionColumn(columns) {
+    if (POSITION_COLUMN && columns.includes(POSITION_COLUMN)) return POSITION_COLUMN;
+    const cands = ["posisjon","position","pos","rolle","role"];
+    // case-insensitive søk
+    const lower = columns.map(c => c.toLowerCase());
+    for (let i = 0; i < lower.length; i++) {
+      if (cands.includes(lower[i])) return columns[i];
+    }
+    return "";
+  }
+
+  function buildPositionChips(data, colName) {
+    posChipsWrap.innerHTML = '';
+    posAllBtn.setAttribute('aria-pressed', activePositions.size === 0 ? 'true' : 'false');
+
+    if (!colName) { posAllBtn.disabled = true; return; }
+    posAllBtn.disabled = false;
+
+    const seen = new Set();
+    const values = [];
+    for (const r of data) {
+      const v = String(r[colName] ?? '').trim();
+      if (v && !seen.has(v)) { seen.add(v); values.push(v); }
+    }
+    // Vanlig norsk rekkefølge
+    const order = ["K", "F", "M", "A", "GK", "DEF", "MID", "FWD", "Keeper", "Forsvar", "Midtbane", "Angrep"];
+    values.sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b, 'no', { numeric: true });
+    });
+
+    for (const val of values) {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = val;
+      btn.setAttribute('aria-pressed', activePositions.has(val) ? 'true' : 'false');
+      btn.addEventListener('click', () => {
+        // Slå av "Alle"
+        posAllBtn.setAttribute('aria-pressed', 'false');
+        if (activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
+        if (activePositions.size === 0) posAllBtn.setAttribute('aria-pressed', 'true');
         render();
-      };
+        // Oppdater knappene visuelt
+        btn.setAttribute('aria-pressed', activePositions.has(val) ? 'true' : 'false');
+      });
       posChipsWrap.appendChild(btn);
     }
-    posAllBtn.onclick=()=>{activePositions.clear();posAllBtn.setAttribute('aria-pressed','true');render();};
+
+    posAllBtn.onclick = () => {
+      activePositions.clear();
+      posAllBtn.setAttribute('aria-pressed', 'true');
+      render();
+      [...posChipsWrap.querySelectorAll('.chip')].forEach(ch => ch.setAttribute('aria-pressed', 'false'));
+    };
   }
 
-  Papa.parse(CSV_URL,{
-    download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
-    complete:(res)=>{
-      const data=res.data||[];RAW_COLUMNS=res.meta.fields||Object.keys(data[0]);
-      const hide=new Set(HIDE_COLUMNS);VISIBLE_COLUMNS=RAW_COLUMNS.filter(c=>!hide.has(c));
-      detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
-      colFilters=Object.fromEntries(VISIBLE_COLUMNS.map(c=>[c,'']));
-      DATA=data.map(r=>{const o={};RAW_COLUMNS.forEach(c=>o[c]=r[c]??'');return o;});
-      buildPositionChips(DATA,detectedPositionCol);
-      totalEl.textContent=DATA.length; render();
+  // --- last data ---
+  setStatus('Laster data…');
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    dynamicTyping: true,
+    skipEmptyLines: 'greedy',
+    complete: (res) => {
+      setStatus('');
+      if (res.errors && res.errors.length) console.warn('CSV parse errors:', res.errors);
+
+      const data = res.data || [];
+      RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length)
+        ? res.meta.fields
+        : (data[0] ? Object.keys(data[0]) : []);
+
+      // Skjul etter bokstav (indeks) + navn
+      const hideIdx = new Set(HIDE_BY_LETTER.map(letterToIndex));
+      const hideName = new Set(HIDE_COLUMNS);
+      VISIBLE_COLUMNS = [];
+      RAW_COLUMNS.forEach((c, i) => {
+        if (!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c);
+      });
+
+      // Velg posisjonskolonne (case-insensitive – finner f.eks. "POSISJON")
+      detectedPositionCol = detectPositionColumn(RAW_COLUMNS);
+
+      // Start per-kolonnefiltre for synlige
+      colFilters = Object.fromEntries(VISIBLE_COLUMNS.map(c => [c, '']));
+
+      // Normaliser rader
+      DATA = normalizeRecords(data);
+
+      // Bygg posisjonschips
+      buildPositionChips(DATA, detectedPositionCol);
+
+      // Teller og første render
+      totalEl.textContent = String(DATA.length);
+      render();
     },
-    error:(err)=>{setStatus('Feil ved lasting av CSV');console.error(err);}
+    error: (err) => {
+      setStatus('Kunne ikke laste CSV. Se konsollen.');
+      console.error(err);
+      thead.innerHTML = '<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>';
+    }
   });
 
-  q.oninput=render;
-  resetBtn.onclick=()=>{q.value='';sortCol=null;sortDir=1;activePositions.clear();colFilters=Object.fromEntries(VISIBLE_COLUMNS.map(c=>[c,'']));render();};
+  // --- UI handlers ---
+  q.addEventListener('input', render);
+  resetBtn.addEventListener('click', () => {
+    q.value = '';
+    sortCol = null;
+    sortDir = 1;
+    activePositions.clear();
+    posAllBtn.setAttribute('aria-pressed', 'true');
+    colFilters = Object.fromEntries(VISIBLE_COLUMNS.map(c => [c, '']));
+    render();
+    // reset visuell status på chips
+    [...posChipsWrap.querySelectorAll('.chip')].forEach(ch => ch.setAttribute('aria-pressed', 'false'));
+  });
 </script>
 </body>
 </html>
