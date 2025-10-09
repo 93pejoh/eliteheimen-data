@@ -6,117 +6,83 @@
 <title>Eliteheimen</title>
 <meta name="description" content="Eliteheimen – interaktiv spilleroversikt for Fantasy Eliteserien." />
 
-<!-- Fonter og favicon -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="logo.png">
 
 <style>
-  :root {
-    --radius: 14px;
-    --surface: #ffffff;
-    --text: #0f172a;
-    --muted: #667085;
-    --border: #e5e7eb;
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    margin: 20px; color: var(--text); background: #fafafa;
-  }
+  :root { --radius:14px; --surface:#fff; --text:#0f172a; --muted:#667085; --border:#e5e7eb; }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:20px;color:var(--text);background:#fafafa}
 
-  /* Hero / header */
-  .hero {
-    position: relative; overflow: hidden; border-radius: var(--radius);
-    padding: 18px; margin-bottom: 12px; color: #fff;
-    background:
-      radial-gradient(80% 120% at 10% -10%, rgba(14,165,233,.25), transparent 40%),
-      radial-gradient(80% 120% at 110% 10%, rgba(34,197,94,.25), transparent 40%),
-      linear-gradient(180deg, #0b1220, #111827);
-    border: 1px solid rgba(255,255,255,.06);
-  }
-  .hero-inner { display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-  .brand {
-    display:flex; gap:12px; align-items:center;
-    backdrop-filter: blur(6px);
-    border-radius: 999px; padding:8px 12px;
-    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-  }
-  .brand img { width:48px; height:48px; border-radius: 12px; object-fit: cover; background:#fff; }
-  .brand h1 { margin:0; font-size: 1.5rem; font-weight: 800; letter-spacing: .2px; }
-
-  .quicknav { margin-top: 8px; display:flex; gap:8px; flex-wrap: wrap; }
-  .qbtn {
-    padding:8px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.18);
-    background: rgba(255,255,255,.06); color:#e5e7eb; text-decoration:none; font-weight:600;
-  }
-  .qbtn:hover { border-color: rgba(255,255,255,.35); }
-
-  .toolbar { display:flex; gap:8px; align-items:center; }
-  .toggle {
-    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
-    border:1px solid #3b4152; cursor:pointer; user-select:none; background:rgba(255,255,255,.06); color:#e5e7eb;
-  }
+  /* Hero */
+  .hero{position:relative;overflow:hidden;border-radius:var(--radius);padding:18px;margin-bottom:12px;color:#fff;
+    background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
+               radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
+               linear-gradient(180deg,#0b1220,#111827);
+    border:1px solid rgba(255,255,255,.06)}
+  .hero-inner{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .brand{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
+  .brand img{width:48px;height:48px;border-radius:12px;object-fit:cover;background:#fff}
+  .brand h1{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:.2px}
+  .quicknav{display:flex;gap:8px;flex-wrap:wrap}
+  .qbtn{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);
+    color:#e5e7eb;text-decoration:none;font-weight:600}
+  .qbtn:hover{border-color:rgba(255,255,255,.35)}
+  .toolbar{display:flex;gap:8px;align-items:center}
+  .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
+    background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
 
   /* KPI-kort */
-  .cards { display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); margin: 10px 0 14px; }
-  .card {
-    background: var(--surface); color: var(--text); border:1px solid #eef2f7; border-radius: var(--radius);
-    padding: 12px 14px; box-shadow: 0 1px 0 rgba(15,23,42,.04);
-  }
-  .card h3 { margin:0 0 .25rem; font-size:.95rem; color:#111827; }
-  .card p { margin:0; color: var(--muted); font-size:.92rem; }
+  .cards{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin:10px 0 14px}
+  .card{background:var(--surface);color:var(--text);border:1px solid #eef2f7;border-radius:var(--radius);padding:12px 14px;box-shadow:0 1px 0 rgba(15,23,42,.04)}
+  .card h3{margin:0 0 .25rem;font-size:.95rem;color:#111827}
+  .card p{margin:0;color:var(--muted);font-size:.92rem}
 
-  /* Kontroller & filter */
-  .controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; margin: 8px 0; }
-  input[type="search"] { padding: 8px 10px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
-  input[type="search"]:focus { border-color: #888; }
-  button { padding: 6px 10px; border: 1px solid #ddd; border-radius: var(--radius); background: #fff; cursor: pointer; }
-  label.switch { display: inline-flex; align-items: center; gap: 6px; user-select: none; }
-  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 4px 10px; background: #fff; }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 8px; }
-  .chip { border: none; border-radius: 999px; padding: 4px 10px; background: #f2f4f7; cursor: pointer; user-select: none; }
-  .chip[aria-pressed="true"] { background: #dbeafe; outline: 2px solid #93c5fd; }
-  .chip:active { transform: scale(0.98); }
+  /* Kontroller */
+  .controls{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;margin:8px 0}
+  input[type="search"]{padding:8px 10px;border:1px solid #ccc;border-radius:var(--radius);outline:none}
+  input[type="search"]:focus{border-color:#888}
+  button{padding:6px 10px;border:1px solid #ddd;border-radius:var(--radius);background:#fff;cursor:pointer}
+  label.switch{display:inline-flex;align-items:center;gap:6px;user-select:none}
+  .pill{border:1px solid #e0e0e0;border-radius:999px;padding:4px 10px;background:#fff}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 8px}
+  .chip{border:none;border-radius:999px;padding:4px 10px;background:#f2f4f7;cursor:pointer;user-select:none}
+  .chip[aria-pressed="true"]{background:#dbeafe;outline:2px solid #93c5fd}
+  .chip:active{transform:scale(0.98)}
 
-  /* Pris – kompakt slider */
-  .price-compact { display: inline-flex; align-items: center; gap: 8px; margin: 2px 0 8px; }
-  .price-compact input[type="range"] { width: 220px; height: 4px; }
-  .muted { color: #666; font-size: .88rem; }
+  /* Pris – kompakt */
+  .price-compact{display:inline-flex;align-items:center;gap:8px;margin:2px 0 8px}
+  .price-compact input[type="range"]{width:220px;height:4px}
+  .muted{color:#666;font-size:.88rem}
 
   /* Tabell */
-  .table-wrap { overflow: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); background:#fff; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
-  thead th { position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e5e5e5; padding: 8px; white-space: nowrap; text-align: center; }
-  tbody td { border-top: 1px solid #f0f0f0; padding: 6px 8px; vertical-align: top; white-space: nowrap; text-align: center; }
-  thead th button { background: transparent; border: none; font: inherit; cursor: pointer; }
-  .sort-ind { opacity: .6; font-size: .9em; margin-left: 6px; }
-  tbody tr:nth-child(even) td { background: #fcfcfc; }
-  tbody tr:hover td { background: #f3f7ff; }
-  tbody td:first-child, thead th:first-child {
-    position: sticky; left: 0; z-index: 1; background: #fff;
-    box-shadow: 1px 0 0 #eee;
-  }
+  .table-wrap{overflow:auto;border:1px solid #e5e5e5;border-radius:var(--radius);background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:.95rem}
+  thead th{position:sticky;top:0;background:#fafafa;border-bottom:1px solid #e5e5e5;padding:8px;white-space:nowrap;text-align:center}
+  tbody td{border-top:1px solid #f0f0f0;padding:6px 8px;vertical-align:top;white-space:nowrap;text-align:center}
+  thead th button{background:transparent;border:none;font:inherit;cursor:pointer}
+  .sort-ind{opacity:.6;font-size:.9em;margin-left:6px}
+  tbody tr:nth-child(even) td{background:#fcfcfc}
+  tbody tr:hover td{background:#f3f7ff}
+  tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 #eee}
 
-  .legend { font-size: .9rem; color: #666; margin-top: 6px; }
-  .footer-wrap {
-    margin-top: 18px; padding-top: 12px; border-top: 1px solid #e5e7eb; color: #64748b;
-    display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
-  }
-  .footer-wrap a { color:#64748b; text-decoration:none; }
-  .footer-wrap a:hover { color:#0ea5e9; }
+  .legend{font-size:.9rem;color:#666;margin-top:6px}
+  .footer-wrap{margin-top:18px;padding-top:12px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .footer-wrap a{color:#64748b;text-decoration:none}
+  .footer-wrap a:hover{color:#0ea5e9}
 
   /* Dark mode */
-  html.dark body { background:#0b1220; color:#e5e7eb; }
-  html.dark .card { background:#0f172a; color:#e5e7eb; border-color:#1f2a44; }
-  html.dark .controls input[type="search"], html.dark button, html.dark .pill { background:#0f172a; color:#e5e7eb; border-color:#1f2a44; }
-  html.dark .chip { background:#111827; color:#e5e7eb; }
-  html.dark .chip[aria-pressed="true"] { background:#1f2937; outline-color:#334155; }
-  html.dark .table-wrap { border-color:#1f2a44; background:#0f172a; }
-  html.dark thead th { background:#0f172a; border-bottom-color:#1f2a44; }
-  html.dark tbody td { border-top-color:#15213b; }
-  html.dark tbody tr:hover td { background:#0d1a34; }
-  html.dark .legend, html.dark .footer-wrap { color:#a3adc2; }
+  html.dark body{background:#0b1220;color:#e5e7eb}
+  html.dark .card{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
+  html.dark .controls input[type="search"], html.dark button, html.dark .pill{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
+  html.dark .chip{background:#111827;color:#e5e7eb}
+  html.dark .chip[aria-pressed="true"]{background:#1f2937;outline-color:#334155}
+  html.dark .table-wrap{border-color:#1f2a44;background:#0f172a}
+  html.dark thead th{background:#0f172a;border-bottom-color:#1f2a44}
+  html.dark tbody td{border-top-color:#15213b}
+  html.dark tbody tr:hover td{background:#0d1a34}
+  html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
 </style>
 </head>
 <body>
@@ -138,12 +104,12 @@
     </div>
   </section>
 
-  <!-- KPI-KORT -->
+  <!-- KPI -->
   <section class="cards">
     <div class="card"><h3>Spillere vist</h3><p id="kpi-count">–</p></div>
   </section>
 
-  <!-- Filtre -->
+  <!-- KONTROLLER -->
   <section id="filters">
     <div class="controls" role="region" aria-label="Kontroller">
       <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
@@ -154,12 +120,14 @@
       <button id="reset" type="button">Nullstill</button>
     </div>
 
+    <!-- Posisjonsfilter -->
     <div class="row" role="region" aria-label="Posisjonsfilter">
       <strong>Posisjoner:</strong>
       <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
       <div id="pos-chips" class="row" style="margin:0;"></div>
     </div>
 
+    <!-- Pris – kompakt slider -->
     <div id="price-compact" class="price-compact" style="display:none;">
       <strong>Pris ≤</strong>
       <input id="priceCapRange" type="range" step="1" />
@@ -167,23 +135,25 @@
     </div>
   </section>
 
+  <!-- TABELL -->
   <section id="table" class="table-wrap" aria-labelledby="top">
     <table id="tbl" aria-describedby="q">
       <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
     </table>
   </section>
-  <div class="legend">R23–R28: #d2255d → #04b155 (magenta → grønn). NESTE 6: lys → mørk blå (egen skala). NAVN og NESTE 6 i bold.</div>
+  <div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: lys → mørk blå. NAVN og NESTE 6 i bold.</div>
 
+  <!-- FOOTER -->
   <footer class="footer-wrap" id="about">
     <div>© 2025 Eliteheimen. Data fra GitHub-repoet.</div>
     <div>
       <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
-      &nbsp;•&nbsp;
-      <a href="#top">Til toppen ↑</a>
+      &nbsp;•&nbsp;<a href="#top">Til toppen ↑</a>
     </div>
   </footer>
 
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
   // ======== KONFIG ========
@@ -191,131 +161,66 @@
 
   // Skjul kolonner etter Excel-bokstav:
   const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
+  const HIDE_COLUMNS = []; // evt. kolonnenavn du vil skjule eksplisitt
 
-  // (Valgfritt) Skjul også etter eksakt kolonnenavn:
-  const HIDE_COLUMNS = [];
+  // Posisjon/NAVN/pris
+  let POSITION_COLUMN = "";              // tom = autodeteksjon
+  const NAME_PREF = "navn";              // NAVN i bold
+  let PRICE_COLUMN = "";                 // tom = autodeteksjon
 
-  // Posisjonskolonne (tom = autodetekter case-insensitive):
-  let POSITION_COLUMN = "";
-
-  // NAVN i bold (case-insensitiv deteksjon av kolonnenavn):
-  const NAME_PREF = "navn";
-
-  // Betinget formatering:
-  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles skala
+  // Betinget formatering
+  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles skala (midtpunkt 3)
   const NESTE6_COLUMN = "NESTE 6";                              // egen blå skala
-
-  // (Valgfritt) Inverter skala for disse (lavere er bedre):
-  const INVERT_COLOR_COLUMNS = []; // f.eks. ["R23"]
-
-  // Pris-kolonne (overstyr for å låse navnet, ellers autodetekter):
-  let PRICE_COLUMN = "";
+  const INVERT_COLOR_COLUMNS = []; // f.eks. ["R23"] om lavere=bedre
 
   // ======== ELEMENTER ========
-  const thead = document.getElementById('thead');
-  const tbody = document.getElementById('tbody');
-  const q = document.getElementById('q');
-  const shown = document.getElementById('shown');
-  const total = document.getElementById('total');
-  const resetBtn = document.getElementById('reset');
-  const posChipsWrap = document.getElementById('pos-chips');
-  const posAllBtn = document.getElementById('pos-all');
-  const condfmtToggle = document.getElementById('condfmt');
+  const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
+  const q=document.getElementById('q'), shown=document.getElementById('shown'), total=document.getElementById('total');
+  const resetBtn=document.getElementById('reset'), condfmtToggle=document.getElementById('condfmt');
+  const posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
 
   // Pris – kompakt
-  const priceCompactWrap = document.getElementById('price-compact');
-  const priceCapRange = document.getElementById('priceCapRange');
-  const priceCapLabel = document.getElementById('priceCapLabel');
+  const priceCompactWrap=document.getElementById('price-compact');
+  const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
 
   // KPI
-  const kpiCount = document.getElementById('kpi-count');
+  const kpiCount=document.getElementById('kpi-count');
 
   // ======== STATE ========
-  let RAW_COLUMNS = [];
-  let VISIBLE_COLUMNS = [];
-  let DATA = [];
-  let sortCol = null;
-  let sortDir = 1;
-  let activePositions = new Set(); // tom = alle
-  let detectedPositionCol = ""; // faktisk brukt navn
-  let detectedNameCol = ""; // faktisk NAVN-kolonne
-  let detectedPriceCol = ""; // faktisk PRIS-kolonne
-  let priceGlobalMin = null, priceGlobalMax = null, priceCapVal = null;
+  let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
+  let sortCol=null, sortDir=1;
+  let activePositions=new Set();
+  let detectedPositionCol="", detectedNameCol="", detectedPriceCol="";
+  let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 
   // ======== UTILS ========
-  function letterToIndex(letter){
-    const s=letter.trim().toUpperCase();
-    let n=0; for(let i=0;i<s.length;i++) n=n*26+(s.charCodeAt(i)-64);
-    return n-1;
-  }
-  function isNumericLike(val){
-    if (val===null || val===undefined) return false;
-    if (typeof val==='number') return true;
-    const t=String(val).trim();
-    if (t==='') return false;
-    if (t.endsWith('%')) return !isNaN(Number(t.slice(0,-1).replace(',','.')));
-    return !isNaN(Number(t.replace(/\s/g,'').replace('kr','').replace('KR','').replace(',','.')));
-  }
-  function toNumber(val){
-    if (typeof val==='number') return val;
-    const t=String(val).trim().replace(/\s/g,'').replace('kr','').replace('KR','');
-    if (t.endsWith('%')) return Number(t.slice(0,-1).replace(',','.'));
-    return Number(t.replace(',','.'));
-  }
-  function cmp(a,b){
-    const an=isNumericLike(a), bn=isNumericLike(b);
-    if(an&&bn) return toNumber(a)-toNumber(b);
-    return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});
-  }
-  function detectInsensitive(columns, wantedLower){
-    const lower = columns.map(c => c.toLowerCase());
-    const i = lower.indexOf(wantedLower);
-    return i >= 0 ? columns[i] : "";
-  }
-  const fmtInt = n => new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
+  function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
+  function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
+    if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
+    return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));}
+  function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
+  function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
+  function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
+  const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 
-  // ======== FARGESKALA-VERKTØY (magenta → grønn) ========
-  const GROUP_START_HEX = "#d2255d";
-  const GROUP_END_HEX   = "#04b155";
+  // FARGEVERKTØY – magenta → hvit → grønn (midtpunkt 3)
+  const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
+  function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];}
+  function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
 
-  function hexToRgb(hex){
-    const h = hex.replace('#','').trim();
-    if (h.length !== 6) return [210,37,93]; // fallback til noe magenta-ish
-    const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
-    return [r,g,b];
-  }
-  function lerp(a,b,t){ return a + (b-a)*t; }
-  function lerpRgb(c1,c2,t){
-    return [
-      Math.round(lerp(c1[0], c2[0], t)),
-      Math.round(lerp(c1[1], c2[1], t)),
-      Math.round(lerp(c1[2], c2[2], t)),
-    ];
-  }
-  function rgbToCss(rgb){ return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`; }
-  function luminance(rgb){
-    const srgb = rgb.map(v => {
-      v /= 255;
-      return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
-    });
-    return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
-  }
-
-  // ======== SORTERBAR HEADER ========
+  // ======== HEADER ========
   function renderHeader(){
     const tr=document.createElement('tr');
     VISIBLE_COLUMNS.forEach(col=>{
       const th=document.createElement('th');
       const btn=document.createElement('button');
       btn.textContent=col;
-      btn.addEventListener('click',()=>{ if (sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; } render(); });
+      btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
       th.appendChild(btn);
-      if (sortCol===col){
-        const s=document.createElement('span');
-        s.className='sort-ind';
-        s.textContent=sortDir===1?'▲':'▼';
-        th.appendChild(s);
-      }
+      if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
       tr.appendChild(th);
     });
     thead.innerHTML=''; thead.appendChild(tr);
@@ -325,8 +230,8 @@
   function rowMatches(row){
     const query=(q.value||'').toLowerCase();
     if (query){
-      const hit = VISIBLE_COLUMNS.some(c => String(row[c]??'').toLowerCase().includes(query));
-      if (!hit) return false;
+      const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
+      if(!hit)return false;
     }
     if (detectedPositionCol && activePositions.size>0){
       const pv=String(row[detectedPositionCol]??'').trim();
@@ -334,100 +239,90 @@
     }
     if (detectedPriceCol && priceCapVal!=null){
       const v=row[detectedPriceCol];
-      if (!isNumericLike(v)) return false;
-      if (toNumber(v) > priceCapVal) return false;
+      if(!isNumericLike(v))return false;
+      if(toNumber(v)>priceCapVal)return false;
     }
     return true;
   }
 
   // ======== BETINGET FORMATERING ========
-  // R23–R28: lineær interpolering mellom #d2255d og #04b155
   function colorGroup(val, min, max, invert=false){
-    if (!isNumericLike(val)) return '';
-    const x = toNumber(val);
-    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
-    let t=(x-min)/(max-min);
-    if (invert) t=1-t;
-    t = Math.max(0, Math.min(1, t));
-    const c1 = hexToRgb(GROUP_START_HEX);
-    const c2 = hexToRgb(GROUP_END_HEX);
-    const rgb = lerpRgb(c1, c2, t);
-    const bg = rgbToCss(rgb);
-    const text = luminance(rgb) < 0.45 ? '#fff' : 'inherit';
-    return `background:${bg};color:${text}`;
-  }
-  // NESTE 6 – blå skala
-  function colorNeste6(val, min, max, invert=false){
-    if (!isNumericLike(val)) return '';
+    if(!isNumericLike(val))return '';
     const x=toNumber(val);
-    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
-    let t=(x-min)/(max-min);
-    if (invert) t=1-t;
-    const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-    return `background:hsl(${hue} ${sat}% ${light}%)`;
+    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+    const mid=3;
+
+    let rgb;
+    if (x<=mid){
+      const t=(x-min)/(mid-min); // 0..1
+      const c1=hexToRgb(GROUP_LOW), c2=hexToRgb(GROUP_MID);
+      rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
+    } else {
+      const t=(x-mid)/(max-mid); // 0..1
+      const c1=hexToRgb(GROUP_MID), c2=hexToRgb(GROUP_HIGH);
+      rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
+    }
+    if(invert){ // valgfri inversjon for kolonner i INVERT_COLOR_COLUMNS
+      const t=(x-min)/(max-min);
+      const c1=hexToRgb(GROUP_HIGH), c2=hexToRgb(GROUP_LOW);
+      rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
+    }
+    const text=luminance(rgb)<0.55?'#fff':'#000';
+    return `background:${rgbToCss(rgb)};color:${text}`;
   }
+
+  function colorNeste6(val,min,max, invert=false){
+    if(!isNumericLike(val))return '';
+    const x=toNumber(val);
+    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+    let t=(x-min)/(max-min); if(invert)t=1-t;
+    const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
+    const text = light<65 ? '#fff' : 'inherit';
+    return `background:hsl(${hue} ${sat}% ${light}%);color:${text}`;
+  }
+
   function computeGroupRange(rows, cols){
     let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      for (const c of cols){
-        const v=r[c];
-        if (isNumericLike(v)){
-          const num=toNumber(v);
-          if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; }
-        }
-      }
-    }
+    for(const r of rows){for(const c of cols){const v=r[c];
+      if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+    }}
     return any && max>min ? {min,max} : null;
   }
   function computeSingleRange(rows, col){
     let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      const v=r[col];
-      if (isNumericLike(v)){
-        const num=toNumber(v);
-        if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; }
-      }
+    for(const r of rows){const v=r[col];
+      if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
     }
     return any && max>min ? {min,max} : null;
   }
 
   // ======== POSISJON ========
   function detectPositionColumn(columns){
-    if (POSITION_COLUMN && columns.includes(POSITION_COLUMN)) return POSITION_COLUMN;
+    if(POSITION_COLUMN && columns.includes(POSITION_COLUMN))return POSITION_COLUMN;
     const cands=["posisjon","position","pos","rolle","role"];
     const lower=columns.map(c=>c.toLowerCase());
-    for (let i=0;i<lower.length;i++) if (cands.includes(lower[i])) return columns[i];
+    for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
     return "";
   }
-  function buildPositionChips(data, colName){
+  function buildPositionChips(data, col){
     posChipsWrap.innerHTML='';
     posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
-    if (!colName){ posAllBtn.disabled=true; return; }
-    posAllBtn.disabled=false;
+    if(!col){posAllBtn.disabled=true;return;} posAllBtn.disabled=false;
 
     const seen=new Set(), values=[];
-    for (const r of data){
-      const v=String(r[colName]??'').trim();
-      if (v && !seen.has(v)){ seen.add(v); values.push(v); }
-    }
+    for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
     const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
-    values.sort((a,b)=>{
-      const ia=order.indexOf(a), ib=order.indexOf(b);
-      if(ia!==-1&&ib!==-1)return ia-ib;
-      if(ia!==-1)return-1;
-      if(ib!==-1)return 1;
-      return a.localeCompare(b,'no',{numeric:true});
-    });
+    values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);
+      if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1;
+      return a.localeCompare(b,'no',{numeric:true});});
 
-    for (const val of values){
+    for(const val of values){
       const btn=document.createElement('button');
-      btn.className='chip';
-      btn.textContent=val;
-      btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+      btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
       btn.addEventListener('click',()=>{
         posAllBtn.setAttribute('aria-pressed','false');
-        if (activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-        if (activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
+        if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
+        if(activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
         btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
         render();
       });
@@ -442,15 +337,13 @@
   }
 
   // ======== KPI ========
-  function updateKPIs(rows){
-    kpiCount.textContent = `${fmtInt(rows.length)} spillere`;
-  }
+  function updateKPIs(rows){ kpiCount.textContent=`${fmtInt(rows.length)} spillere`; }
 
   // ======== RENDER ========
   function render(){
     renderHeader();
-    let rows = DATA.filter(rowMatches);
-    if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
+    let rows=DATA.filter(rowMatches);
+    if(sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
     const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
     const neste6Range = condfmtToggle.checked && VISIBLE_COLUMNS.includes(NESTE6_COLUMN)
@@ -458,28 +351,26 @@
 
     tbody.innerHTML='';
     const frag=document.createDocumentFragment();
-    for (const row of rows){
+    for(const row of rows){
       const tr=document.createElement('tr');
       tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
         let style='';
-        if (condfmtToggle.checked){
-          if (GROUP_COLUMNS.includes(c) && groupRange){
+        if(condfmtToggle.checked){
+          if(GROUP_COLUMNS.includes(c) && groupRange){
             style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-          } else if (c === NESTE6_COLUMN && neste6Range){
+          } else if(c===NESTE6_COLUMN && neste6Range){
             style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
           }
         }
-        let val = row[c] ?? '';
-        // Posisjon-badges
-        if (detectedPositionCol && c === detectedPositionCol){
-          const pos = String(val);
-          const bg = pos === "K" ? "#E0F2FE" : pos === "F" ? "#DCFCE7" : pos === "M" ? "#FEF9C3" : pos === "A" ? "#FFE4E6" : "#F2F4F7";
-          val = `<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${bg};font-weight:600">${pos}</span>`;
+        let val=row[c]??'';
+        // Posisjon-badge
+        if(detectedPositionCol && c===detectedPositionCol){
+          const pos=String(val);
+          const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
+          val=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${bg};font-weight:600">${pos}</span>`;
         }
         // Bold for NAVN og NESTE 6
-        if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) {
-          val = `<strong>${val}</strong>`;
-        }
+        if((detectedNameCol && c===detectedNameCol) || c===NESTE6_COLUMN) val=`<strong>${val}</strong>`;
         return `<td style="${style}">${val}</td>`;
       }).join('');
       frag.appendChild(tr);
@@ -492,67 +383,50 @@
 
   // ======== PRIS ========
   function detectPriceColumn(columns){
-    if (PRICE_COLUMN && columns.includes(PRICE_COLUMN)) return PRICE_COLUMN;
-    const prefs = ["pris","price","kostnad","cost"];
-    const lower = columns.map(c => c.toLowerCase());
-    for (let i=0;i<lower.length;i++) if (prefs.includes(lower[i])) return columns[i];
+    if(PRICE_COLUMN && columns.includes(PRICE_COLUMN)) return PRICE_COLUMN;
+    const prefs=["pris","price","kostnad","cost"];
+    const lower=columns.map(c=>c.toLowerCase());
+    for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
     return "";
   }
-  function computePriceRange(rows, col){
-    let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      const v=r[col];
-      if (isNumericLike(v)){
-        const num=toNumber(v);
-        if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; }
-      }
+  function computePriceRange(rows,col){
+    let min=Infinity,max=-Infinity,any=false;
+    for(const r of rows){const v=r[col];
+      if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
     }
-    return any ? {min, max} : null;
+    return any?{min,max}:null;
   }
   function setupPriceCompact(){
-    if (!detectedPriceCol) { priceCompactWrap.style.display='none'; return; }
-    const r = computePriceRange(DATA, detectedPriceCol);
-    if (!r) { priceCompactWrap.style.display='none'; return; }
-    priceGlobalMin = Math.floor(r.min);
-    priceGlobalMax = Math.ceil(r.max);
-    // Start med maks (vis alt)
-    priceCapVal = priceGlobalMax;
-
-    priceCapRange.min = priceGlobalMin;
-    priceCapRange.max = priceGlobalMax;
-    priceCapRange.value = priceCapVal;
-    priceCapLabel.textContent = fmtInt(priceCapVal);
-
-    priceCompactWrap.style.display = 'inline-flex';
-
-    priceCapRange.addEventListener('input', () => {
-      priceCapVal = Number(priceCapRange.value);
-      priceCapLabel.textContent = fmtInt(priceCapVal);
-      render();
-    });
+    if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
+    const r=computePriceRange(DATA,detectedPriceCol);
+    if(!r){priceCompactWrap.style.display='none';return;}
+    priceGlobalMin=Math.floor(r.min);
+    priceGlobalMax=Math.ceil(r.max);
+    priceCapVal=priceGlobalMax;
+    priceCapRange.min=priceGlobalMin; priceCapRange.max=priceGlobalMax; priceCapRange.value=priceCapVal;
+    priceCapLabel.textContent=fmtInt(priceCapVal);
+    priceCompactWrap.style.display='inline-flex';
+    priceCapRange.addEventListener('input',()=>{priceCapVal=Number(priceCapRange.value);priceCapLabel.textContent=fmtInt(priceCapVal);render();});
   }
 
   // ======== INIT ========
-  Papa.parse(CSV_URL, {
-    download:true, header:true, dynamicTyping:true, skipEmptyLines:'greedy',
+  Papa.parse(CSV_URL,{
+    download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
     complete:(res)=>{
       const data=res.data||[];
-      RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length)
-        ? res.meta.fields
-        : (data[0] ? Object.keys(data[0]) : []);
+      RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
 
-      // kolonner å vise
+      // beregn synlige kolonner
       const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
       const hideName=new Set(HIDE_COLUMNS);
       VISIBLE_COLUMNS=[];
       RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c); });
 
-      detectedPositionCol = detectPositionColumn(RAW_COLUMNS);
-      detectedNameCol = detectInsensitive(RAW_COLUMNS, NAME_PREF);
-      detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
+      detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
+      detectedNameCol=detectInsensitive(RAW_COLUMNS, NAME_PREF);
+      detectedPriceCol=detectPriceColumn(RAW_COLUMNS);
 
-      // normaliser rader
-      DATA = data.map(r=>{ const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o; });
+      DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o;});
 
       buildPositionChips(DATA, detectedPositionCol);
       setupPriceCompact();
@@ -566,29 +440,27 @@
   // ======== HANDLERS ========
   q.addEventListener('input', render);
   condfmtToggle.addEventListener('change', render);
-  resetBtn.addEventListener('click',()=>{
+  resetBtn.addEventListener('click', ()=>{
     q.value=''; sortCol=null; sortDir=1; activePositions.clear();
-    if (detectedPriceCol && priceGlobalMax!=null){
-      priceCapVal = priceGlobalMax;
-      priceCapRange.value = priceCapVal;
-      priceCapLabel.textContent = fmtInt(priceCapVal);
+    if(detectedPriceCol && priceGlobalMax!=null){
+      priceCapVal=priceGlobalMax; priceCapRange.value=priceCapVal; priceCapLabel.textContent=fmtInt(priceCapVal);
     }
     posAllBtn.setAttribute('aria-pressed','true');
     [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
     render();
   });
 
-  // Mørk modus – husk preferanse
+  // Mørk modus
   (function(){
-    const key = 'eh_dark2';
-    const tgl = document.getElementById('darkToggle');
-    if (!tgl) return;
-    const saved = localStorage.getItem(key);
-    if (saved === '1') document.documentElement.classList.add('dark');
-    tgl.checked = saved === '1';
-    tgl.addEventListener('change', ()=>{
+    const key='eh_dark2';
+    const tgl=document.getElementById('darkToggle');
+    if(!tgl)return;
+    const saved=localStorage.getItem(key);
+    if(saved==='1') document.documentElement.classList.add('dark');
+    tgl.checked=(saved==='1');
+    tgl.addEventListener('change',()=>{
       document.documentElement.classList.toggle('dark', tgl.checked);
-      localStorage.setItem(key, tgl.checked ? '1' : '0');
+      localStorage.setItem(key, tgl.checked ? '1':'0');
     });
   })();
 </script>
