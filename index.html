@@ -62,391 +62,366 @@
   tbody tr:hover td{background:#f3f7ff}
   tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 #eee}
 
-  .legend{font-size:.9rem;color:#666;margin-top:6px}
-  .footer-wrap{margin-top:18px;padding-top:12px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-  .footer-wrap a{color:#64748b;text-decoration:none}
-  .footer-wrap a:hover{color:#0ea5e9}
+  /* Header – bedre lesbarhet */
+  thead th {font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#0f172a;z-index:2}
+  thead th button:hover{text-decoration:underline}
+  html.dark thead th {
+    background:#0b1325;color:#f1f5f9;border-bottom-color:#223356;
+    box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
+  html.dark thead th:first-child {
+    background:#0b1325;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
 
   /* Posisjons-badge */
   .pos-badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:600;color:#111827}
   html.dark .pos-badge{color:#0b1220 !important}
 
-  /* Dark mode */
+  .legend{font-size:.9rem;color:#666;margin-top:6px}
+  .footer-wrap{margin-top:18px;padding-top:12px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .footer-wrap a{color:#64748b;text-decoration:none}
+  .footer-wrap a:hover{color:#0ea5e9}
+
+  /* Dark mode: generelt + tabellkontrast */
   html.dark body{background:#0b1220;color:#e5e7eb}
   html.dark .card{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
   html.dark .controls input[type="search"]{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
   html.dark .chip{background:#111827;color:#e5e7eb}
   html.dark .chip[aria-pressed="true"]{background:#1f2937;outline-color:#334155}
   html.dark .table-wrap{border-color:#1f2a44;background:#0f172a}
-  html.dark thead th{background:#0f172a;border-bottom-color:#1f2a44}
   html.dark tbody td{border-top-color:#1a2743;background:transparent}
   html.dark tbody tr:nth-child(even) td{background:#0e172a}
   html.dark tbody tr:hover td{background:#122038}
   html.dark tbody td:first-child, html.dark thead th:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
-  
-/* --- Forbedret tabell-header --- */
-thead th {
-  font-weight: 700;
-  letter-spacing: .3px;
-  text-transform: uppercase;
-  color: #0f172a;
-  z-index: 2;
-}
-
-...
-
 </style>
 </head>
 <body>
 
-  <!-- HERO -->
-  <section class="hero" id="top">
-    <div class="hero-inner">
-      <div class="brand">
-        <img src="logo.png" alt="Eliteheimen logo" />
-        <div><h1>Eliteheimen</h1></div>
-      </div>
-      <div class="toolbar">
-        <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
-      </div>
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <div class="brand">
+      <img src="logo.png" alt="Eliteheimen logo" />
+      <div><h1>Eliteheimen</h1></div>
     </div>
-  </section>
-
-  <!-- KPI -->
-  <section class="cards">
-    <div class="card"><h3>Spillere vist</h3><p id="kpi-count">–</p></div>
-  </section>
-
-  <!-- KONTROLLER -->
-  <section id="filters">
-    <div class="controls" role="region" aria-label="Kontroller">
-      <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
+    <div class="toolbar">
+      <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
     </div>
+  </div>
+</section>
 
-    <!-- Posisjonsfilter -->
-    <div class="row" role="region" aria-label="Posisjonsfilter">
-      <strong>Posisjoner:</strong>
-      <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
-      <div id="pos-chips" class="row" style="margin:0;"></div>
-    </div>
+<!-- KPI -->
+<section class="cards">
+  <div class="card"><h3>Spillere vist</h3><p id="kpi-count">–</p></div>
+</section>
 
-    <!-- Pris – kompakt slider -->
-    <div id="price-compact" class="price-compact" style="display:none;">
-      <strong>Pris ≤</strong>
-      <input id="priceCapRange" type="range" step="1" />
-      <span class="muted" id="priceCapLabel"></span>
-    </div>
-  </section>
+<!-- KONTROLLER -->
+<section id="filters">
+  <div class="controls" role="region" aria-label="Kontroller">
+    <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
+  </div>
 
-  <!-- TABELL -->
-  <section id="table" class="table-wrap" aria-labelledby="top">
-    <table id="tbl" aria-describedby="q">
-      <thead id="thead"></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </section>
-  <div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: blå skala – tekst alltid svart. NAVN og NESTE 6 i bold.</div>
+  <!-- Posisjonsfilter -->
+  <div class="row" role="region" aria-label="Posisjonsfilter">
+    <strong>Posisjoner:</strong>
+    <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
+    <div id="pos-chips" class="row" style="margin:0;"></div>
+  </div>
 
-  <!-- FOOTER -->
-  <footer class="footer-wrap" id="about">
-    <div>© 2025 Eliteheimen. Data fra GitHub-repoet.</div>
-    <div>
-      <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
-      &nbsp;•&nbsp;<a href="#top">Til toppen ↑</a>
-    </div>
-  </footer>
+  <!-- Pris – kompakt slider -->
+  <div id="price-compact" class="price-compact" style="display:none;">
+    <strong>Pris ≤</strong>
+    <input id="priceCapRange" type="range" step="1" />
+    <span class="muted" id="priceCapLabel"></span>
+  </div>
+</section>
+
+<!-- TABELL -->
+<section id="table" class="table-wrap" aria-labelledby="top">
+  <table id="tbl" aria-describedby="q">
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</section>
+
+<div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: blå skala – tekst alltid svart. NAVN og NESTE 6 i bold.</div>
+
+<!-- FOOTER -->
+<footer class="footer-wrap" id="about">
+  <div>© 2025 Eliteheimen. Data fra GitHub-repoet.</div>
+  <div>
+    <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;•&nbsp;<a href="#top">Til toppen ↑</a>
+  </div>
+</footer>
 
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-  // ======== KONFIG ========
-  const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
+/* ======== KONFIG ======== */
+const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
+/* Skjul kolonner etter Excel-bokstav (0-basert blir beregnet): */
+const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
+/* Betinget formatering */
+const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"];   // felles skala (midtpunkt 3)
+const NESTE6_COLUMN = "NESTE 6";                               // egen blå skala
 
-  // Skjul kolonner etter Excel-bokstav:
-  const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
-  const HIDE_COLUMNS = []; // evt. kolonnenavn du vil skjule eksplisitt
+/* ======== ELEMENTER ======== */
+const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
+const q=document.getElementById('q'), posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
+const priceCompactWrap=document.getElementById('price-compact');
+const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
+const kpiCount=document.getElementById('kpi-count');
 
-  // Posisjon/NAVN/pris
-  let POSITION_COLUMN = "";
-  const NAME_PREF = "navn";
-  let PRICE_COLUMN = "";
+/* ======== STATE ======== */
+let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
+let sortCol=null, sortDir=1;
+let activePositions=new Set();
+let detectedPositionCol="", detectedNameCol="", detectedPriceCol="";
+let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 
-  // Betinget formatering
-  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // midtpunkt 3
-  const NESTE6_COLUMN = "NESTE 6";
-  const INVERT_COLOR_COLUMNS = [];
+/* ======== UTILS ======== */
+function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
+function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
+  if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
+  return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));}
+function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
+function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
+function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
+const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 
-  // ======== ELEMENTER ========
-  const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
-  const q=document.getElementById('q');
-  const posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
-  const priceCompactWrap=document.getElementById('price-compact');
-  const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
-  const kpiCount=document.getElementById('kpi-count');
+/* Fargeskala R23–R28 (magenta→hvit→grønn; midt=3) */
+const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
+function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];}
+function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
 
-  // ======== STATE ========
-  let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
-  let sortCol=null, sortDir=1;
-  let activePositions=new Set();
-  let detectedPositionCol="", detectedNameCol="", detectedPriceCol="";
-  let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
-
-  // ======== UTILS ========
-  function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
-  function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
-    if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
-    return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));}
-  function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
-  function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
-  function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
-  const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
-
-  // Fargeskala R23–R28 (magenta→hvit→grønn, midt=3)
-  const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
-  function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
-  function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
-  function lerp(a,b,t){return a+(b-a)*t;}
-  function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];}
-  function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
-  const isDarkMode = ()=> document.documentElement.classList.contains('dark');
-
-  // ======== HEADER ========
-  function renderHeader(){
-    const tr=document.createElement('tr');
-    VISIBLE_COLUMNS.forEach(col=>{
-      const th=document.createElement('th');
-      const btn=document.createElement('button');
-      btn.textContent=col;
-      btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
-      th.appendChild(btn);
-      if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
-      tr.appendChild(th);
-    });
-    thead.innerHTML=''; thead.appendChild(tr);
-  }
-
-  // ======== FILTRERING ========
-  function rowMatches(row){
-    const query=(q.value||'').toLowerCase();
-    if (query){
-      const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
-      if(!hit)return false;
-    }
-    if (detectedPositionCol && activePositions.size>0){
-      const pv=String(row[detectedPositionCol]??'').trim();
-      if (!activePositions.has(pv)) return false;
-    }
-    if (detectedPriceCol && priceCapVal!=null){
-      const v=row[detectedPriceCol];
-      if(!isNumericLike(v))return false;
-      if(toNumber(v)>priceCapVal)return false;
-    }
-    return true;
-  }
-
-  // ======== BETINGET FORMATERING ========
-  function colorGroup(val, min, max, invert=false){
-    if(!isNumericLike(val))return '';
-    const x=toNumber(val);
-    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-    const mid=3;
-    let rgb;
-    if (x<=mid){
-      const t=(x-min)/(mid-min);
-      const c1=hexToRgb(GROUP_LOW), c2=hexToRgb(GROUP_MID);
-      rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
-    } else {
-      const t=(x-mid)/(max-mid);
-      const c1=hexToRgb(GROUP_MID), c2=hexToRgb(GROUP_HIGH);
-      rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
-    }
-    if(invert){
-      const t=(x-min)/(max-min);
-      const c1=hexToRgb(GROUP_HIGH), c2=hexToRgb(GROUP_LOW);
-      rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
-    }
-    const text=luminance(rgb)<0.55?'#fff':'#000';
-    return `background:${rgbToCss(rgb)};color:${text}`;
-  }
-
-  // NESTE 6 – alltid svart tekst
-  function colorNeste6(val,min,max, invert=false){
-    if(!isNumericLike(val))return '';
-    const x=toNumber(val);
-    if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-    let t=(x-min)/(max-min); if(invert)t=1-t;
-    const hue=210, sat=90, light=92 - t*32;
-    return `background:hsl(${hue} ${sat}% ${light}%);color:#000;`;
-  }
-
-  function computeGroupRange(rows, cols){
-    let min=Infinity, max=-Infinity, any=false;
-    for(const r of rows){for(const c of cols){const v=r[c];
-      if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
-    }}
-    return any && max>min ? {min,max} : null;
-  }
-  function computeSingleRange(rows, col){
-    let min=Infinity, max=-Infinity, any=false;
-    for(const r of rows){const v=r[col];
-      if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
-    }
-    return any && max>min ? {min,max} : null;
-  }
-
-  // ======== POSISJON ========
-  function detectPositionColumn(columns){
-    if(POSITION_COLUMN && columns.includes(POSITION_COLUMN))return POSITION_COLUMN;
-    const cands=["posisjon","position","pos","rolle","role"];
-    const lower=columns.map(c=>c.toLowerCase());
-    for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
-    return "";
-  }
-  function buildPositionChips(data, col){
-    posChipsWrap.innerHTML='';
-    posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
-    if(!col){posAllBtn.disabled=true;return;} posAllBtn.disabled=false;
-
-    const seen=new Set(), values=[];
-    for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
-    const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
-    values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);
-      if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1;
-      return a.localeCompare(b,'no',{numeric:true});});
-
-    for(const val of values){
-      const btn=document.createElement('button');
-      btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-      btn.addEventListener('click',()=>{
-        posAllBtn.setAttribute('aria-pressed','false');
-        if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-        if(activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
-        btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-        render();
-      });
-      posChipsWrap.appendChild(btn);
-    }
-    posAllBtn.onclick=()=>{
-      activePositions.clear();
-      posAllBtn.setAttribute('aria-pressed','true');
-      [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
-      render();
-    };
-  }
-
-  // ======== RENDER ========
-  function updateKPIs(rows){ kpiCount.textContent = `${fmtInt(rows.length)} spillere`; }
-
-  function render(){
-    renderHeader();
-    let rows = DATA.filter(rowMatches);
-    if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
-
-    const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
-    const neste6Range = VISIBLE_COLUMNS.includes(NESTE6_COLUMN) ? computeSingleRange(rows, NESTE6_COLUMN) : null;
-
-    tbody.innerHTML='';
-    const frag=document.createDocumentFragment();
-    for (const row of rows){
-      const tr=document.createElement('tr');
-      tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
-        let style='';
-        if (GROUP_COLUMNS.includes(c) && groupRange){
-          style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-        } else if (c === NESTE6_COLUMN && neste6Range){
-          style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
-        }
-        let val = row[c] ?? '';
-        if (detectedPositionCol && c === detectedPositionCol){
-          const pos = String(val);
-          const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
-          val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
-        }
-        if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
-        return `<td style="${style}">${val}</td>`;
-      }).join('');
-      frag.appendChild(tr);
-    }
-    tbody.appendChild(frag);
-    updateKPIs(rows);
-  }
-
-  // ======== PRIS ========
-  function detectPriceColumn(columns){
-    if(PRICE_COLUMN && columns.includes(PRICE_COLUMN)) return PRICE_COLUMN;
-    const prefs=["pris","price","kostnad","cost"];
-    const lower=columns.map(c=>c.toLowerCase());
-    for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
-    return "";
-  }
-  function computePriceRange(rows,col){
-    let min=Infinity,max=-Infinity,any=false;
-    for(const r of rows){const v=r[col];
-      if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
-    }
-    return any?{min,max}:null;
-  }
-  function setupPriceCompact(){
-    const detectedPriceColLocal = detectPriceColumn(RAW_COLUMNS);
-    detectedPriceCol = detectedPriceColLocal;
-    if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
-    const r=computePriceRange(DATA,detectedPriceCol);
-    if(!r){priceCompactWrap.style.display='none';return;}
-    priceGlobalMin=Math.floor(r.min);
-    priceGlobalMax=Math.ceil(r.max);
-    priceCapVal=priceGlobalMax;
-    priceCapRange.min=priceGlobalMin; priceCapRange.max=priceGlobalMax; priceCapRange.value=priceCapVal;
-    priceCapLabel.textContent=fmtInt(priceCapVal);
-    priceCompactWrap.style.display='inline-flex';
-    priceCapRange.addEventListener('input',()=>{priceCapVal=Number(priceCapRange.value);priceCapLabel.textContent=fmtInt(priceCapVal);render();});
-  }
-
-  // ======== INIT ========
-  Papa.parse(CSV_URL,{
-    download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
-    complete:(res)=>{
-      const data=res.data||[];
-      RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
-
-      // synlige kolonner (skjul etter bokstav/eksplisitt)
-      const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
-      const hideName=new Set(HIDE_COLUMNS);
-      VISIBLE_COLUMNS=[];
-      RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c); });
-
-      // deteksjoner
-      detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
-      detectedNameCol=detectInsensitive(RAW_COLUMNS, NAME_PREF);
-
-      // data
-      DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
-
-      buildPositionChips(DATA, detectedPositionCol);
-      setupPriceCompact();
-
-      render();
-    },
-    error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
+/* Header */
+function renderHeader(){
+  const tr=document.createElement('tr');
+  VISIBLE_COLUMNS.forEach(col=>{
+    const th=document.createElement('th');
+    const btn=document.createElement('button');
+    btn.textContent=col;
+    btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
+    th.appendChild(btn);
+    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
+    tr.appendChild(th);
   });
+  thead.innerHTML=''; thead.appendChild(tr);
+}
 
-  // ======== HANDLERS ========
-  q.addEventListener('input', render);
+/* FILTRERING */
+function rowMatches(row){
+  const query=(q.value||'').toLowerCase();
+  if (query){
+    const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
+    if(!hit)return false;
+  }
+  if (detectedPositionCol && activePositions.size>0){
+    const pv=String(row[detectedPositionCol]??'').trim();
+    if (!activePositions.has(pv)) return false;
+  }
+  if (detectedPriceCol && priceCapVal!=null){
+    const v=row[detectedPriceCol];
+    if(!isNumericLike(v))return false;
+    if(toNumber(v)>priceCapVal)return false;
+  }
+  return true;
+}
 
-  // Mørk modus – husk valg
-  (function(){
-    const key='eh_dark2';
-    const tgl=document.getElementById('darkToggle');
-    if(!tgl)return;
-    const saved=localStorage.getItem(key);
-    if(saved==='1') document.documentElement.classList.add('dark');
-    tgl.checked=(saved==='1');
-    tgl.addEventListener('change',()=>{
-      document.documentElement.classList.toggle('dark', tgl.checked);
-      localStorage.setItem(key, tgl.checked ? '1':'0');
-      render(); // re-render for kontrast m.m.
+/* BETINGET FORMATERING */
+function colorGroup(val, min, max){
+  if(!isNumericLike(val))return '';
+  const x=toNumber(val);
+  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  const mid=3;
+  let rgb;
+  if (x<=mid){
+    const t=(x-min)/(mid-min); // 0..1
+    rgb=lerpRgb(hexToRgb(GROUP_LOW),hexToRgb(GROUP_MID),Math.max(0,Math.min(1,t)));
+  } else {
+    const t=(x-mid)/(max-mid); // 0..1
+    rgb=lerpRgb(hexToRgb(GROUP_MID),hexToRgb(GROUP_HIGH),Math.max(0,Math.min(1,t)));
+  }
+  const text=luminance(rgb)<0.55?'#fff':'#000';
+  return `background:${rgbToCss(rgb)};color:${text}`;
+}
+
+/* NESTE 6 – alltid SVART tekst */
+function colorNeste6(val,min,max){
+  if(!isNumericLike(val))return '';
+  const x=toNumber(val);
+  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  let t=(x-min)/(max-min);
+  const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
+  return `background:hsl(${hue} ${sat}% ${light}%);color:#000;`;
+}
+
+function computeGroupRange(rows, cols){
+  let min=Infinity, max=-Infinity, any=false;
+  for(const r of rows){for(const c of cols){const v=r[c];
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+  }}
+  return any && max>min ? {min,max} : null;
+}
+function computeSingleRange(rows, col){
+  let min=Infinity, max=-Infinity, any=false;
+  for(const r of rows){const v=r[col];
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+  }
+  return any && max>min ? {min,max} : null;
+}
+
+/* POSISJON */
+function detectPositionColumn(columns){
+  const cands=["posisjon","position","pos","rolle","role"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
+  return "";
+}
+function buildPositionChips(data, col){
+  posChipsWrap.innerHTML='';
+  posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
+  if(!col){posAllBtn.disabled=true;return;} posAllBtn.disabled=false;
+
+  const seen=new Set(), values=[];
+  for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
+  const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
+  values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);
+    if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1;
+    return a.localeCompare(b,'no',{numeric:true});});
+
+  for(const val of values){
+    const btn=document.createElement('button');
+    btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+    btn.addEventListener('click',()=>{
+      posAllBtn.setAttribute('aria-pressed','false');
+      if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
+      if(activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
+      btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+      render();
     });
-  })();
+    posChipsWrap.appendChild(btn);
+  }
+  posAllBtn.onclick=()=>{
+    activePositions.clear();
+    posAllBtn.setAttribute('aria-pressed','true');
+    [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
+    render();
+  };
+}
+
+/* HEADER + BODY */
+function updateKPIs(rows){ kpiCount.textContent = `${fmtInt(rows.length)} spillere`; }
+
+function render(){
+  renderHeader();
+  let rows=DATA.filter(rowMatches);
+  if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
+
+  const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
+  const neste6Range = VISIBLE_COLUMNS.includes(NESTE6_COLUMN) ? computeSingleRange(rows, NESTE6_COLUMN) : null;
+
+  tbody.innerHTML='';
+  const frag=document.createDocumentFragment();
+  for (const row of rows){
+    const tr=document.createElement('tr');
+    tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
+      let style='';
+      if (GROUP_COLUMNS.includes(c) && groupRange){
+        style = colorGroup(row[c], groupRange.min, groupRange.max);
+      } else if (c === NESTE6_COLUMN && neste6Range){
+        style = colorNeste6(row[c], neste6Range.min, neste6Range.max);
+      }
+      let val = row[c] ?? '';
+      // posisjon badge
+      if (detectedPositionCol && c === detectedPositionCol){
+        const pos = String(val);
+        const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
+        val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
+      }
+      // navn + NESTE 6 i bold
+      if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
+      return `<td style="${style}">${val}</td>`;
+    }).join('');
+    frag.appendChild(tr);
+  }
+  tbody.appendChild(frag);
+  updateKPIs(rows);
+}
+
+/* PRIS */
+function detectPriceColumn(columns){
+  const prefs=["pris","price","kostnad","cost"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
+  return "";
+}
+function computePriceRange(rows,col){
+  let min=Infinity,max=-Infinity,any=false;
+  for(const r of rows){const v=r[col];
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+  }
+  return any?{min,max}:null;
+}
+function setupPriceCompact(){
+  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
+  if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
+  const r=computePriceRange(DATA,detectedPriceCol);
+  if(!r){priceCompactWrap.style.display='none';return;}
+  priceGlobalMin=Math.floor(r.min);
+  priceGlobalMax=Math.ceil(r.max);
+  priceCapVal=priceGlobalMax;
+  priceCapRange.min=priceGlobalMin; priceCapRange.max=priceGlobalMax; priceCapRange.value=priceCapVal;
+  priceCapLabel.textContent=fmtInt(priceCapVal);
+  priceCompactWrap.style.display='inline-flex';
+  priceCapRange.addEventListener('input',()=>{priceCapVal=Number(priceCapRange.value);priceCapLabel.textContent=fmtInt(priceCapVal);render();});
+}
+
+/* INIT */
+Papa.parse(CSV_URL,{
+  download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
+  complete:(res)=>{
+    const data=res.data||[];
+    RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
+    // synlige kolonner (skjul etter bokstav)
+    const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
+    VISIBLE_COLUMNS=[];
+    RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) VISIBLE_COLUMNS.push(c); });
+
+    // deteksjoner
+    detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
+    detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
+
+    DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
+
+    buildPositionChips(DATA, detectedPositionCol);
+    setupPriceCompact();
+
+    render();
+  },
+  error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
+});
+
+/* Interaksjon */
+q.addEventListener('input', render);
+
+/* Mørk modus – husk valg */
+(function(){
+  const key='eh_dark2';
+  const tgl=document.getElementById('darkToggle');
+  if(!tgl)return;
+  const saved=localStorage.getItem(key);
+  if(saved==='1') document.documentElement.classList.add('dark');
+  tgl.checked=(saved==='1');
+  tgl.addEventListener('change',()=>{
+    document.documentElement.classList.toggle('dark', tgl.checked);
+    localStorage.setItem(key, tgl.checked ? '1':'0');
+    render(); // oppdatér kontrast der det trengs
+  });
+})();
 </script>
 </body>
 </html>
