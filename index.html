@@ -114,6 +114,34 @@ html.dark thead th:first-child{
   background: #0b1325 !important;
   box-shadow: 1px 0 0 #1f2a44, 0 2px 0 #0b1325, 0 1px 0 #223356;
 }
+  /* --- Tving lys header-tekst i mørk modus (høy spesifisitet) --- */
+html.dark .table-wrap thead th,
+html.dark #table thead th,
+html.dark table#tbl thead th {
+  color: #f8fafc !important;           /* nesten hvit */
+  background: #0b1325 !important;      /* litt mørkere enn radene */
+  border-bottom-color: #223356 !important;
+  z-index: 3;
+}
+
+/* Knappene inne i headeren skal matche fargen over */
+html.dark .table-wrap thead th > button,
+html.dark #table thead th > button,
+html.dark table#tbl thead th > button {
+  color: #f8fafc !important;
+}
+
+/* Sorteringsindikator – lys nok i dark mode */
+html.dark .sort-ind {
+  color: #cbd5e1 !important;  /* lys grå-blå */
+  opacity: 1;                 /* fullt synlig */
+}
+
+/* (valgfritt) litt tydeligere lesbarhet mot mørk bakgrunn */
+html.dark .table-wrap thead th {
+  text-shadow: 0 1px 0 rgba(0,0,0,.35);
+}
+
 </style>
 </head>
 <body>
