@@ -34,9 +34,8 @@
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Bold NAVN, posisjonsfilter og målrettet fargelegging (R23–R28 felles skala • “Neste 6” egen blå skala).</div>
+  <div class="sub">Bold NAVN, posisjonsfilter og målrettet fargelegging (R23–R28 felles rød→grønn • «NESTE 6» egen blå skala).</div>
 
-  <!-- Rad 1: Globalt søk, teller, betinget formatering, nullstill -->
   <div class="controls" role="region" aria-label="Kontroller">
     <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
     <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
@@ -46,7 +45,7 @@
     <button id="reset" type="button">Nullstill</button>
   </div>
 
-  <!-- Rad 2: Posisjonsfilter -->
+  <!-- Posisjonsfilter -->
   <div class="row" role="region" aria-label="Posisjonsfilter">
     <strong>Posisjoner:</strong>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
@@ -60,7 +59,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </div>
-  <div class="legend">R23–R28: rød → grønn (felles). Neste 6: lys → mørkere blå (egen skala).</div>
+  <div class="legend">R23–R28: rød → grønn (felles). NESTE 6: lys → mørkere blå (egen skala).</div>
 
   <div class="footer">
     Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
@@ -71,7 +70,7 @@
   // ===================== KONFIG =====================
   const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
 
-  // Skjul disse kolonnene etter Excel-bokstav:
+  // Skjul kolonner etter Excel-bokstav:
   const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
   // (Valgfritt) Skjul også etter eksakt kolonnenavn:
@@ -80,12 +79,12 @@
   // Posisjonskolonne (tom = autodetekter case-insensitive):
   let POSITION_COLUMN = "";
 
-  // Bold for NAVN-kolonnen (case-insensitive match):
-  const NAME_PREF = "navn"; // vil matche NAVN, Navn, navn
+  // NAVN i bold (case-insensitiv deteksjon av kolonnenavn):
+  const NAME_PREF = "navn";
 
   // Betinget formatering:
   const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles rød→grønn
-  const NESTE6_COLUMN = "Neste 6";                               // egen blå skala
+  const NESTE6_COLUMN = "NESTE 6";                               // ***EKSAKT match (case-sensitiv)***
 
   // (Valgfritt) Inverter skala for disse (lavere er bedre):
   const INVERT_COLOR_COLUMNS = []; // f.eks. ["R23"]
@@ -109,7 +108,7 @@
   let sortDir = 1;
   let activePositions = new Set(); // tom = alle
   let detectedPositionCol = ""; // faktisk brukt navn
-  let detectedNameCol = ""; // faktisk navn-kolonne
+  let detectedNameCol = ""; // faktisk NAVN-kolonne
 
   function setStatus(msg){ statusEl.textContent = msg || ''; }
 
@@ -177,13 +176,13 @@
     return `background: hsl(${hue} 80% 92%)`;
   }
   function colorNeste6(val, min, max, invert=false){
-    // lys → mørkere blå for Neste 6
+    // lys → mørkere blå for NESTE 6
     if (!isNumericLike(val)) return '';
     const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
     let t=(x-min)/(max-min); if (invert) t=1-t;
-    const hue=210;              // blå
-    const light = 96 - t*22;    // 96% (lys) → 74% (mørkere)
-    const sat = 75;             // metning
+    const hue=210;            // blå
+    const sat=75;
+    const light=96 - t*22;    // 96% (lys) → 74% (mørkere)
     return `background: hsl(${hue} ${sat}% ${light}%)`;
   }
 
@@ -212,8 +211,10 @@
     let rows = DATA.filter(rowMatches);
     if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
+    // R23–R28 deler skala; NESTE 6 har egen — begge beregnet på synlige rader
     const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
-    const neste6Range = condfmtToggle.checked ? computeSingleRange(rows, NESTE6_COLUMN) : null;
+    const neste6Range = condfmtToggle.checked && VISIBLE_COLUMNS.includes(NESTE6_COLUMN)
+                        ? computeSingleRange(rows, NESTE6_COLUMN) : null;
 
     tbody.innerHTML='';
     const frag=document.createDocumentFragment();
@@ -224,14 +225,13 @@
         if (condfmtToggle.checked){
           if (GROUP_COLUMNS.includes(c) && groupRange){
             style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-          } else if (c===NESTE6_COLUMN && neste6Range){
+          } else if (c === NESTE6_COLUMN && neste6Range){
+            // ***EKSAKT navn «NESTE 6» – egen blå skala***
             style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
           }
         }
         let val = row[c] ?? '';
-        if (detectedNameCol && c === detectedNameCol) {
-          val = `<strong>${val}</strong>`;
-        }
+        if (detectedNameCol && c === detectedNameCol) val = `<strong>${val}</strong>`;
         return `<td style="${style}">${val}</td>`;
       }).join('');
       frag.appendChild(tr);
