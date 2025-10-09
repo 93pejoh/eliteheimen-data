@@ -12,10 +12,10 @@
 <style>
   :root { --radius:14px; --surface:#fff; --text:#0f172a; --muted:#667085; --border:#e5e7eb; }
   *{box-sizing:border-box}
-  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:20px;color:var(--text);background:#fafafa}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
   /* Hero */
-  .hero{position:relative;overflow:hidden;border-radius:var(--radius);padding:18px;margin-bottom:12px;color:#fff;
+  .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:6px;color:#fff;
     background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
                radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
                linear-gradient(180deg,#0b1220,#111827);
@@ -23,215 +23,107 @@
   .hero-inner{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   .brand{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
-  .brand img{width:48px;height:48px;border-radius:12px;object-fit:cover;background:#fff}
-  .brand h1{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:.2px}
+  .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff}
+  .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
   .toolbar{display:flex;gap:8px;align-items:center}
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
 
-  /* Kontroller – bare søkefelt */
-  .controls{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;margin:8px 0}
-  .controls input[type="search"]{padding:8px 10px;border:1px solid #ccc;border-radius:var(--radius);outline:none}
-  .controls input[type="search"]:focus{border-color:#888}
-
-  /* Posisjons-chips */
-  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 8px}
-  .chip{border:none;border-radius:999px;padding:4px 10px;background:#f2f4f7;cursor:pointer;user-select:none}
-  .chip[aria-pressed="true"]{background:#dbeafe;outline:2px solid #93c5fd}
-  .chip:active{transform:scale(0.98)}
+  /* Filterbar (kompakt) */
+  .filterbar{
+    position:sticky; top:0; z-index:5;
+    background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+    box-shadow:0 6px 20px rgba(2,8,23,.06);
+    padding:6px 8px; margin:6px 0;
+  }
+  .filterbar-row{
+    display:grid; align-items:center;
+    grid-auto-flow:column; grid-template-columns:auto 1fr auto auto auto auto auto auto;
+    gap:8px;
+  }
+  .filterbar .label{ color:#64748b; font-size:.85rem; white-space:nowrap; }
+  .gap{ width:6px; }
+  .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .chip{border:none;border-radius:999px;padding:2px 8px;background:#f2f4f7;cursor:pointer;user-select:none}
+  .chip[aria-pressed="true"]{background:#e5effe;outline:2px solid #93c5fd}
+  .pill.kpi-mini{background:#f8fafc;border:1px solid #e5e7eb;border-radius:999px;padding:4px 8px;white-space:nowrap}
+  .filterbar input[type="search"]{
+    height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;width:100%;
+  }
+  /* Klubb-dropdown */
+  .filterbar select{
+    height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff;
+  }
 
   /* Pris – kompakt */
-  .price-compact{display:inline-flex;align-items:center;gap:8px;margin:2px 0 8px}
-  .price-compact input[type="range"]{width:220px;height:4px}
-  .muted{color:#666;font-size:.88rem}
+  .price-compact{display:inline-flex;align-items:center;gap:6px}
+  .price-compact input[type="range"]{width:150px;height:3px}
+  .muted{color:#666;font-size:.82rem}
 
   /* Tabell */
-  .table-wrap{overflow:auto;border:1px solid #e5e5e5;border-radius:var(--radius);background:#fff}
-  table{border-collapse:collapse;width:100%;font-size:.95rem}
-  thead th{position:sticky;top:0;background:#fafafa;border-bottom:1px solid #e5e5e5;padding:8px;white-space:nowrap;text-align:center}
-  tbody td{border-top:1px solid #f0f0f0;padding:6px 8px;white-space:nowrap;text-align:center}
-  thead th button{background:transparent;border:none;font:inherit;cursor:pointer}
-  .sort-ind{opacity:.6;font-size:.9em;margin-left:6px}
+  .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #e5e5e5;border-radius:10px;background:#fff;position:relative;margin-top:6px}
+  table{border-collapse:collapse;width:100%;font-size:.92rem;line-height:1.25}
+  thead th{position:sticky;top:0;background:#fafafa;border-bottom:1px solid #e5e5e5;padding:6px;white-space:nowrap;text-align:center;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#0f172a;z-index:2}
+  thead th button{background:transparent;border:none;font:inherit;cursor:pointer;color:inherit}
+  thead th button:hover{text-decoration:underline}
+  .sort-ind{opacity:1;font-size:.9em;margin-left:6px;color:#475569}
+  tbody td{border-top:1px solid #f0f0f0;padding:4px 6px;white-space:nowrap;text-align:center}
   tbody tr:nth-child(even) td{background:#fcfcfc}
   tbody tr:hover td{background:#f3f7ff}
-  tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 #eee}
+  /* Sticky første kolonne (NAVN flyttes først i JS) */
+  tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:3;background:#fff;box-shadow:1px 0 0 #eee}
+  .pos-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;color:#111827}
 
-  /* Header – bedre lesbarhet */
-  thead th {font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#0f172a;z-index:2}
-  thead th button:hover{text-decoration:underline}
-  html.dark thead th {
-    background:#0b1325;color:#f1f5f9;border-bottom-color:#223356;
-    box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
-  html.dark thead th:first-child {
-    background:#0b1325;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
-
-  /* Posisjons-badge */
-  .pos-badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:600;color:#111827}
-  html.dark .pos-badge{color:#0b1220 !important}
-
-  .legend{font-size:.9rem;color:#666;margin-top:6px}
-  .footer-wrap{margin-top:18px;padding-top:12px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .legend{font-size:.85rem;color:#666;margin-top:4px}
+  .footer-wrap{margin-top:12px;padding-top:8px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   .footer-wrap a{color:#64748b;text-decoration:none}
   .footer-wrap a:hover{color:#0ea5e9}
 
-  /* Dark mode: generelt + tabellkontrast */
+  /* Dark mode */
   html.dark body{background:#0b1220;color:#e5e7eb}
-  html.dark .card{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
-  html.dark .controls input[type="search"]{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
+  html.dark .filterbar{background:#0f172a;border-color:#1f2a44;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  html.dark .filterbar input[type="search"]{background:#0b1325;color:#e5e7eb;border-color:#1f2a44}
+  html.dark .filterbar select{background:#0b1325;color:#e5e7eb;border-color:#1f2a44}
   html.dark .chip{background:#111827;color:#e5e7eb}
   html.dark .chip[aria-pressed="true"]{background:#1f2937;outline-color:#334155}
   html.dark .table-wrap{border-color:#1f2a44;background:#0f172a}
+  html.dark thead th{background:#0b1325 !important;color:#f1f5f9 !important;border-bottom-color:#223356 !important;box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
+  html.dark thead th:first-child{background:#0b1325 !important;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
   html.dark tbody td{border-top-color:#1a2743;background:transparent}
   html.dark tbody tr:nth-child(even) td{background:#0e172a}
   html.dark tbody tr:hover td{background:#122038}
-  html.dark tbody td:first-child, html.dark thead th:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
+  html.dark tbody td:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
-  /* Header-knapper skal arve tekstfarge fra th (lys + mørk modus) */
-thead th button{
-  color: inherit !important;
-  background: transparent;
-  border: 0;
-  -webkit-appearance: none;
-  appearance: none;
-  font: inherit;
-  cursor: pointer;
-}
 
-/* Ekstra: sørg for god kontrast på selve headeren i dark mode */
-html.dark thead th{
-  background: #0b1325 !important;
-  color: #f1f5f9 !important;
-  border-bottom-color: #223356 !important;
-  z-index: 3;
-}
-html.dark thead th:first-child{
-  background: #0b1325 !important;
-  box-shadow: 1px 0 0 #1f2a44, 0 2px 0 #0b1325, 0 1px 0 #223356;
-}
-  /* --- Tving lys header-tekst i mørk modus (høy spesifisitet) --- */
-html.dark .table-wrap thead th,
-html.dark #table thead th,
-html.dark table#tbl thead th {
-  color: #f8fafc !important;           /* nesten hvit */
-  background: #0b1325 !important;      /* litt mørkere enn radene */
-  border-bottom-color: #223356 !important;
-  z-index: 3;
-}
+  /* Liten visuell hint om horisontal scroll */
+  .table-wrap::after{
+    content:"";position:absolute;right:0;top:0;bottom:0;width:18px;pointer-events:none;
+    background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.95));
+  }
+  html.dark .table-wrap::after{
+    background:linear-gradient(to right, rgba(15,23,42,0), rgba(15,23,42,.95));
+  }
 
-/* Knappene inne i headeren skal matche fargen over */
-html.dark .table-wrap thead th > button,
-html.dark #table thead th > button,
-html.dark table#tbl thead th > button {
-  color: #f8fafc !important;
-}
+  /* Ekstra mobiljustering */
+  @media (max-width: 780px){
+    body{ margin:10px; }
+    .brand h1{ font-size:1.1rem; }
+    .filterbar-row{
+      grid-template-columns:1fr 1fr;
+      grid-auto-flow:row;
+      gap:8px;
+    }
+    .pill.kpi-mini{ grid-column:1 / 2; }
+    #q{ grid-column:2 / 3; }
+    #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact{ grid-column:1 / -1; }
+    .price-compact input[type="range"]{ width:100%; height:3px; }
+    table{ font-size:.9rem; }
+    thead th{ padding:6px; }
+    tbody td{ padding:4px 6px; }
+  }
 
-/* Sorteringsindikator – lys nok i dark mode */
-html.dark .sort-ind {
-  color: #cbd5e1 !important;  /* lys grå-blå */
-  opacity: 1;                 /* fullt synlig */
-}
-
-/* (valgfritt) litt tydeligere lesbarhet mot mørk bakgrunn */
-html.dark .table-wrap thead th {
-  text-shadow: 0 1px 0 rgba(0,0,0,.35);
-}
-
-/* ——— Kompakt topp/hero ——— */
-.hero { padding:14px; margin-bottom:10px; }
-.brand img { width:40px; height:40px; border-radius:10px; }
-.brand h1 { font-size:1.35rem; }
-
-/* ——— Filterbar ——— */
-.filterbar{
-  position:sticky; top:10px; z-index:5;
-  background:#fff; border:1px solid #e5e7eb; border-radius:12px;
-  box-shadow:0 6px 20px rgba(2,8,23,.06);
-  padding:8px 10px; margin:8px 0 10px;
-}
-.filterbar-row{
-  display:grid; align-items:center; grid-auto-flow:column; grid-template-columns:auto 1fr auto auto auto auto auto;
-  gap:10px;
-}
-.filterbar .label{ color:#64748b; font-size:.85rem; white-space:nowrap; }
-.filterbar input[type="search"]{
-  height:36px; border:1px solid #d1d5db; border-radius:10px; padding:0 12px;
-}
-.filterbar .pill.kpi-mini{
-  background:#f8fafc; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; white-space:nowrap;
-}
-.row.microgap{ gap:6px; }
-.gap{ width:6px; } /* liten spacer */
-
-/* Posisjons-chips litt strammere */
-.chip{ padding:4px 10px; }
-.chip[aria-pressed="true"]{ background:#e5effe; outline:2px solid #93c5fd; }
-
-/* Pris – kompakt */
-.price-compact{ display:inline-flex; align-items:center; gap:8px; }
-.price-compact input[type="range"]{ width:180px; height:4px; }
-
-/* Tabell: mindre luft til toppen */
-.table-wrap{ margin-top:8px; }
-
-/* ——— Dark mode varianter ——— */
-html.dark .filterbar{
-  background:#0f172a; border-color:#1f2a44; box-shadow:0 6px 24px rgba(0,0,0,.35);
-}
-html.dark .filterbar input[type="search"]{
-  background:#0b1325; color:#e5e7eb; border-color:#1f2a44;
-}
-html.dark .pill.kpi-mini{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
-html.dark .label{ color:#94a3b8; }
-html.dark .chip{ background:#111827; color:#e5e7eb; }
-html.dark .chip[aria-pressed="true"]{ background:#1f2937; outline-color:#334155; }
-
-/* === Kompakt layout: mindre whitespace === */
-
-/* Rammer og basis */
-body{ margin:14px; }
-.table-wrap{ margin-top:6px; border-radius:10px; }
-table{ font-size:.92rem; line-height:1.25; }
-
-/* Hero strammere */
-.hero{ padding:10px; margin-bottom:6px; border-radius:12px; }
-.brand img{ width:36px; height:36px; border-radius:8px; }
-.brand h1{ font-size:1.2rem; }
-
-/* Filterbar strammere */
-.filterbar{ padding:6px 8px; margin:6px 0; border-radius:10px; }
-.filterbar-row{ gap:8px; }
-.filterbar input[type="search"]{ height:32px; padding:0 10px; }
-.filterbar .pill.kpi-mini{ padding:4px 8px; }
-.label{ font-size:.8rem; }
-.row.microgap{ gap:4px; }
-.chip{ padding:2px 8px; }
-.price-compact{ gap:6px; }
-.price-compact input[type="range"]{ width:150px; height:3px; }
-.muted{ font-size:.82rem; }
-
-/* Tabell: tettere celler/headers */
-thead th{ padding:6px 6px; }
-tbody td{ padding:4px 6px; }
-thead th button{ padding:0; } /* fjern ekstra knapp-padding */
-.pos-badge{ padding:2px 8px; }
-
-/* Legend/fotlinje litt tettere */
-.legend{ margin-top:4px; }
-.footer-wrap{ margin-top:12px; padding-top:8px; }
-
-/* Dark mode – samme innstramming */
-html.dark .filterbar{ box-shadow:0 4px 18px rgba(0,0,0,.3); }
-
-/* Ekstra: komprimer ytterligere på små skjermer */
-@media (max-width: 900px){
-  body{ margin:10px; }
-  .brand h1{ font-size:1.1rem; }
-  .filterbar input[type="search"]{ height:30px; }
-  table{ font-size:.9rem; }
-  thead th{ padding:5px 6px; }
-  tbody td{ padding:4px 5px; }
-}
-
+  /* Fjern eventuell gammel KPI-seksjon hvis den skulle dukke opp */
+  .cards, section.cards, .cards .card { display:none !important;height:0 !important;margin:0 !important;padding:0 !important;border:0 !important; }
 </style>
 </head>
 <body>
@@ -258,6 +150,9 @@ html.dark .filterbar{ box-shadow:0 4px 18px rgba(0,0,0,.3); }
     <span class="label">Posisjoner</span>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
     <div id="pos-chips" class="row microgap" style="margin:0;"></div>
+    <div class="gap"></div>
+    <span class="label" id="clubLabel">Klubb</span>
+    <select id="clubSelect"><option value="">Alle</option></select>
     <div class="gap"></div>
     <span class="label">Pris ≤</span>
     <div id="price-compact" class="price-compact" style="display:none;">
@@ -291,25 +186,27 @@ html.dark .filterbar{ box-shadow:0 4px 18px rgba(0,0,0,.3); }
 <script>
 /* ======== KONFIG ======== */
 const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
-/* Skjul kolonner etter Excel-bokstav (0-basert blir beregnet): */
+/* Skjul kolonner etter Excel-bokstav: */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 /* Betinget formatering */
-const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"];   // felles skala (midtpunkt 3)
-const NESTE6_COLUMN = "NESTE 6";                               // egen blå skala
+const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles skala (midtpunkt 3)
+const NESTE6_COLUMN = "NESTE 6";                              // egen blå skala
 
 /* ======== ELEMENTER ======== */
 const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
 const q=document.getElementById('q'), posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
 const priceCompactWrap=document.getElementById('price-compact');
 const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
-const kpiCount=document.getElementById('kpi-count');
+const clubSelect=document.getElementById('clubSelect'), clubLabel=document.getElementById('clubLabel');
+const miniKPI=document.getElementById('kpi-count-mini');
 
 /* ======== STATE ======== */
 let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
 let sortCol=null, sortDir=1;
 let activePositions=new Set();
-let detectedPositionCol="", detectedNameCol="", detectedPriceCol="";
+let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClubCol="";
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
+let selectedClub="";
 
 /* ======== UTILS ======== */
 function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
@@ -344,7 +241,7 @@ function renderHeader(){
   thead.innerHTML=''; thead.appendChild(tr);
 }
 
-/* FILTRERING */
+/* Filtrering */
 function rowMatches(row){
   const query=(q.value||'').toLowerCase();
   if (query){
@@ -355,6 +252,10 @@ function rowMatches(row){
     const pv=String(row[detectedPositionCol]??'').trim();
     if (!activePositions.has(pv)) return false;
   }
+  if (detectedClubCol && selectedClub){
+    const cv=String(row[detectedClubCol]??'').trim();
+    if (cv !== selectedClub) return false;
+  }
   if (detectedPriceCol && priceCapVal!=null){
     const v=row[detectedPriceCol];
     if(!isNumericLike(v))return false;
@@ -363,7 +264,7 @@ function rowMatches(row){
   return true;
 }
 
-/* BETINGET FORMATERING */
+/* Betinget formatering */
 function colorGroup(val, min, max){
   if(!isNumericLike(val))return '';
   const x=toNumber(val);
@@ -371,17 +272,15 @@ function colorGroup(val, min, max){
   const mid=3;
   let rgb;
   if (x<=mid){
-    const t=(x-min)/(mid-min); // 0..1
+    const t=(x-min)/(mid-min);
     rgb=lerpRgb(hexToRgb(GROUP_LOW),hexToRgb(GROUP_MID),Math.max(0,Math.min(1,t)));
   } else {
-    const t=(x-mid)/(max-mid); // 0..1
+    const t=(x-mid)/(max-mid);
     rgb=lerpRgb(hexToRgb(GROUP_MID),hexToRgb(GROUP_HIGH),Math.max(0,Math.min(1,t)));
   }
   const text=luminance(rgb)<0.55?'#fff':'#000';
   return `background:${rgbToCss(rgb)};color:${text}`;
 }
-
-/* NESTE 6 – alltid SVART tekst */
 function colorNeste6(val,min,max){
   if(!isNumericLike(val))return '';
   const x=toNumber(val);
@@ -390,7 +289,6 @@ function colorNeste6(val,min,max){
   const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
   return `background:hsl(${hue} ${sat}% ${light}%);color:#000;`;
 }
-
 function computeGroupRange(rows, cols){
   let min=Infinity, max=-Infinity, any=false;
   for(const r of rows){for(const c of cols){const v=r[c];
@@ -406,13 +304,27 @@ function computeSingleRange(rows, col){
   return any && max>min ? {min,max} : null;
 }
 
-/* POSISJON */
+/* Deteksjoner */
 function detectPositionColumn(columns){
   const cands=["posisjon","position","pos","rolle","role"];
   const lower=columns.map(c=>c.toLowerCase());
   for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
   return "";
 }
+function detectPriceColumn(columns){
+  const prefs=["pris","price","kostnad","cost"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
+  return "";
+}
+function detectClubColumn(columns){
+  const cands=["klubb","lag","team","club"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
+  return "";
+}
+
+/* UI-bygging */
 function buildPositionChips(data, col){
   posChipsWrap.innerHTML='';
   posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
@@ -444,14 +356,59 @@ function buildPositionChips(data, col){
     render();
   };
 }
+function buildClubSelect(data, col){
+  if (!clubSelect || !clubLabel) return;
+  if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
 
-/* HEADER + BODY */
+  const seen=new Set(), values=[];
+  for (const r of data){
+    const v=String(r[col]??'').trim();
+    if (v && !seen.has(v)){ seen.add(v); values.push(v); }
+  }
+  values.sort((a,b)=> a.localeCompare(b,'no',{numeric:true,sensitivity:'base'}));
+  clubSelect.innerHTML = `<option value="">Alle</option>` + values.map(v=>`<option value="${v}">${v}</option>`).join('');
+  clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
+}
+
+/* KPI */
 function updateKPIs(rows){
   const text = `${fmtInt(rows.length)} spillere`;
-  const mini = document.getElementById('kpi-count-mini');
-  if (mini) mini.textContent = text;
-  if (typeof kpiCount !== 'undefined' && kpiCount) kpiCount.textContent = text; // beholder støtte om kortet viser
+  if (miniKPI) miniKPI.textContent = text;
 }
+
+/* Pris */
+function computePriceRange(rows,col){
+  let min=Infinity,max=-Infinity,any=false;
+  for(const r of rows){const v=r[col];
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+  }
+  return any?{min,max}:null;
+}
+function setupPriceCompact(){
+  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
+  if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
+  const r = computePriceRange(DATA, detectedPriceCol);
+  if(!r){priceCompactWrap.style.display='none';return;}
+
+  priceGlobalMin = r.min;
+  priceGlobalMax = r.max;
+  priceCapVal = priceGlobalMax;
+
+  priceCapRange.min = priceGlobalMin.toFixed(1);
+  priceCapRange.max = priceGlobalMax.toFixed(1);
+  priceCapRange.step = 0.1;
+  priceCapRange.value = priceCapVal.toFixed(1);
+  priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+
+  priceCompactWrap.style.display = 'inline-flex';
+  priceCapRange.addEventListener('input', () => {
+    priceCapVal = Number(priceCapRange.value);
+    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+    render();
+  });
+}
+
+/* Render */
 function render(){
   renderHeader();
   let rows=DATA.filter(rowMatches);
@@ -472,15 +429,13 @@ function render(){
         style = colorNeste6(row[c], neste6Range.min, neste6Range.max);
       }
       let val = row[c] ?? '';
-      // posisjon badge
       if (detectedPositionCol && c === detectedPositionCol){
         const pos = String(val);
         const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
-      // navn + NESTE 6 i bold
       if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
-      return `<td style="${style}">${val}</td>`;
+      return `<td>${val}</td>`;
     }).join('');
     frag.appendChild(tr);
   }
@@ -488,47 +443,6 @@ function render(){
   updateKPIs(rows);
 }
 
-/* PRIS */
-function detectPriceColumn(columns){
-  const prefs=["pris","price","kostnad","cost"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
-  return "";
-}
-function computePriceRange(rows,col){
-  let min=Infinity,max=-Infinity,any=false;
-  for(const r of rows){const v=r[col];
-    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
-  }
-  return any?{min,max}:null;
-}
-function setupPriceCompact(){
-  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
-  if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
-  const r = computePriceRange(DATA, detectedPriceCol);
-  if(!r){priceCompactWrap.style.display='none';return;}
-
-  // Start- og sluttverdier direkte fra datagrunnlaget
-  priceGlobalMin = r.min;
-  priceGlobalMax = r.max;
-  priceCapVal = priceGlobalMax;
-
-  // Gjør slideren mer følsom (hver tiendedel)
-  priceCapRange.min = priceGlobalMin.toFixed(1);
-  priceCapRange.max = priceGlobalMax.toFixed(1);
-  priceCapRange.step = 0.1;
-  priceCapRange.value = priceCapVal.toFixed(1);
-
-  // Vis verdi med én desimal
-  priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
-
-  priceCompactWrap.style.display = 'inline-flex';
-  priceCapRange.addEventListener('input', () => {
-    priceCapVal = Number(priceCapRange.value);
-    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
-    render();
-  });
-}
 /* INIT */
 Papa.parse(CSV_URL,{
   download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
@@ -540,13 +454,20 @@ Papa.parse(CSV_URL,{
     VISIBLE_COLUMNS=[];
     RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) VISIBLE_COLUMNS.push(c); });
 
-    // deteksjoner
     detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
     detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
+    detectedClubCol=detectClubColumn(RAW_COLUMNS);
+
+    // Flytt NAVN først (gir sticky første kolonne)
+    if (detectedNameCol){
+      const i=VISIBLE_COLUMNS.indexOf(detectedNameCol);
+      if(i>0){ VISIBLE_COLUMNS.splice(i,1); VISIBLE_COLUMNS.unshift(detectedNameCol); }
+    }
 
     DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
     buildPositionChips(DATA, detectedPositionCol);
+    buildClubSelect(DATA, detectedClubCol);
     setupPriceCompact();
 
     render();
@@ -568,10 +489,19 @@ q.addEventListener('input', render);
   tgl.addEventListener('change',()=>{
     document.documentElement.classList.toggle('dark', tgl.checked);
     localStorage.setItem(key, tgl.checked ? '1':'0');
-    render(); // oppdatér kontrast der det trengs
+    render();
+  });
+})();
+
+/* Failsafe: fjern gammel KPI-seksjon om den skulle dukke opp via cache */
+(function removeLegacyKpiCard(){
+  document.querySelectorAll('section.cards, .cards, .cards .card').forEach(el => el.remove());
+  document.querySelectorAll('h3').forEach(h=>{
+    if(h.textContent.trim().toLowerCase() === 'spillere vist'){
+      const sec = h.closest('section'); (sec || h.parentElement).remove();
+    }
   });
 })();
 </script>
 </body>
 </html>
- 
