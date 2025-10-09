@@ -142,7 +142,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </section>
-  <div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: lys → mørk blå. NAVN og NESTE 6 i bold.</div>
+  <div class="legend">R23–R28: #d2255d → #FFFFFF → #04b155 (midtpunkt 3). NESTE 6: egen blå skala, **alltid svart tekst**. NAVN og NESTE 6 i bold.</div>
 
   <!-- FOOTER -->
   <footer class="footer-wrap" id="about">
@@ -166,7 +166,7 @@
   // Posisjon/NAVN/pris
   let POSITION_COLUMN = "";              // tom = autodeteksjon
   const NAME_PREF = "navn";              // NAVN i bold
-  let PRICE_COLUMN = "";                 // tom = autodeteksjon
+  let PRICE_COLUMN = "";                 // tom = autodetekter
 
   // Betinget formatering
   const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles skala (midtpunkt 3)
@@ -262,7 +262,7 @@
       const c1=hexToRgb(GROUP_MID), c2=hexToRgb(GROUP_HIGH);
       rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
     }
-    if(invert){ // valgfri inversjon for kolonner i INVERT_COLOR_COLUMNS
+    if(invert){ // valgfri inversjon
       const t=(x-min)/(max-min);
       const c1=hexToRgb(GROUP_HIGH), c2=hexToRgb(GROUP_LOW);
       rgb=lerpRgb(c1,c2,Math.max(0,Math.min(1,t)));
@@ -271,14 +271,14 @@
     return `background:${rgbToCss(rgb)};color:${text}`;
   }
 
+  // **NESTE 6 – alltid SVART tekst**
   function colorNeste6(val,min,max, invert=false){
     if(!isNumericLike(val))return '';
     const x=toNumber(val);
     if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
     let t=(x-min)/(max-min); if(invert)t=1-t;
     const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-    const text = light<65 ? '#fff' : 'inherit';
-    return `background:hsl(${hue} ${sat}% ${light}%);color:${text}`;
+    return `background:hsl(${hue} ${sat}% ${light}%);color:#000`;
   }
 
   function computeGroupRange(rows, cols){
@@ -397,6 +397,8 @@
     return any?{min,max}:null;
   }
   function setupPriceCompact(){
+    const detectedPriceColLocal = detectPriceColumn(RAW_COLUMNS);
+    detectedPriceCol = detectedPriceColLocal;
     if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
     const r=computePriceRange(DATA,detectedPriceCol);
     if(!r){priceCompactWrap.style.display='none';return;}
@@ -416,15 +418,15 @@
       const data=res.data||[];
       RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
 
-      // beregn synlige kolonner
+      // beregn synlige kolonner (skjul etter bokstav og navn)
       const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
       const hideName=new Set(HIDE_COLUMNS);
       VISIBLE_COLUMNS=[];
       RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c); });
 
+      // deteksjoner
       detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
       detectedNameCol=detectInsensitive(RAW_COLUMNS, NAME_PREF);
-      detectedPriceCol=detectPriceColumn(RAW_COLUMNS);
 
       DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o;});
 
