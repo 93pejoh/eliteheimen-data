@@ -103,6 +103,21 @@
     background: #0f172a;                /* match tabellbakgrunn */
     box-shadow: 1px 0 0 #1f2a44;
   }
+
+/* --- Posisjons-badger --- */
+.pos-badge {
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:999px;
+  font-weight:600;
+  color:#111827; /* mørk tekst i lys modus */
+}
+
+/* I mørk modus: behold lys bakgrunn, men gjør teksten mørk nok til å leses */
+html.dark .pos-badge {
+  color:#0b1220 !important;
+}
+
 </style>
 </head>
 <body>
@@ -404,7 +419,7 @@
         if (detectedPositionCol && c === detectedPositionCol){
           const pos = String(val);
           const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
-          val = `<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${bg};font-weight:600">${pos}</span>`;
+         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
         }
         if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
         return `<td style="${style}">${val}</td>`;
