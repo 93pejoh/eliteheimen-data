@@ -396,7 +396,7 @@
         if (condfmtToggle.checked){
           if (GROUP_COLUMNS.includes(c) && groupRange){
             style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-          } else if (c === NESTE 6 && neste6Range){
+          } else if (c === NESTE6_COLUMN && neste6Range){
             style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
           }
         }
