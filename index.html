@@ -4,42 +4,46 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen – runde 23</title>
-<meta name="description" content="Interaktiv tabell som henter CSV fra en URL, skjuler valgte kolonner (etter Excel-bokstav) og har enkel posisjonsfiltrering." />
+<meta name="description" content="Tabell med posisjonsfilter, sortering og målrettet betinget formatering." />
 <style>
   :root { --radius: 12px; }
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, Noto Sans, sans-serif; margin: 24px; }
-  h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
   .sub { color: #555; margin-bottom: 1rem; }
-  .controls { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 12px; }
-  input[type="search"], input[type="text"] { padding: 10px 12px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
-  input[type="search"]:focus, input[type="text"]:focus { border-color: #888; }
+  .controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; margin-bottom: 12px; }
+  input[type="search"] { padding: 10px 12px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
+  input[type="search"]:focus { border-color: #888; }
   button { padding: 8px 12px; border: 1px solid #ddd; border-radius: var(--radius); background: #fff; cursor: pointer; }
+  label.switch { display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 6px 10px; background: #fff; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
   .chip { border: 1px solid #ddd; border-radius: 999px; padding: 6px 10px; background: #fff; cursor: pointer; user-select: none; }
   .chip[aria-pressed="true"] { outline: 2px solid #444; }
-  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 6px 10px; background: #fff; }
   .table-wrap { overflow: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); }
   table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
   thead th { position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e5e5e5; text-align: left; padding: 10px; white-space: nowrap; }
-  thead tr.filter-row th { background: #fff; border-bottom: 1px solid #eee; }
-  thead tr.filter-row input { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.9rem; }
   tbody td { border-top: 1px solid #f0f0f0; padding: 8px 10px; vertical-align: top; white-space: nowrap; }
-  .sort-ind { opacity: 0.6; font-size: 0.9em; margin-left: 6px; }
-  .footer { margin-top: 16px; font-size: 0.9rem; color: #666; }
+  thead th button { background: transparent; border: none; font: inherit; cursor: pointer; }
+  .sort-ind { opacity: .6; font-size: .9em; margin-left: 6px; }
+  .legend { font-size: .9rem; color: #666; }
+  .footer { margin-top: 16px; font-size: .9rem; color: #666; }
   .error { color: #b00020; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 </style>
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Skjuler valgte kolonner (etter Excel-bokstaver) og gir enkel posisjonsfiltrering. Data hentes fra GitHub.</div>
+  <div class="sub">Posisjonsfilter, sortering og målrettet fargelegging (R23–R28 sammen; “Neste 6” egen skala).</div>
 
-  <!-- Rad 1: Globalt søk, teller, nullstill -->
+  <!-- Rad 1: Globalt søk, teller, betinget formatering, nullstill -->
   <div class="controls" role="region" aria-label="Kontroller">
     <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
     <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
-    <button id="reset" type="button">Nullstill filtre</button>
+    <label class="switch" title="Skru av/på fargelegging">
+      <input type="checkbox" id="condfmt" checked /> Betinget formatering
+    </label>
+    <button id="reset" type="button">Nullstill</button>
   </div>
 
   <!-- Rad 2: Posisjonsfilter -->
@@ -56,6 +60,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </div>
+  <div class="legend">Fargeskala: lav verdi → lys rød, høy verdi → lys grønn. R23–R28 deler skala; “Neste 6” har egen.</div>
 
   <div class="footer">
     Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
@@ -66,17 +71,23 @@
   // ===================== KONFIG =====================
   const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
 
-  // Skjul disse kolonnene etter Excel-bokstaver (1=A, 2=B, ...):
-  // Du ba om: F, H, J, L, N, P, R  (UPPM + alle *_MIN-kolonnene)
+  // Skjul disse kolonnene etter Excel-bokstav:
   const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
   // (Valgfritt) Skjul også etter eksakt kolonnenavn:
   const HIDE_COLUMNS = [];
 
-  // (Valgfritt) Om du vil overstyre navnet på posisjonskolonnen:
-  let POSITION_COLUMN = ""; // tom = autodetekter (case-insensitive)
+  // Posisjonskolonne (tom = autodetekter case-insensitive):
+  let POSITION_COLUMN = "";
 
-  // Søk bare i synlige kolonner (true) eller i alle (false):
+  // Betinget formatering: grupper
+  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles skala
+  const NESTE6_COLUMN = "Neste 6";                              // isolert skala
+
+  // (Valgfritt) Inverter skala for disse (lavere er bedre):
+  const INVERT_COLOR_COLUMNS = []; // f.eks. ["Pris", "R23"]
+
+  // Søk bare i synlige kolonner
   const SEARCH_VISIBLE_ONLY = true;
   // ==================================================
 
@@ -89,251 +100,205 @@
   const statusEl = document.getElementById('status');
   const posChipsWrap = document.getElementById('pos-chips');
   const posAllBtn = document.getElementById('pos-all');
+  const condfmtToggle = document.getElementById('condfmt');
 
   let RAW_COLUMNS = [];
   let VISIBLE_COLUMNS = [];
   let DATA = [];
   let sortCol = null;
   let sortDir = 1;
-  let colFilters = {};
-  let activePositions = new Set(); // tom = "alle"
+  let activePositions = new Set(); // tom = alle
   let detectedPositionCol = ""; // faktisk brukt navn
 
-  function setStatus(msg) { statusEl.textContent = msg || ''; }
+  function setStatus(msg){ statusEl.textContent = msg || ''; }
 
-  // --- verktøy ---
-  function letterToIndex(letter) {
-    // Excel A=0, B=1, ..., Z=25, AA=26, AB=27, ...
-    const s = letter.trim().toUpperCase();
-    let n = 0;
-    for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
-    return n - 1; // 0-basert
+  // ===== utils =====
+  function letterToIndex(letter){ const s=letter.trim().toUpperCase(); let n=0; for(let i=0;i<s.length;i++) n=n*26+(s.charCodeAt(i)-64); return n-1; }
+  function isNumericLike(val){
+    if (val===null || val===undefined) return false;
+    if (typeof val==='number') return true;
+    const t=String(val).trim();
+    if (t==='') return false;
+    if (t.endsWith('%')) return !isNaN(Number(t.slice(0,-1).replace(',','.')));
+    return !isNaN(Number(t.replace(',','.')));
   }
-  function isNumericLike(val) {
-    if (val === null || val === undefined) return false;
-    if (typeof val === 'number') return true;
-    if (typeof val !== 'string') return false;
-    const v = val.replace(',', '.').trim();
-    return v !== '' && !isNaN(Number(v));
+  function toNumber(val){
+    if (typeof val==='number') return val;
+    const t=String(val).trim();
+    if (t.endsWith('%')) return Number(t.slice(0,-1).replace(',','.'));
+    return Number(t.replace(',','.'));
   }
-  function cmp(a, b) {
-    const an = isNumericLike(a);
-    const bn = isNumericLike(b);
-    if (an && bn) return Number(String(a).replace(',', '.')) - Number(String(b).replace(',', '.'));
-    return String(a).localeCompare(String(b), 'no', { numeric: true, sensitivity: 'base' });
-  }
+  function cmp(a,b){ const an=isNumericLike(a), bn=isNumericLike(b); if(an&&bn) return toNumber(a)-toNumber(b); return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'}); }
 
-  // --- header og filter ---
-  function renderHeader() {
-    const tr = document.createElement('tr');
-    VISIBLE_COLUMNS.forEach(col => {
-      const th = document.createElement('th');
-      const btn = document.createElement('button');
-      btn.textContent = col;
-      btn.style.background = 'transparent';
-      btn.style.border = 'none';
-      btn.style.font = 'inherit';
-      btn.style.cursor = 'pointer';
-      btn.addEventListener('click', () => {
-        if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
-        render();
-      });
+  // ===== header (kun sortering) =====
+  function renderHeader(){
+    const tr=document.createElement('tr');
+    VISIBLE_COLUMNS.forEach(col=>{
+      const th=document.createElement('th');
+      const btn=document.createElement('button');
+      btn.textContent=col;
+      btn.addEventListener('click',()=>{ if(sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; } render(); });
       th.appendChild(btn);
-      if (sortCol === col) {
-        const s = document.createElement('span');
-        s.className = 'sort-ind';
-        s.textContent = sortDir === 1 ? '▲' : '▼';
-        th.appendChild(s);
-      }
+      if (sortCol===col){ const s=document.createElement('span'); s.className='sort-ind'; s.textContent=sortDir===1?'▲':'▼'; th.appendChild(s); }
       tr.appendChild(th);
     });
-
-    const fr = document.createElement('tr');
-    fr.className = 'filter-row';
-    VISIBLE_COLUMNS.forEach(col => {
-      const th = document.createElement('th');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Filtrer…';
-      input.value = colFilters[col] || '';
-      input.addEventListener('input', e => { colFilters[col] = e.target.value; render(); });
-      th.appendChild(input);
-      fr.appendChild(th);
-    });
-
-    thead.innerHTML = '';
-    thead.appendChild(tr);
-    thead.appendChild(fr);
+    thead.innerHTML=''; thead.appendChild(tr);
   }
 
-  // --- filtreringslogikk ---
-  function recordMatchesFilters(row) {
-    // Globalt søk
-    const query = (q.value || '').toLowerCase();
-    if (query) {
-      const colsToSearch = SEARCH_VISIBLE_ONLY ? VISIBLE_COLUMNS : RAW_COLUMNS;
-      const inGlobal = colsToSearch.some(c => String(row[c] ?? '').toLowerCase().includes(query));
-      if (!inGlobal) return false;
+  // ===== filtrering =====
+  function rowMatches(row){
+    const query=(q.value||'').toLowerCase();
+    if (query){
+      const cols = SEARCH_VISIBLE_ONLY ? VISIBLE_COLUMNS : RAW_COLUMNS;
+      const hit = cols.some(c => String(row[c]??'').toLowerCase().includes(query));
+      if (!hit) return false;
     }
-    // Per-kolonne (bare synlige)
-    for (const [col, val] of Object.entries(colFilters)) {
-      const needle = (val || '').toLowerCase().trim();
-      if (needle) {
-        const hay = String(row[col] ?? '').toLowerCase();
-        if (!hay.includes(needle)) return false;
-      }
-    }
-    // Posisjon
-    if (detectedPositionCol && activePositions.size > 0) {
-      const pv = String(row[detectedPositionCol] ?? '').trim();
+    if (detectedPositionCol && activePositions.size>0){
+      const pv=String(row[detectedPositionCol]??'').trim();
       if (!activePositions.has(pv)) return false;
     }
     return true;
   }
 
-  function render() {
-    renderHeader();
-    let filtered = DATA.filter(recordMatchesFilters);
-    if (sortCol) filtered.sort((a, b) => sortDir * cmp(a[sortCol], b[sortCol]));
+  // ===== betinget formatering =====
+  function valueColor(val, min, max, invert=false){
+    if (!isNumericLike(val)) return '';
+    const x=toNumber(val); if(!isFinite(x) || !isFinite(min) || !isFinite(max) || max<=min) return '';
+    let t=(x-min)/(max-min); if (invert) t=1-t;
+    const hue = 0 + t*120; // 0=rød → 120=grønn
+    return `background: hsl(${hue} 80% 92%)`;
+  }
 
-    tbody.innerHTML = '';
-    const frag = document.createDocumentFragment();
-    for (const row of filtered) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = VISIBLE_COLUMNS.map(c => `<td>${row[c] ?? ''}</td>`).join('');
+  // Finn felles min/max over R23–R28 på de synlige radene
+  function computeGroupRange(rows, cols){
+    let min=Infinity, max=-Infinity, any=false;
+    for (const r of rows){
+      for (const c of cols){
+        const v=r[c];
+        if (isNumericLike(v)){
+          const num=toNumber(v);
+          if (isFinite(num)){ any=true; if (num<min) min=num; if (num>max) max=num; }
+        }
+      }
+    }
+    return any && max>min ? {min, max} : null;
+  }
+
+  // Finn min/max for “Neste 6” på de synlige radene
+  function computeSingleRange(rows, col){
+    let min=Infinity, max=-Infinity, any=false;
+    for (const r of rows){
+      const v=r[col];
+      if (isNumericLike(v)){
+        const num=toNumber(v);
+        if (isFinite(num)){ any=true; if (num<min) min=num; if (num>max) max=num; }
+      }
+    }
+    return any && max>min ? {min, max} : null;
+  }
+
+  // ===== render =====
+  function render(){
+    renderHeader();
+    let rows = DATA.filter(rowMatches);
+    if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
+
+    // Ranges basert på synlige rader
+    const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
+    const neste6Range = condfmtToggle.checked ? computeSingleRange(rows, NESTE6_COLUMN) : null;
+
+    // bygg tabell
+    tbody.innerHTML='';
+    const frag=document.createDocumentFragment();
+    for (const row of rows){
+      const tr=document.createElement('tr');
+      tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
+        let style='';
+        if (condfmtToggle.checked){
+          if (GROUP_COLUMNS.includes(c) && groupRange){
+            style = valueColor(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
+          } else if (c===NESTE6_COLUMN && neste6Range){
+            style = valueColor(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
+          }
+        }
+        const val=row[c]??'';
+        return `<td style="${style}">${val}</td>`;
+      }).join('');
       frag.appendChild(tr);
     }
     tbody.appendChild(frag);
-    shownEl.textContent = String(filtered.length);
-    totalEl.textContent = String(DATA.length);
+    shownEl.textContent=String(rows.length);
+    totalEl.textContent=String(DATA.length);
   }
 
-  function normalizeRecords(recs) {
-    return recs.map(r => {
-      const o = {};
-      RAW_COLUMNS.forEach(c => o[c] = r[c] ?? '');
-      return o;
-    });
-  }
-
-  function detectPositionColumn(columns) {
+  // ===== posisjoner =====
+  function detectPositionColumn(columns){
     if (POSITION_COLUMN && columns.includes(POSITION_COLUMN)) return POSITION_COLUMN;
-    const cands = ["posisjon","position","pos","rolle","role"];
-    // case-insensitive søk
-    const lower = columns.map(c => c.toLowerCase());
-    for (let i = 0; i < lower.length; i++) {
-      if (cands.includes(lower[i])) return columns[i];
-    }
+    const cands=["posisjon","position","pos","rolle","role"];
+    const lower=columns.map(c=>c.toLowerCase());
+    for (let i=0;i<lower.length;i++) if (cands.includes(lower[i])) return columns[i];
     return "";
   }
 
-  function buildPositionChips(data, colName) {
-    posChipsWrap.innerHTML = '';
-    posAllBtn.setAttribute('aria-pressed', activePositions.size === 0 ? 'true' : 'false');
+  function buildPositionChips(data, colName){
+    posChipsWrap.innerHTML='';
+    posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
+    if (!colName){ posAllBtn.disabled=true; return; }
+    posAllBtn.disabled=false;
 
-    if (!colName) { posAllBtn.disabled = true; return; }
-    posAllBtn.disabled = false;
+    const seen=new Set(), values=[];
+    for (const r of data){ const v=String(r[colName]??'').trim(); if (v && !seen.has(v)){ seen.add(v); values.push(v); } }
+    const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
+    values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b); if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return-1; if(ib!==-1)return 1; return a.localeCompare(b,'no',{numeric:true});});
 
-    const seen = new Set();
-    const values = [];
-    for (const r of data) {
-      const v = String(r[colName] ?? '').trim();
-      if (v && !seen.has(v)) { seen.add(v); values.push(v); }
-    }
-    // Vanlig norsk rekkefølge
-    const order = ["K", "F", "M", "A", "GK", "DEF", "MID", "FWD", "Keeper", "Forsvar", "Midtbane", "Angrep"];
-    values.sort((a, b) => {
-      const ia = order.indexOf(a), ib = order.indexOf(b);
-      if (ia !== -1 && ib !== -1) return ia - ib;
-      if (ia !== -1) return -1;
-      if (ib !== -1) return 1;
-      return a.localeCompare(b, 'no', { numeric: true });
-    });
-
-    for (const val of values) {
-      const btn = document.createElement('button');
-      btn.className = 'chip';
-      btn.textContent = val;
-      btn.setAttribute('aria-pressed', activePositions.has(val) ? 'true' : 'false');
-      btn.addEventListener('click', () => {
-        // Slå av "Alle"
-        posAllBtn.setAttribute('aria-pressed', 'false');
+    for (const val of values){
+      const btn=document.createElement('button');
+      btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+      btn.addEventListener('click',()=>{
+        posAllBtn.setAttribute('aria-pressed','false');
         if (activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-        if (activePositions.size === 0) posAllBtn.setAttribute('aria-pressed', 'true');
+        if (activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
+        btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
         render();
-        // Oppdater knappene visuelt
-        btn.setAttribute('aria-pressed', activePositions.has(val) ? 'true' : 'false');
       });
       posChipsWrap.appendChild(btn);
     }
-
-    posAllBtn.onclick = () => {
-      activePositions.clear();
-      posAllBtn.setAttribute('aria-pressed', 'true');
-      render();
-      [...posChipsWrap.querySelectorAll('.chip')].forEach(ch => ch.setAttribute('aria-pressed', 'false'));
-    };
+    posAllBtn.onclick=()=>{ activePositions.clear(); posAllBtn.setAttribute('aria-pressed','true'); [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false')); render(); };
   }
 
-  // --- last data ---
+  // ===== last data =====
   setStatus('Laster data…');
   Papa.parse(CSV_URL, {
-    download: true,
-    header: true,
-    dynamicTyping: true,
-    skipEmptyLines: 'greedy',
-    complete: (res) => {
+    download:true, header:true, dynamicTyping:true, skipEmptyLines:'greedy',
+    complete:(res)=>{
       setStatus('');
       if (res.errors && res.errors.length) console.warn('CSV parse errors:', res.errors);
+      const data=res.data||[];
 
-      const data = res.data || [];
-      RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length)
-        ? res.meta.fields
-        : (data[0] ? Object.keys(data[0]) : []);
+      RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length) ? res.meta.fields : (data[0] ? Object.keys(data[0]) : []);
+      const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
+      const hideName=new Set(HIDE_COLUMNS);
+      VISIBLE_COLUMNS=[];
+      RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c); });
 
-      // Skjul etter bokstav (indeks) + navn
-      const hideIdx = new Set(HIDE_BY_LETTER.map(letterToIndex));
-      const hideName = new Set(HIDE_COLUMNS);
-      VISIBLE_COLUMNS = [];
-      RAW_COLUMNS.forEach((c, i) => {
-        if (!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c);
-      });
-
-      // Velg posisjonskolonne (case-insensitive – finner f.eks. "POSISJON")
       detectedPositionCol = detectPositionColumn(RAW_COLUMNS);
+      DATA = data.map(r=>{ const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o; });
 
-      // Start per-kolonnefiltre for synlige
-      colFilters = Object.fromEntries(VISIBLE_COLUMNS.map(c => [c, '']));
-
-      // Normaliser rader
-      DATA = normalizeRecords(data);
-
-      // Bygg posisjonschips
       buildPositionChips(DATA, detectedPositionCol);
-
-      // Teller og første render
-      totalEl.textContent = String(DATA.length);
+      totalEl.textContent=String(DATA.length);
       render();
     },
-    error: (err) => {
-      setStatus('Kunne ikke laste CSV. Se konsollen.');
-      console.error(err);
-      thead.innerHTML = '<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>';
-    }
+    error:(err)=>{ setStatus('Kunne ikke laste CSV. Se konsollen.'); console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
   });
 
-  // --- UI handlers ---
+  // ===== handlers =====
   q.addEventListener('input', render);
-  resetBtn.addEventListener('click', () => {
-    q.value = '';
-    sortCol = null;
-    sortDir = 1;
-    activePositions.clear();
-    posAllBtn.setAttribute('aria-pressed', 'true');
-    colFilters = Object.fromEntries(VISIBLE_COLUMNS.map(c => [c, '']));
+  condfmtToggle.addEventListener('change', render);
+  resetBtn.addEventListener('click',()=>{
+    q.value=''; sortCol=null; sortDir=1; activePositions.clear();
+    posAllBtn.setAttribute('aria-pressed','true');
+    [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
     render();
-    // reset visuell status på chips
-    [...posChipsWrap.querySelectorAll('.chip')].forEach(ch => ch.setAttribute('aria-pressed', 'false'));
   });
 </script>
 </body>
