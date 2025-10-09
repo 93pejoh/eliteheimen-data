@@ -73,7 +73,7 @@
   .footer-wrap a{color:#64748b;text-decoration:none}
   .footer-wrap a:hover{color:#0ea5e9}
 
-  /* Dark mode */
+  /* Dark mode (grunnlag) */
   html.dark body{background:#0b1220;color:#e5e7eb}
   html.dark .card{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
   html.dark .controls input[type="search"], html.dark button, html.dark .pill{background:#0f172a;color:#e5e7eb;border-color:#1f2a44}
@@ -83,9 +83,26 @@
   html.dark thead th{background:#0f172a;border-bottom-color:#1f2a44}
   html.dark tbody td{border-top-color:#15213b}
   html.dark tbody tr:hover td{background:#0d1a34}
-  /* Sticky første kolonne (dark) – FIX */
+  /* Sticky første kolonne (dark) – grunnlag */
   html.dark tbody td:first-child, html.dark thead th:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
+
+  /* --- Dark mode: bedre tabellkontrast (PATCH) --- */
+  html.dark tbody td { 
+    border-top-color: #1a2743;          /* mørkere grid-linje */
+    background: transparent;            /* la fargelagte celler skinne gjennom */
+  }
+  html.dark tbody tr:nth-child(even) td { 
+    background: #0e172a;                /* subtil zebra */
+  }
+  html.dark tbody tr:hover td { 
+    background: #122038;                /* passende hover */
+  }
+  html.dark tbody td:first-child, 
+  html.dark thead th:first-child {
+    background: #0f172a;                /* match tabellbakgrunn */
+    box-shadow: 1px 0 0 #1f2a44;
+  }
 </style>
 </head>
 <body>
@@ -284,8 +301,6 @@
     if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
     let t=(x-min)/(max-min); if(invert)t=1-t;
     const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-
-    // Lys modus: alltid svart (som ønsket). Dark modus: automatisk kontrast.
     const textColor = isDarkMode() ? (light < 65 ? '#fff' : '#000') : '#000';
     return `background:hsl(${hue} ${sat}% ${light}%);color:${textColor}`;
   }
@@ -381,7 +396,7 @@
         if (condfmtToggle.checked){
           if (GROUP_COLUMNS.includes(c) && groupRange){
             style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-          } else if (c === NESTE6_COLUMN && neste6Range){
+          } else if (c === NESTE 6 && neste6Range){
             style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
           }
         }
@@ -485,29 +500,7 @@
     tgl.addEventListener('change',()=>{
       document.documentElement.classList.toggle('dark', tgl.checked);
       localStorage.setItem(key, tgl.checked ? '1':'0');
-      render(); // re-render for å oppdatere kontrast på NESTE 6 i dark mode
-      /* --- Dark mode: bedre tabellkontrast --- */
-html.dark tbody td { 
-  border-top-color: #1a2743;           /* mørkere grid-linje */
-  background: transparent;             /* la celler med farger skinne gjennom */
-}
-
-/* zebra-striping i dark mode – subtil, ikke lys */
-html.dark tbody tr:nth-child(even) td { 
-  background: #0e172a;                 /* dempet mørk blå */
-}
-
-/* hover i dark mode – litt lysere enn stripen, men ikke grå/hvit */
-html.dark tbody tr:hover td { 
-  background: #122038; 
-}
-
-/* sticky første kolonne må matche tabellbakgrunnen i dark mode */
-html.dark tbody td:first-child, 
-html.dark thead th:first-child {
-  background: #0f172a;
-  box-shadow: 1px 0 0 #1f2a44;
-}
+      render(); // oppdatér kontrast for NESTE 6 i dark mode
     });
   })();
 </script>
