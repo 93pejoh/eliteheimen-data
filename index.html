@@ -419,17 +419,30 @@ function computePriceRange(rows,col){
 function setupPriceCompact(){
   detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
   if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
-  const r=computePriceRange(DATA,detectedPriceCol);
+  const r = computePriceRange(DATA, detectedPriceCol);
   if(!r){priceCompactWrap.style.display='none';return;}
-  priceGlobalMin=Math.floor(r.min);
-  priceGlobalMax=Math.ceil(r.max);
-  priceCapVal=priceGlobalMax;
-  priceCapRange.min=priceGlobalMin; priceCapRange.max=priceGlobalMax; priceCapRange.value=priceCapVal;
-  priceCapLabel.textContent=fmtInt(priceCapVal);
-  priceCompactWrap.style.display='inline-flex';
-  priceCapRange.addEventListener('input',()=>{priceCapVal=Number(priceCapRange.value);priceCapLabel.textContent=fmtInt(priceCapVal);render();});
-}
 
+  // Start- og sluttverdier direkte fra datagrunnlaget
+  priceGlobalMin = r.min;
+  priceGlobalMax = r.max;
+  priceCapVal = priceGlobalMax;
+
+  // Gjør slideren mer følsom (hver tiendedel)
+  priceCapRange.min = priceGlobalMin.toFixed(1);
+  priceCapRange.max = priceGlobalMax.toFixed(1);
+  priceCapRange.step = 0.1;
+  priceCapRange.value = priceCapVal.toFixed(1);
+
+  // Vis verdi med én desimal
+  priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+
+  priceCompactWrap.style.display = 'inline-flex';
+  priceCapRange.addEventListener('input', () => {
+    priceCapVal = Number(priceCapRange.value);
+    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+    render();
+  });
+}
 /* INIT */
 Papa.parse(CSV_URL,{
   download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
