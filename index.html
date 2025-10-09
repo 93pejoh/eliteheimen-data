@@ -92,6 +92,28 @@
   html.dark tbody tr:hover td{background:#122038}
   html.dark tbody td:first-child, html.dark thead th:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
   html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
+  /* Header-knapper skal arve tekstfarge fra th (lys + mørk modus) */
+thead th button{
+  color: inherit !important;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Ekstra: sørg for god kontrast på selve headeren i dark mode */
+html.dark thead th{
+  background: #0b1325 !important;
+  color: #f1f5f9 !important;
+  border-bottom-color: #223356 !important;
+  z-index: 3;
+}
+html.dark thead th:first-child{
+  background: #0b1325 !important;
+  box-shadow: 1px 0 0 #1f2a44, 0 2px 0 #0b1325, 0 1px 0 #223356;
+}
 </style>
 </head>
 <body>
