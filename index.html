@@ -4,44 +4,42 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen – runde 23</title>
-<meta name="description" content="Tabell med posisjonsfilter, pris-slider, sortering, bold NAVN og målrettet betinget formatering." />
+<meta name="description" content="Tabell med posisjonsfilter, kompakt pris-slider, sortering, bold NAVN og målrettet betinget formatering." />
 <style>
   :root { --radius: 12px; }
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, Noto Sans, sans-serif; margin: 24px; }
   h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
   .sub { color: #555; margin-bottom: 1rem; }
-  .controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; margin-bottom: 12px; }
-  input[type="search"] { padding: 10px 12px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
+  .controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  input[type="search"] { padding: 8px 10px; border: 1px solid #ccc; border-radius: var(--radius); outline: none; }
   input[type="search"]:focus { border-color: #888; }
-  button { padding: 8px 12px; border: 1px solid #ddd; border-radius: var(--radius); background: #fff; cursor: pointer; }
-  label.switch { display: inline-flex; align-items: center; gap: 8px; user-select: none; }
-  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 6px 10px; background: #fff; }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
-  .chip { border: 1px solid #ddd; border-radius: 999px; padding: 6px 10px; background: #fff; cursor: pointer; user-select: none; }
+  button { padding: 6px 10px; border: 1px solid #ddd; border-radius: var(--radius); background: #fff; cursor: pointer; }
+  label.switch { display: inline-flex; align-items: center; gap: 6px; user-select: none; }
+  .pill { border: 1px solid #e0e0e0; border-radius: 999px; padding: 4px 10px; background: #fff; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 8px; }
+  .chip { border: 1px solid #ddd; border-radius: 999px; padding: 4px 10px; background: #fff; cursor: pointer; user-select: none; }
   .chip[aria-pressed="true"] { outline: 2px solid #444; }
   .table-wrap { overflow: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); }
   table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
-  thead th { position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e5e5e5; padding: 10px; white-space: nowrap; text-align: center; }
-  tbody td { border-top: 1px solid #f0f0f0; padding: 8px 10px; vertical-align: top; white-space: nowrap; text-align: center; }
+  thead th { position: sticky; top: 0; background: #fafafa; border-bottom: 1px solid #e5e5e5; padding: 8px; white-space: nowrap; text-align: center; }
+  tbody td { border-top: 1px solid #f0f0f0; padding: 6px 8px; vertical-align: top; white-space: nowrap; text-align: center; }
   thead th button { background: transparent; border: none; font: inherit; cursor: pointer; }
   .sort-ind { opacity: .6; font-size: .9em; margin-left: 6px; }
-  .legend { font-size: .9rem; color: #666; }
-  .footer { margin-top: 16px; font-size: .9rem; color: #666; }
+  .legend { font-size: .9rem; color: #666; margin-top: 6px; }
+  .footer { margin-top: 12px; font-size: .9rem; color: #666; }
   .error { color: #b00020; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-  /* Pris-slider layout */
-  .price-wrap { display: grid; grid-template-columns: auto 1fr; gap: 10px 12px; align-items: center; margin-bottom: 12px; }
-  .price-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: center; }
-  .price-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .price-fields input { padding: 8px 10px; border: 1px solid #ccc; border-radius: var(--radius); width: 100%; }
-  .muted { color: #666; font-size: .9rem; }
+  /* Kompakt pris-slider */
+  .price-compact { display: inline-flex; align-items: center; gap: 8px; margin: 2px 0 8px; }
+  .price-compact input[type="range"] { width: 200px; height: 4px; }
+  .muted { color: #666; font-size: .88rem; }
 </style>
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Bold NAVN, posisjonsfilter, <b>pris-slider</b>, rød→grønn (R23–R28), sterk blå kontrast (NESTE 6), alt midtstilt.</div>
+  <div class="sub">Bold NAVN, posisjonsfilter, <b>kompakt pris-slider (≤ grense)</b>, rød→grønn (R23–R28), sterk blå (NESTE 6), alt midtstilt.</div>
 
   <!-- Rad 1: Globalt søk, teller, betinget formatering, nullstill -->
   <div class="controls" role="region" aria-label="Kontroller">
@@ -60,20 +58,11 @@
     <div id="pos-chips" class="row" style="margin:0;"></div>
   </div>
 
-  <!-- Prisfilter (vises bare hvis pris-kolonnen finnes) -->
-  <div id="price-filter" class="price-wrap" style="display:none;">
-    <div><strong>Pris:</strong><div class="muted" id="price-col-name"></div></div>
-    <div>
-      <div class="price-sliders">
-        <input id="priceMinRange" type="range" step="1" />
-        <input id="priceMaxRange" type="range" step="1" />
-      </div>
-      <div class="price-fields">
-        <input id="priceMin" type="number" inputmode="decimal" />
-        <input id="priceMax" type="number" inputmode="decimal" />
-      </div>
-      <div class="muted">Dra håndtakene eller skriv inn verdier. Filtreringen er inklusiv (min ≤ pris ≤ max).</div>
-    </div>
+  <!-- Kompakt prisfilter (viser bare hvis pris-kolonne finnes) -->
+  <div id="price-compact" class="price-compact" style="display:none;">
+    <strong>Pris ≤</strong>
+    <input id="priceCapRange" type="range" step="1" />
+    <span class="muted" id="priceCapLabel"></span>
   </div>
 
   <div id="status" aria-live="polite" class="sr-only"></div>
@@ -83,7 +72,7 @@
       <tbody id="tbody"></tbody>
     </table>
   </div>
-  <div class="legend">R23–R28: rød → grønn (felles). NESTE 6 (eksakt navn): lys → mørk blå (egen skala). NAVN og NESTE 6 i bold.</div>
+  <div class="legend">R23–R28: rød → grønn (felles). NESTE 6: lys → mørk blå (egen skala). NAVN og NESTE 6 i bold. Prisfilter viser rader ≤ valgt grense.</div>
 
   <div class="footer">
     Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
@@ -129,13 +118,10 @@
   const posAllBtn = document.getElementById('pos-all');
   const condfmtToggle = document.getElementById('condfmt');
 
-  // Pris–UI
-  const priceWrap = document.getElementById('price-filter');
-  const priceColName = document.getElementById('price-col-name');
-  const priceMinRange = document.getElementById('priceMinRange');
-  const priceMaxRange = document.getElementById('priceMaxRange');
-  const priceMin = document.getElementById('priceMin');
-  const priceMax = document.getElementById('priceMax');
+  // Pris compact UI
+  const priceCompactWrap = document.getElementById('price-compact');
+  const priceCapRange = document.getElementById('priceCapRange');
+  const priceCapLabel = document.getElementById('priceCapLabel');
 
   // State
   let RAW_COLUMNS = [];
@@ -147,7 +133,7 @@
   let detectedPositionCol = ""; // faktisk brukt navn
   let detectedNameCol = ""; // faktisk NAVN-kolonne
   let detectedPriceCol = ""; // faktisk PRIS-kolonne
-  let priceMinVal = null, priceMaxVal = null, priceGlobalMin = null, priceGlobalMax = null;
+  let priceGlobalMin = null, priceGlobalMax = null, priceCapVal = null;
 
   function setStatus(msg){ statusEl.textContent = msg || ''; }
 
@@ -163,6 +149,7 @@
     const t=String(val).trim();
     if (t==='') return false;
     if (t.endsWith('%')) return !isNaN(Number(t.slice(0,-1).replace(',','.')));
+    // fjern kr og mellomrom
     return !isNaN(Number(t.replace(/\s/g,'').replace('kr','').replace('KR','').replace(',','.')));
   }
   function toNumber(val){
@@ -193,7 +180,7 @@
     thead.innerHTML=''; thead.appendChild(tr);
   }
 
-  // ===== pris (slider) =====
+  // ===== pris =====
   function detectPriceColumn(columns){
     if (PRICE_COLUMN && columns.includes(PRICE_COLUMN)) return PRICE_COLUMN;
     const prefs = ["pris","price","kostnad","cost"];
@@ -201,7 +188,6 @@
     for (let i=0;i<lower.length;i++) if (prefs.includes(lower[i])) return columns[i];
     return "";
   }
-
   function computePriceRange(rows, col){
     let min=Infinity, max=-Infinity, any=false;
     for (const r of rows){
@@ -210,48 +196,27 @@
     }
     return any ? {min, max} : null;
   }
-
-  function clampPrice(val){
-    if (val==null) return null;
-    if (priceGlobalMin==null || priceGlobalMax==null) return val;
-    return Math.min(priceGlobalMax, Math.max(priceGlobalMin, val));
-  }
-
-  function setupPriceUI(){
-    if (!detectedPriceCol) { priceWrap.style.display='none'; return; }
-
-    // Global range (på alle rader, ikke bare synlige)
+  function setupPriceCompact(){
+    if (!detectedPriceCol) { priceCompactWrap.style.display='none'; return; }
     const r = computePriceRange(DATA, detectedPriceCol);
-    if (!r) { priceWrap.style.display='none'; return; }
-
+    if (!r) { priceCompactWrap.style.display='none'; return; }
     priceGlobalMin = Math.floor(r.min);
     priceGlobalMax = Math.ceil(r.max);
+    // Start med maks (dvs. vis alt; dra venstre for å begrense)
+    priceCapVal = priceGlobalMax;
 
-    // Init valgt range
-    priceMinVal = priceGlobalMin;
-    priceMaxVal = priceGlobalMax;
+    priceCapRange.min = priceGlobalMin;
+    priceCapRange.max = priceGlobalMax;
+    priceCapRange.value = priceCapVal;
+    priceCapLabel.textContent = new Intl.NumberFormat('no-NO', {maximumFractionDigits:0}).format(priceCapVal);
 
-    // Sync UI
-    priceColName.textContent = detectedPriceCol;
-    priceWrap.style.display = '';
-    priceMinRange.min = priceGlobalMin; priceMinRange.max = priceGlobalMax; priceMinRange.value = priceMinVal;
-    priceMaxRange.min = priceGlobalMin; priceMaxRange.max = priceGlobalMax; priceMaxRange.value = priceMaxVal;
-    priceMin.value = priceMinVal; priceMax.value = priceMaxVal;
+    priceCompactWrap.style.display = 'inline-flex';
 
-    // Handlers – sørg for at min <= max
-    function applyAndRender(){
-      priceMinVal = clampPrice(Number(priceMin.value));
-      priceMaxVal = clampPrice(Number(priceMax.value));
-      if (priceMinVal > priceMaxVal){ const mid = priceMinVal; priceMinVal = priceMaxVal; priceMaxVal = mid; }
-      priceMinRange.value = priceMinVal;
-      priceMaxRange.value = priceMaxVal;
+    priceCapRange.addEventListener('input', () => {
+      priceCapVal = Number(priceCapRange.value);
+      priceCapLabel.textContent = new Intl.NumberFormat('no-NO', {maximumFractionDigits:0}).format(priceCapVal);
       render();
-    }
-
-    priceMinRange.addEventListener('input', () => { priceMin.value = priceMinRange.value; applyAndRender(); });
-    priceMaxRange.addEventListener('input', () => { priceMax.value = priceMaxRange.value; applyAndRender(); });
-    priceMin.addEventListener('input', applyAndRender);
-    priceMax.addEventListener('input', applyAndRender);
+    });
   }
 
   // ===== filtrering =====
@@ -265,19 +230,17 @@
       const pv=String(row[detectedPositionCol]??'').trim();
       if (!activePositions.has(pv)) return false;
     }
-    // Prisfilter (inklusive)
-    if (detectedPriceCol && priceMinVal!=null && priceMaxVal!=null){
-      const v = row[detectedPriceCol];
+    // Pris ≤ cap (hvis aktiv)
+    if (detectedPriceCol && priceCapVal!=null){
+      const v=row[detectedPriceCol];
       if (!isNumericLike(v)) return false;
-      const num = toNumber(v);
-      if (!(num >= priceMinVal && num <= priceMaxVal)) return false;
+      if (toNumber(v) > priceCapVal) return false;
     }
     return true;
   }
 
   // ===== betinget formatering =====
   function colorGroup(val, min, max, invert=false){
-    // rød→grønn for R23–R28
     if (!isNumericLike(val)) return '';
     const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
     let t=(x-min)/(max-min); if (invert) t=1-t;
@@ -285,14 +248,12 @@
     return `background: hsl(${hue} 80% 92%)`;
   }
   function colorNeste6(val, min, max, invert=false){
-    // sterk blå kontrast for NESTE 6
     if (!isNumericLike(val)) return '';
     const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
     let t=(x-min)/(max-min); if (invert) t=1-t;
     const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
     return `background: hsl(${hue} ${sat}% ${light}%)`;
   }
-
   function computeGroupRange(rows, cols){
     let min=Infinity, max=-Infinity, any=false;
     for (const r of rows){
@@ -320,7 +281,6 @@
     for (let i=0;i<lower.length;i++) if (cands.includes(lower[i])) return columns[i];
     return "";
   }
-
   function buildPositionChips(data, colName){
     posChipsWrap.innerHTML='';
     posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
@@ -339,7 +299,7 @@
       btn.addEventListener('click',()=>{
         posAllBtn.setAttribute('aria-pressed','false');
         if (activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-        if (activePositions.size===0)posAllBtn.setAttribute('aria-pressed','true');
+        if (activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
         btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
         render();
       });
@@ -348,13 +308,12 @@
     posAllBtn.onclick=()=>{ activePositions.clear(); posAllBtn.setAttribute('aria-pressed','true'); [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false')); render(); };
   }
 
-  // ===== header + body =====
+  // ===== render =====
   function render(){
     renderHeader();
     let rows = DATA.filter(rowMatches);
     if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
-    // Ranges basert på synlige rader
     const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
     const neste6Range = condfmtToggle.checked && VISIBLE_COLUMNS.includes(NESTE6_COLUMN)
                         ? computeSingleRange(rows, NESTE6_COLUMN) : null;
@@ -373,7 +332,6 @@
           }
         }
         let val = row[c] ?? '';
-        // Bold for NAVN og NESTE 6
         if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) {
           val = `<strong>${val}</strong>`;
         }
@@ -386,14 +344,14 @@
     total.textContent=String(DATA.length);
   }
 
-  // ===== initialiser =====
+  // ===== init =====
   Papa.parse(CSV_URL, {
     download:true, header:true, dynamicTyping:true, skipEmptyLines:'greedy',
     complete:(res)=>{
-      if (res.errors && res.errors.length) console.warn('CSV parse errors:', res.errors);
       const data=res.data||[];
-
       RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length) ? res.meta.fields : (data[0] ? Object.keys(data[0]) : []);
+
+      // kolonner å vise
       const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
       const hideName=new Set(HIDE_COLUMNS);
       VISIBLE_COLUMNS=[];
@@ -403,12 +361,10 @@
       detectedNameCol = detectInsensitive(RAW_COLUMNS, NAME_PREF);
       detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
 
-      // Normaliser rader (sørg for at alle keys finnes)
       DATA = data.map(r=>{ const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o; });
 
-      // Bygg posisjonsknapper og pris–UI
       buildPositionChips(DATA, detectedPositionCol);
-      setupPriceUI();
+      setupPriceCompact();
 
       total.textContent=String(DATA.length);
       render();
@@ -421,11 +377,10 @@
   condfmtToggle.addEventListener('change', render);
   resetBtn.addEventListener('click',()=>{
     q.value=''; sortCol=null; sortDir=1; activePositions.clear();
-    // nullstill pris
-    if (detectedPriceCol && priceGlobalMin!=null){
-      priceMinVal = priceGlobalMin; priceMaxVal = priceGlobalMax;
-      priceMinRange.value = priceMinVal; priceMaxRange.value = priceMaxVal;
-      priceMin.value = priceMinVal; priceMax.value = priceMaxVal;
+    if (detectedPriceCol && priceGlobalMax!=null){
+      priceCapVal = priceGlobalMax;
+      priceCapRange.value = priceCapVal;
+      priceCapLabel.textContent = new Intl.NumberFormat('no-NO', {maximumFractionDigits:0}).format(priceCapVal);
     }
     posAllBtn.setAttribute('aria-pressed','true');
     [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
