@@ -159,29 +159,21 @@ html.dark .table-wrap thead th {
   </div>
 </section>
 
-<!-- KPI -->
-<section class="cards">
-  <div class="card"><h3>Spillere vist</h3><p id="kpi-count">–</p></div>
-</section>
-
-<!-- KONTROLLER -->
-<section id="filters">
-  <div class="controls" role="region" aria-label="Kontroller">
+<!-- KONTROLLER (kompakt filterbar) -->
+<section id="filters" class="filterbar">
+  <div class="filterbar-row">
+    <span class="pill kpi-mini"><strong>Spillere:</strong> <span id="kpi-count-mini">–</span></span>
     <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
-  </div>
-
-  <!-- Posisjonsfilter -->
-  <div class="row" role="region" aria-label="Posisjonsfilter">
-    <strong>Posisjoner:</strong>
+    <div class="gap"></div>
+    <span class="label">Posisjoner</span>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
-    <div id="pos-chips" class="row" style="margin:0;"></div>
-  </div>
-
-  <!-- Pris – kompakt slider -->
-  <div id="price-compact" class="price-compact" style="display:none;">
-    <strong>Pris ≤</strong>
-    <input id="priceCapRange" type="range" step="1" />
-    <span class="muted" id="priceCapLabel"></span>
+    <div id="pos-chips" class="row microgap" style="margin:0;"></div>
+    <div class="gap"></div>
+    <span class="label">Pris ≤</span>
+    <div id="price-compact" class="price-compact" style="display:none;">
+      <input id="priceCapRange" type="range" step="0.1" />
+      <span class="muted" id="priceCapLabel"></span>
+    </div>
   </div>
 </section>
 
