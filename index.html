@@ -29,289 +29,76 @@
   .legend { font-size: .9rem; color: #666; }
   .footer { margin-top: 16px; font-size: .9rem; color: #666; }
   .error { color: #b00020; }
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 </style>
 </head>
 <body>
   <h1>Eliteheimen – runde 23</h1>
-  <div class="sub">Bold NAVN, posisjonsfilter og målrettet fargelegging (R23–R28 felles rød→grønn • «NESTE 6» egen blå skala).</div>
+  <div class="sub">Bold NAVN, posisjonsfilter og målrettet fargelegging (R23–R28 felles rød→grønn • «NESTE 6» kraftig blå kontrast).</div>
 
-  <div class="controls" role="region" aria-label="Kontroller">
-    <input id="q" type="search" placeholder="Søk i synlige kolonner…" aria-label="Globalt søk" />
+  <div class="controls">
+    <input id="q" type="search" placeholder="Søk i synlige kolonner…" />
     <div class="pill"><span id="shown">0</span>/<span id="total">0</span> rader</div>
-    <label class="switch" title="Skru av/på fargelegging">
-      <input type="checkbox" id="condfmt" checked /> Betinget formatering
-    </label>
+    <label class="switch"><input type="checkbox" id="condfmt" checked /> Betinget formatering</label>
     <button id="reset" type="button">Nullstill</button>
   </div>
 
-  <!-- Posisjonsfilter -->
-  <div class="row" role="region" aria-label="Posisjonsfilter">
+  <div class="row">
     <strong>Posisjoner:</strong>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
     <div id="pos-chips" class="row" style="margin:0;"></div>
   </div>
 
-  <div id="status" aria-live="polite" class="sr-only"></div>
   <div class="table-wrap">
-    <table id="tbl" aria-describedby="q">
+    <table id="tbl">
       <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
-  <div class="legend">R23–R28: rød → grønn (felles). NESTE 6: lys → mørkere blå (egen skala).</div>
-
-  <div class="footer">
-    Kilde: <code>https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv</code>.
-  </div>
+  <div class="legend">R23–R28: rød→grønn. NESTE 6: lys→mørk blå med sterk kontrast.</div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-  // ===================== KONFIG =====================
-  const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
+const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/Eliteheimen%20%E2%80%93%20runde%2023.csv";
+const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
+const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"];
+const NESTE6_COLUMN = "NESTE 6";
+const NAME_PREF = "navn";
 
-  // Skjul kolonner etter Excel-bokstav:
-  const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
+let RAW_COLUMNS=[],VISIBLE_COLUMNS=[],DATA=[],sortCol=null,sortDir=1,activePositions=new Set(),detectedNameCol="",detectedPositionCol="";
 
-  // (Valgfritt) Skjul også etter eksakt kolonnenavn:
-  const HIDE_COLUMNS = [];
+function letterToIndex(l){const s=l.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
+function isNum(v){if(v===null||v===undefined)return false;if(typeof v==="number")return true;const t=String(v).trim();return t!==""&&!isNaN(Number(t.replace(",",".")));}
+function toNum(v){if(typeof v==="number")return v;return Number(String(v).trim().replace(",","."));}
+function cmp(a,b){const an=isNum(a),bn=isNum(b);if(an&&bn)return toNum(a)-toNum(b);return String(a).localeCompare(String(b),"no",{numeric:true});}
+function detectInsensitive(cols,w){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(w);return i>=0?cols[i]:"";}
+function colorGroup(v,min,max){if(!isNum(v))return"";const x=toNum(v);let t=(x-min)/(max-min);const hue=0+t*120;return`background:hsl(${hue} 80% 92%)`;}
+function colorNeste6(v,min,max){if(!isNum(v))return"";const x=toNum(v);let t=(x-min)/(max-min);
+  const hue=210, sat=90, light=92 - t*32; // sterkere kontrast
+  return`background:hsl(${hue} ${sat}% ${light}%)`;
+}
+function computeRange(rows,cols){let min=Infinity,max=-Infinity,any=false;for(const r of rows){for(const c of cols){const v=r[c];if(isNum(v)){const num=toNum(v);if(isFinite(num)){any=true;if(num<min)min=num;if(num>max)max=num;}}}}return any&&max>min?{min,max}:null;}
+function computeSingle(rows,col){let min=Infinity,max=-Infinity,any=false;for(const r of rows){const v=r[col];if(isNum(v)){const num=toNum(v);if(isFinite(num)){any=true;if(num<min)min=num;if(num>max)max=num;}}}return any&&max>min?{min,max}:null;}
 
-  // Posisjonskolonne (tom = autodetekter case-insensitive):
-  let POSITION_COLUMN = "";
+function renderHeader(){const tr=document.createElement("tr");VISIBLE_COLUMNS.forEach(col=>{const th=document.createElement("th");const btn=document.createElement("button");btn.textContent=col;btn.onclick=()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();};th.append(btn);if(sortCol===col){const s=document.createElement("span");s.className="sort-ind";s.textContent=sortDir===1?"▲":"▼";th.append(s);}tr.append(th);});thead.innerHTML="";thead.append(tr);}
+function render(){renderHeader();let rows=DATA.filter(rowMatches);if(sortCol)rows.sort((a,b)=>sortDir*cmp(a[sortCol],b[sortCol]));
+ const groupR=computeRange(rows,GROUP_COLUMNS);const nesteR=VISIBLE_COLUMNS.includes(NESTE6_COLUMN)?computeSingle(rows,NESTE6_COLUMN):null;
+ tbody.innerHTML="";const frag=document.createDocumentFragment();
+ for(const row of rows){const tr=document.createElement("tr");tr.innerHTML=VISIBLE_COLUMNS.map(c=>{
+   let style="";if(GROUP_COLUMNS.includes(c)&&groupR)style=colorGroup(row[c],groupR.min,groupR.max);
+   else if(c===NESTE6_COLUMN&&nesteR)style=colorNeste6(row[c],nesteR.min,nesteR.max);
+   let val=row[c]??"";if(detectedNameCol&&c===detectedNameCol)val=`<strong>${val}</strong>`;return`<td style="${style}">${val}</td>`;
+ }).join("");frag.append(tr);}tbody.append(frag);
+ shown.textContent=rows.length;total.textContent=DATA.length;}
 
-  // NAVN i bold (case-insensitiv deteksjon av kolonnenavn):
-  const NAME_PREF = "navn";
+function rowMatches(r){const qv=(q.value||"").toLowerCase();if(qv){const hit=VISIBLE_COLUMNS.some(c=>String(r[c]??"").toLowerCase().includes(qv));if(!hit)return false;}if(detectedPositionCol&&activePositions.size>0){const pv=String(r[detectedPositionCol]??"").trim();if(!activePositions.has(pv))return false;}return true;}
+function detectPos(cols){const cands=["posisjon","position","pos","rolle","role"];const lower=cols.map(c=>c.toLowerCase());for(let i=0;i<lower.length;i++)if(cands.includes(lower[i]))return cols[i];return"";}
 
-  // Betinget formatering:
-  const GROUP_COLUMNS = ["R23","R24","R25","R26","R27","R28"]; // felles rød→grønn
-  const NESTE6_COLUMN = "NESTE 6";                               // ***EKSAKT match (case-sensitiv)***
-
-  // (Valgfritt) Inverter skala for disse (lavere er bedre):
-  const INVERT_COLOR_COLUMNS = []; // f.eks. ["R23"]
-  // ==================================================
-
-  const thead = document.getElementById('thead');
-  const tbody = document.getElementById('tbody');
-  const q = document.getElementById('q');
-  const shownEl = document.getElementById('shown');
-  const totalEl = document.getElementById('total');
-  const resetBtn = document.getElementById('reset');
-  const statusEl = document.getElementById('status');
-  const posChipsWrap = document.getElementById('pos-chips');
-  const posAllBtn = document.getElementById('pos-all');
-  const condfmtToggle = document.getElementById('condfmt');
-
-  let RAW_COLUMNS = [];
-  let VISIBLE_COLUMNS = [];
-  let DATA = [];
-  let sortCol = null;
-  let sortDir = 1;
-  let activePositions = new Set(); // tom = alle
-  let detectedPositionCol = ""; // faktisk brukt navn
-  let detectedNameCol = ""; // faktisk NAVN-kolonne
-
-  function setStatus(msg){ statusEl.textContent = msg || ''; }
-
-  // ===== utils =====
-  function letterToIndex(letter){ const s=letter.trim().toUpperCase(); let n=0; for(let i=0;i<s.length;i++) n=n*26+(s.charCodeAt(i)-64); return n-1; }
-  function isNumericLike(val){
-    if (val===null || val===undefined) return false;
-    if (typeof val==='number') return true;
-    const t=String(val).trim();
-    if (t==='') return false;
-    if (t.endsWith('%')) return !isNaN(Number(t.slice(0,-1).replace(',','.')));
-    return !isNaN(Number(t.replace(',','.')));
-  }
-  function toNumber(val){
-    if (typeof val==='number') return val;
-    const t=String(val).trim();
-    if (t.endsWith('%')) return Number(t.slice(0,-1).replace(',','.'));
-    return Number(t.replace(',','.'));
-  }
-  function cmp(a,b){ const an=isNumericLike(a), bn=isNumericLike(b); if(an&&bn) return toNumber(a)-toNumber(b); return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'}); }
-
-  function detectByNameInsensitive(columns, wantedLower){
-    const lower = columns.map(c => c.toLowerCase());
-    const i = lower.indexOf(wantedLower);
-    return i >= 0 ? columns[i] : "";
-  }
-
-  // ===== header (kun sortering) =====
-  function renderHeader(){
-    const tr=document.createElement('tr');
-    VISIBLE_COLUMNS.forEach(col=>{
-      const th=document.createElement('th');
-      const btn=document.createElement('button');
-      btn.textContent=col;
-      btn.addEventListener('click',()=>{ if (sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; } render(); });
-      th.appendChild(btn);
-      if (sortCol===col){ const s=document.createElement('span'); s.className='sort-ind'; s.textContent=sortDir===1?'▲':'▼'; th.appendChild(s); }
-      tr.appendChild(th);
-    });
-    thead.innerHTML=''; thead.appendChild(tr);
-  }
-
-  // ===== filtrering =====
-  function rowMatches(row){
-    const query=(q.value||'').toLowerCase();
-    if (query){
-      const cols = VISIBLE_COLUMNS; // søk i synlige
-      const hit = cols.some(c => String(row[c]??'').toLowerCase().includes(query));
-      if (!hit) return false;
-    }
-    if (detectedPositionCol && activePositions.size>0){
-      const pv=String(row[detectedPositionCol]??'').trim();
-      if (!activePositions.has(pv)) return false;
-    }
-    return true;
-  }
-
-  // ===== betinget formatering =====
-  function colorGroup(val, min, max, invert=false){
-    // rød→grønn for R23–R28
-    if (!isNumericLike(val)) return '';
-    const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
-    let t=(x-min)/(max-min); if (invert) t=1-t;
-    const hue=0 + t*120; // 0=rød, 120=grønn
-    return `background: hsl(${hue} 80% 92%)`;
-  }
-  function colorNeste6(val, min, max, invert=false){
-    // lys → mørkere blå for NESTE 6
-    if (!isNumericLike(val)) return '';
-    const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min) return '';
-    let t=(x-min)/(max-min); if (invert) t=1-t;
-    const hue=210;            // blå
-    const sat=75;
-    const light=96 - t*22;    // 96% (lys) → 74% (mørkere)
-    return `background: hsl(${hue} ${sat}% ${light}%)`;
-  }
-
-  function computeGroupRange(rows, cols){
-    let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      for (const c of cols){
-        const v=r[c];
-        if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
-      }
-    }
-    return any && max>min ? {min,max} : null;
-  }
-  function computeSingleRange(rows, col){
-    let min=Infinity, max=-Infinity, any=false;
-    for (const r of rows){
-      const v=r[col];
-      if (isNumericLike(v)){ const num=toNumber(v); if (isFinite(num)){ any=true; if(num<min)min=num; if(num>max)max=num; } }
-    }
-    return any && max>min ? {min,max} : null;
-  }
-
-  // ===== render =====
-  function render(){
-    renderHeader();
-    let rows = DATA.filter(rowMatches);
-    if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
-
-    // R23–R28 deler skala; NESTE 6 har egen — begge beregnet på synlige rader
-    const groupRange  = condfmtToggle.checked ? computeGroupRange(rows, GROUP_COLUMNS) : null;
-    const neste6Range = condfmtToggle.checked && VISIBLE_COLUMNS.includes(NESTE6_COLUMN)
-                        ? computeSingleRange(rows, NESTE6_COLUMN) : null;
-
-    tbody.innerHTML='';
-    const frag=document.createDocumentFragment();
-    for (const row of rows){
-      const tr=document.createElement('tr');
-      tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
-        let style='';
-        if (condfmtToggle.checked){
-          if (GROUP_COLUMNS.includes(c) && groupRange){
-            style = colorGroup(row[c], groupRange.min, groupRange.max, INVERT_COLOR_COLUMNS.includes(c));
-          } else if (c === NESTE6_COLUMN && neste6Range){
-            // ***EKSAKT navn «NESTE 6» – egen blå skala***
-            style = colorNeste6(row[c], neste6Range.min, neste6Range.max, INVERT_COLOR_COLUMNS.includes(c));
-          }
-        }
-        let val = row[c] ?? '';
-        if (detectedNameCol && c === detectedNameCol) val = `<strong>${val}</strong>`;
-        return `<td style="${style}">${val}</td>`;
-      }).join('');
-      frag.appendChild(tr);
-    }
-    tbody.appendChild(frag);
-    shownEl.textContent=String(rows.length);
-    totalEl.textContent=String(DATA.length);
-  }
-
-  // ===== posisjoner =====
-  function detectPositionColumn(columns){
-    if (POSITION_COLUMN && columns.includes(POSITION_COLUMN)) return POSITION_COLUMN;
-    const cands=["posisjon","position","pos","rolle","role"];
-    const lower=columns.map(c=>c.toLowerCase());
-    for (let i=0;i<lower.length;i++) if (cands.includes(lower[i])) return columns[i];
-    return "";
-  }
-
-  function buildPositionChips(data, colName){
-    posChipsWrap.innerHTML='';
-    posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
-    if (!colName){ posAllBtn.disabled=true; return; }
-    posAllBtn.disabled=false;
-
-    const seen=new Set(), values=[];
-    for (const r of data){ const v=String(r[colName]??'').trim(); if (v && !seen.has(v)){ seen.add(v); values.push(v); } }
-    const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
-    values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b); if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return-1; if(ib!==-1)return 1; return a.localeCompare(b,'no',{numeric:true});});
-
-    for (const val of values){
-      const btn=document.createElement('button');
-      btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-      btn.addEventListener('click',()=>{
-        posAllBtn.setAttribute('aria-pressed','false');
-        if (activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-        if (activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
-        btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-        render();
-      });
-      posChipsWrap.appendChild(btn);
-    }
-    posAllBtn.onclick=()=>{ activePositions.clear(); posAllBtn.setAttribute('aria-pressed','true'); [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false')); render(); };
-  }
-
-  // ===== last data =====
-  setStatus('Laster data…');
-  Papa.parse(CSV_URL, {
-    download:true, header:true, dynamicTyping:true, skipEmptyLines:'greedy',
-    complete:(res)=>{
-      setStatus('');
-      if (res.errors && res.errors.length) console.warn('CSV parse errors:', res.errors);
-      const data=res.data||[];
-
-      RAW_COLUMNS = (res.meta && res.meta.fields && res.meta.fields.length) ? res.meta.fields : (data[0] ? Object.keys(data[0]) : []);
-      const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
-      const hideName=new Set(HIDE_COLUMNS);
-      VISIBLE_COLUMNS=[];
-      RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i) && !hideName.has(c)) VISIBLE_COLUMNS.push(c); });
-
-      detectedPositionCol = detectPositionColumn(RAW_COLUMNS);
-      detectedNameCol = detectByNameInsensitive(RAW_COLUMNS, NAME_PREF);
-
-      DATA = data.map(r=>{ const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??''); return o; });
-
-      buildPositionChips(DATA, detectedPositionCol);
-      totalEl.textContent=String(DATA.length);
-      render();
-    },
-    error:(err)=>{ setStatus('Kunne ikke laste CSV. Se konsollen.'); console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
-  });
-
-  // ===== handlers =====
-  q.addEventListener('input', render);
-  condfmtToggle.addEventListener('change', render);
-  resetBtn.addEventListener('click',()=>{
-    q.value=''; sortCol=null; sortDir=1; activePositions.clear();
-    posAllBtn.setAttribute('aria-pressed','true');
-    [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
-    render();
-  });
+Papa.parse(CSV_URL,{download:true,header:true,dynamicTyping:true,complete:(res)=>{
+ RAW_COLUMNS=res.meta.fields;const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));VISIBLE_COLUMNS=RAW_COLUMNS.filter((c,i)=>!hideIdx.has(i));
+ detectedNameCol=detectInsensitive(RAW_COLUMNS,NAME_PREF);detectedPositionCol=detectPos(RAW_COLUMNS);
+ DATA=res.data;render();
+}});
+q.oninput=render;reset.onclick=()=>{q.value="";sortCol=null;sortDir=1;render();};
 </script>
 </body>
 </html>
