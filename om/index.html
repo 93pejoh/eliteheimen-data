@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Eliteheimen Fantasy</title>
-<meta name="description" content="Eliteheimen Fantasy" />
+<title>Om Eliteheimen Fantasy</title>
+<meta name="description" content="Om Eliteheimen Fantasy – bakgrunn, utvikler og kontaktinformasjon." />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="/logo.png">
 
@@ -13,7 +13,7 @@
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
-  /* Hero */
+  /* Hero (matcher forsiden) */
   .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:12px;color:#fff;
     background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
                radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
@@ -29,7 +29,6 @@
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
-
   .btn {
     display:inline-flex;align-items:center;gap:6px;
     background:#f8fafc;border:1px solid #d1d5db;border-radius:999px;
@@ -38,6 +37,7 @@
   }
   .btn:hover { background:#e0f2fe;border-color:#93c5fd;color:#0c4a6e; }
 
+  /* Innhold */
   .container{max-width:920px;margin:16px auto;padding:0 10px}
   section.card{
     background:#fff;border:1px solid #e5e7eb;border-radius:12px;
@@ -46,32 +46,36 @@
   h2{font-size:1.3rem;margin:0 0 8px}
   h3{font-size:1.05rem;margin:12px 0 6px}
   p{margin:8px 0;line-height:1.55}
-  .lede{font-size:1.05rem;color:#334155}
   ul{margin:8px 0 0 18px}
   li{margin:6px 0}
 
-  /* Profilseksjon */
-  .profile {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
+  /* --- Om meg (ryddig to-kolonne) --- */
+  .about-me { padding: 18px; }
+  .about-grid{
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 18px;
+    align-items: start;
   }
-  .profile-pic {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #e5e7eb;
+  .about-media{ display:flex; justify-content:center; }
+  .about-photo{
+    width:120px;height:120px;border-radius:50%;object-fit:cover;
+    border:2px solid #e5e7eb; box-shadow:0 2px 10px rgba(2,8,23,.06);
   }
-  html.dark .profile-pic {
-    border-color: #1f2a44;
+  html.dark .about-photo{ border-color:#1f2a44; }
+  .about-content{ display:grid; gap:8px; }
+  .about-title{ margin:0 0 2px; font-size:1.25rem; line-height:1.2; }
+  .about-lede{ margin:0; color:#334155; max-width:65ch; }
+  .about-sub{ margin:10px 0 4px; font-size:1.05rem; }
+  .about-list{ margin:0; padding:0; list-style:none; display:grid; gap:6px; }
+  .about-list li{ position:relative; padding-left:18px; }
+  .about-list li::before{
+    content:"•"; position:absolute; left:0; top:0; line-height:1; color:#0ea5e9;
   }
-  .profile-text {
-    flex: 1;
-    min-width: 240px;
-  }
+  html.dark .about-lede{ color:#cbd5e1; }
+  html.dark .about-list li::before{ color:#93c5fd; }
 
+  /* Footer */
   .footer-wrap{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;
     display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   .footer-wrap a{color:#64748b;text-decoration:none}
@@ -84,10 +88,14 @@
   html.dark .btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#f8fafc}
   html.dark .btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);color:#fff}
 
-  @media (max-width:780px){
+  /* Mobil */
+  @media (max-width:720px){
     .brand h1{font-size:1.1rem}
     .brand h2{font-size:.9rem}
     .container{padding:0 8px}
+    .about-grid{ grid-template-columns:1fr; gap:12px; }
+    .about-media{ justify-content:flex-start; }
+    .about-photo{ width:100px; height:100px; }
   }
 </style>
 </head>
@@ -123,18 +131,20 @@
     </p>
   </section>
 
-  <section class="card">
-    <h2>Om meg</h2>
-    <div class="profile">
-      <img src="/om/pernille.jpg" alt="Pernille Joheim" class="profile-pic">
-      <div class="profile-text">
-        <p>
+  <section class="card about-me">
+    <div class="about-grid">
+      <div class="about-media">
+        <img src="/om/pernille.jpg" alt="Pernille Joheim" class="about-photo">
+      </div>
+      <div class="about-content">
+        <h2 class="about-title">Om meg</h2>
+        <p class="about-lede">
           Mitt navn er Pernille Joheim, og jeg er en 32 år gammel kvinne som bruker litt for mye av livet mitt på fotball og fantasy.
           Jeg er utdannet journalist fra OsloMet (datidens Høgskolen i Oslo og Akershus), har jobbet over 10 år i NRK,
           og studerer for tiden dataanalyse ved Noroff på deltid.
         </p>
-        <h3>Meritter</h3>
-        <ul>
+        <h3 class="about-sub">Meritter</h3>
+        <ul class="about-list">
           <li>#62 i Eliteserien Fantasy Hall of Fame</li>
           <li>#459 i Fantasy Premier League (FPL Research Manager Ratings)</li>
           <li>2× topp 50 siste tre sesonger (ESF)</li>
@@ -163,7 +173,7 @@
   </div>
 </footer>
 
-<!-- Mørk modus -->
+<!-- Mørk modus (samme logikk som forsiden) -->
 <script>
 (() => {
   const key='eh_dark2';
