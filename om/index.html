@@ -14,7 +14,7 @@
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
   /* Hero (matcher forsiden) */
-  .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:12px;color:#fff;
+  .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:16px;color:#fff;
     background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
                radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
                linear-gradient(180deg,#0b1220,#111827);
@@ -38,10 +38,10 @@
   .btn:hover { background:#e0f2fe;border-color:#93c5fd;color:#0c4a6e; }
 
   /* Innhold */
-  .container{max-width:920px;margin:16px auto;padding:0 10px}
+  .container{max-width:980px;margin:16px auto;padding:0 10px}
   section.card{
     background:#fff;border:1px solid #e5e7eb;border-radius:12px;
-    padding:16px;margin:12px 0;box-shadow:0 6px 20px rgba(2,8,23,.06)
+    padding:18px;margin:14px 0;box-shadow:0 6px 20px rgba(2,8,23,.06)
   }
   h2{font-size:1.3rem;margin:0 0 8px}
   h3{font-size:1.05rem;margin:12px 0 6px}
@@ -49,34 +49,39 @@
   ul{margin:8px 0 0 18px}
   li{margin:6px 0}
 
-  /* --- Om meg (ryddig to-kolonne) --- */
-  .about-me { padding: 18px; }
-  .about-grid{
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 18px;
-    align-items: start;
+  /* --- Om meg (flex-layout, bilde og tekst på samme linje) --- */
+  .about-me { padding: 20px; }
+  .about-row{
+    display:flex;
+    align-items:center;     /* vertikal midtjustering → samme linje-følelse */
+    gap:20px;
+    flex-wrap:wrap;         /* gjør at det bryter pent på mobil */
   }
-  .about-media{ display:flex; justify-content:center; }
+  .about-media{ flex:0 0 auto; }
   .about-photo{
-    width:120px;height:120px;border-radius:50%;object-fit:cover;
-    border:2px solid #e5e7eb; box-shadow:0 2px 10px rgba(2,8,23,.06);
+    width:130px; height:130px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #e5e7eb;
+    box-shadow:0 2px 10px rgba(2,8,23,.06);
   }
   html.dark .about-photo{ border-color:#1f2a44; }
-  .about-content{ display:grid; gap:8px; }
+  .about-content{
+    flex:1 1 280px;         /* fyll resten, men behold min-bredde */
+    display:grid; gap:8px;
+    max-width:65ch;         /* rolig linjelengde */
+  }
   .about-title{ margin:0 0 2px; font-size:1.25rem; line-height:1.2; }
-  .about-lede{ margin:0; color:#334155; max-width:65ch; }
   .about-sub{ margin:10px 0 4px; font-size:1.05rem; }
   .about-list{ margin:0; padding:0; list-style:none; display:grid; gap:6px; }
   .about-list li{ position:relative; padding-left:18px; }
   .about-list li::before{
     content:"•"; position:absolute; left:0; top:0; line-height:1; color:#0ea5e9;
   }
-  html.dark .about-lede{ color:#cbd5e1; }
   html.dark .about-list li::before{ color:#93c5fd; }
 
   /* Footer */
-  .footer-wrap{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;
+  .footer-wrap{margin-top:18px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;
     display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   .footer-wrap a{color:#64748b;text-decoration:none}
   .footer-wrap a:hover{color:#0ea5e9}
@@ -93,9 +98,8 @@
     .brand h1{font-size:1.1rem}
     .brand h2{font-size:.9rem}
     .container{padding:0 8px}
-    .about-grid{ grid-template-columns:1fr; gap:12px; }
-    .about-media{ justify-content:flex-start; }
-    .about-photo{ width:100px; height:100px; }
+    .about-photo{ width:110px; height:110px; }
+    .about-row{ align-items:flex-start; } /* på mobil starter innholdet øverst */
   }
 </style>
 </head>
@@ -107,7 +111,8 @@
     <div class="brand">
       <img src="/logo.png" alt="Eliteheimen logo" />
       <div>
-        <h1>Eliteheimen Fantasy</h1>
+        <h1>Om Eliteheimen Fantasy</h1>
+        <h2>Bakgrunn, utvikler og kontakt</h2>
       </div>
     </div>
     <div class="toolbar">
@@ -132,13 +137,13 @@
   </section>
 
   <section class="card about-me">
-    <div class="about-grid">
+    <div class="about-row">
       <div class="about-media">
         <img src="/om/pernille.jpg" alt="Pernille Joheim" class="about-photo">
       </div>
       <div class="about-content">
         <h2 class="about-title">Om meg</h2>
-        <p class="about-lede">
+        <p>
           Mitt navn er Pernille Joheim, og jeg er en 32 år gammel kvinne som bruker litt for mye av livet mitt på fotball og fantasy.
           Jeg er utdannet journalist fra OsloMet (datidens Høgskolen i Oslo og Akershus), har jobbet over 10 år i NRK,
           og studerer for tiden dataanalyse ved Noroff på deltid.
