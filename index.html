@@ -15,11 +15,11 @@
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
-  /* Tall ser midtstilte ut: bruk tabulære (monospace) sifre */
-table, th, td {
-  font-variant-numeric: tabular-nums lining-nums;
-  font-feature-settings: "tnum" 1, "lnum" 1; /* Safari/eldre */
-}
+  /* Tall: tabulære sifre for pen kolonnejustering */
+  table, th, td {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
 
   /* Hero */
   .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:6px;color:#fff;
@@ -254,7 +254,13 @@ const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
 function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
 function lerp(a,b,t){return a+(b-a)*t;}
-function lerpRgb(c1,c2,t){return [Math.round(lerp(c1[0],c2[0],t)),Math.round(lerp(c1[1],c2[1],t)),Math.round(lerp(c1[2],c2[2],t))];}
+function lerpRgb(c1,c2,t){
+  return [
+    Math.round(lerp(c1[0], c2[0], t)),
+    Math.round(lerp(c1[1], c2[1], t)),
+    Math.round(lerp(c1[2], c2[2], t))
+  ];
+}
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
 
 /* Header */
@@ -310,7 +316,6 @@ function colorGroup(val, min, max){
     rgb=lerpRgb(hexToRgb(GROUP_MID),hexToRgb(GROUP_HIGH),Math.max(0,Math.min(1,t)));
   }
   const text=luminance(rgb)<0.55?'#fff':'#000';
-  /* Viktig: !important så zebra/hover ikke overstyrer */
   return `background:${rgbToCss(rgb)} !important;color:${text} !important;`;
 }
 function colorNeste6(val,min,max){
@@ -319,7 +324,6 @@ function colorNeste6(val,min,max){
   if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
   let t=(x-min)/(max-min);
   const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
-  /* Viktig: !important så zebra/hover ikke overstyrer */
   return `background:hsl(${hue} ${sat}% ${light}% ) !important;color:#000 !important;`;
 }
 function computeGroupRange(rows, cols){
@@ -545,7 +549,10 @@ q.addEventListener('input', render);
   let last = meta?.content ? new Date(meta.content) : new Date(document.lastModified);
   const fmt = new Intl.DateTimeFormat('nb-NO', { dateStyle:'long', timeStyle:'short' });
   const el = document.getElementById('last-updated');
-  if (el) el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
+  if (el) {
+    el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
+    el.title = last.toISOString();
+  }
 })();
 </script>
 </body>
