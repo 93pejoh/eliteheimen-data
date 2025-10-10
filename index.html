@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen</title>
 <meta name="description" content="Eliteheimen – interaktiv spilleroversikt for Fantasy Eliteserien." />
-<meta name="data-last-updated" content="2025-10-09T21:13:00+02:00">
+<meta name="data-last-updated" content="2025-10-10T21:13:00+02:00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="logo.png">
@@ -52,12 +52,7 @@
     text-decoration: none;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
-  .download-btn:hover {
-    background: #e0f2fe;
-    border-color: #93c5fd;
-    color: #0c4a6e;
-  }
-  /* Mørk modus – nedlastningsknapp */
+  .download-btn:hover { background:#e0f2fe; border-color:#93c5fd; color:#0c4a6e; }
   html.dark .download-btn {
     background: rgba(255,255,255,.12);
     border: 1px solid rgba(255,255,255,.3);
@@ -202,9 +197,7 @@
     </div>
     <div class="toolbar">
       <div id="last-updated"></div>
-      <a class="download-btn"
-         href="https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv"
-         download="data.csv">⬇️ Last ned CSV</a>
+      <a id="downloadCsvBtn" class="download-btn" href="#" role="button">⬇️ Last ned CSV</a>
       <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
     </div>
   </div>
@@ -253,8 +246,11 @@
 <script>
 /* ======== KONFIG ======== */
 const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv";
+window.CSV_URL = CSV_URL; // gjør tilgjengelig for andre <script>-blokker
+
 /* Skjul kolonner etter Excel-bokstav: */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
+
 /* Betinget formatering */
 const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"]; // felles skala (midtpunkt 3)
 const NESTE6_COLUMN = "NESTE 6";                              // egen blå skala
@@ -285,7 +281,7 @@ function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return
 function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
 const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 
-/* Fargeskala R25–R30 (magenta→hvit→grønn; midt=3) */
+/* Fargeskala (magenta→hvit→grønn; midt=3) */
 const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
 function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
@@ -352,6 +348,7 @@ function colorGroup(val, min, max){
     rgb=lerpRgb(hexToRgb(GROUP_MID),hexToRgb(GROUP_HIGH),Math.max(0,Math.min(1,t)));
   }
   const text=luminance(rgb)<0.55?'#fff':'#000';
+  /* !important sikrer at zebra/hover ikke overstyrer */
   return `background:${rgbToCss(rgb)} !important;color:${text} !important;`;
 }
 function colorNeste6(val,min,max){
@@ -585,7 +582,49 @@ q.addEventListener('input', render);
   let last = meta?.content ? new Date(meta.content) : new Date(document.lastModified);
   const fmt = new Intl.DateTimeFormat('nb-NO', { dateStyle:'long', timeStyle:'short' });
   const el = document.getElementById('last-updated');
-  if (el) el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
+  if (el) {
+    el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
+    el.title = last.toISOString();
+  }
+})();
+</script>
+
+<!-- TVING LOKAL NEDLASTING AV CSV (fetch + Blob) -->
+<script>
+(() => {
+  const btn = document.getElementById('downloadCsvBtn');
+  if (!btn) return;
+
+  async function downloadCsv() {
+    try {
+      btn.textContent = "Laster ned…";
+      btn.setAttribute('aria-busy', 'true');
+
+      const res = await fetch(window.CSV_URL || "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv", { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.csv'; // lokalt filnavn
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      // Fallback: åpne rålenken hvis fetch feiler
+      window.open(window.CSV_URL || "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv", '_blank');
+    } finally {
+      btn.textContent = "⬇️ Last ned CSV";
+      btn.removeAttribute('aria-busy');
+    }
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault(); // ikke naviger
+    downloadCsv();
+  });
 })();
 </script>
 </body>
