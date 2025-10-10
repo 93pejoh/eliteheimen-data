@@ -1,38 +1,166 @@
 <!doctype html>
 <html lang="no">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Om Eliteheimen</title>
-  <meta name="description" content="Om Eliteheimen – bakgrunn og kontakt." />
-  <link rel="icon" href="/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Om Eliteheimen</title>
+<meta name="description" content="Om Eliteheimen – hva det er, hvordan det virker, kontakt og bidrag." />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="icon" href="/logo.png">
 
-  <!-- Tips: flytt felles CSS til /style.css og last det inn her og på forsiden -->
-  <link rel="stylesheet" href="/style.css">
+<style>
+  :root { --radius:14px; --surface:#fff; --text:#0f172a; --muted:#667085; --border:#e5e7eb; }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
+
+  /* Hero (samme look som forsiden) */
+  .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:12px;color:#fff;
+    background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
+               radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
+               linear-gradient(180deg,#0b1220,#111827);
+    border:1px solid rgba(255,255,255,.06)}
+  .hero-inner{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .brand{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
+  .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff}
+  .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
+  .brand h2{margin:2px 0 0;font-size:.95rem;font-weight:600;letter-spacing:.2px;color:#e5e7eb;opacity:.9}
+
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
+    background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
+
+  /* Knapper/lenker i toppbaren – samme stil som nedlastingsknappen på forsiden */
+  .btn {
+    display:inline-flex;align-items:center;gap:6px;
+    background:#f8fafc;border:1px solid #d1d5db;border-radius:999px;
+    color:#0f172a;padding:6px 12px;font-weight:600;text-decoration:none;
+    transition:background .2s,border-color .2s,color .2s;
+  }
+  .btn:hover { background:#e0f2fe;border-color:#93c5fd;color:#0c4a6e; }
+
+  /* Innhold */
+  .container{max-width:920px;margin:16px auto;padding:0 10px}
+  .lede{font-size:1.05rem;color:#334155}
+  section.card{
+    background:#fff;border:1px solid #e5e7eb;border-radius:12px;
+    padding:16px;margin:12px 0;box-shadow:0 6px 20px rgba(2,8,23,.06)
+  }
+  h2{font-size:1.3rem;margin:0 0 8px}
+  h3{font-size:1.05rem;margin:12px 0 6px;color:#0f172a}
+  ul{margin:8px 0 0 18px}
+  li{margin:6px 0}
+  .muted{color:#64748b}
+
+  /* Footer */
+  .footer-wrap{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .footer-wrap a{color:#64748b;text-decoration:none}
+  .footer-wrap a:hover{color:#0ea5e9}
+
+  /* Dark mode */
+  html.dark body{background:#0b1220;color:#e5e7eb}
+  html.dark .container .card{background:#0f172a;border-color:#1f2a44;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  html.dark .footer-wrap{color:#a3adc2;border-top-color:#1f2a44}
+  html.dark .btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#f8fafc}
+  html.dark .btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);color:#fff}
+  html.dark .hero{border-color:rgba(255,255,255,.12)}
+  html.dark h3{color:#f1f5f9}
+
+  @media (max-width:780px){
+    .brand h1{font-size:1.1rem}
+    .brand h2{font-size:.9rem}
+    .container{padding:0 8px}
+  }
+</style>
 </head>
 <body>
-  <section class="hero">
-    <div class="hero-inner">
-      <div class="brand">
-        <img src="/logo.png" alt="Eliteheimen logo" />
-        <div><h1>Om Eliteheimen</h1></div>
-      </div>
-      <div class="toolbar">
-        <a class="download-btn" href="/index.html">← Til forsiden</a>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <div class="brand">
+      <img src="/logo.png" alt="Eliteheimen logo" />
+      <div>
+        <h1>Om Eliteheimen</h1>
+        <h2 class="muted">Bakgrunn, data og kontakt</h2>
       </div>
     </div>
+    <div class="toolbar">
+      <a class="btn" href="/">← Til forsiden</a>
+      <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+
+  <p class="lede">
+    Eliteheimen er en uoffisiell, interaktiv spilleroversikt for Fantasy Eliteserien.
+    Målet er å gjøre det raskt og enkelt å filtrere, sortere og sammenligne spillere på tvers av runder, posisjoner og pris.
+  </p>
+
+  <section class="card">
+    <h2>Hva tilbyr siden?</h2>
+    <ul>
+      <li><strong>Kjapp filtrering</strong> på posisjon, klubb og pris.</li>
+      <li><strong>Sortering</strong> på alle kolonner – med smart håndtering av tall, prosenter og tekst.</li>
+      <li><strong>Betinget formatering</strong> (varme/kulde-kart) for runde-verdier og «Neste 6».</li>
+      <li><strong>Mørk modus</strong> med husk av valg i nettleseren.</li>
+      <li><strong>CSV-støtte</strong> – dataene lastes direkte fra GitHub-repoet.</li>
+    </ul>
   </section>
 
-  <main class="container" style="max-width:900px;margin:16px auto;padding:0 12px;">
-    <h2>Hva er Eliteheimen?</h2>
-    <p>Eliteheimen er en interaktiv spilleroversikt for Fantasy Eliteserien …</p>
+  <section class="card">
+    <h2>Data og oppdateringer</h2>
+    <p>
+      Datasettet ligger i repoet <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">eliteheimen-data</a>.
+      Når CSV-filen oppdateres, vil nettsiden hente de nye verdiene ved neste innlasting.
+    </p>
+    <h3>Hvordan beregnes fargene?</h3>
+    <p>
+      For runde-kolonnene brukes en delt skala der <em>3</em> er midtpunkt (magenta → hvit → grønn). «Neste 6» har egen blå skala.
+    </p>
+  </section>
 
-    <h3>Kontakt</h3>
-    <p>E-post: <a href="mailto:pernillejoheim@gmail.com">pernillejoheim@gmail.com</a></p>
-  </main>
+  <section class="card">
+    <h2>Kontakt</h2>
+    <p>
+      Har du forslag, feil eller ønsker om nye funksjoner?
+      Opprett gjerne et issue i repoet, eller send en e-post til <a href="mailto:ditnavn@domene.no">ditnavn@domene.no</a>.
+    </p>
+  </section>
 
-  <!-- Del gjerne mørk-modus-skriptet fra forsiden -->
-  <script src="/app.js"></script>
+  <section class="card">
+    <h2>Åpen kildekode og kreditering</h2>
+    <p>
+      Nettstedet bruker <strong>PapaParse</strong> for CSV-parsing og ren JavaScript for UI-logikk. Fonten er <strong>Inter</strong> via Google Fonts.
+    </p>
+  </section>
+
+</main>
+
+<footer class="footer-wrap">
+  <div>© 2025 Eliteheimen.</div>
+  <div>
+    <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;•&nbsp;<a href="#top">Til toppen ↑</a>
+  </div>
+</footer>
+
+<!-- Mørk modus – samme oppsett som forsiden -->
+<script>
+(() => {
+  const key='eh_dark2';
+  const tgl=document.getElementById('darkToggle');
+  if(!tgl) return;
+  const saved=localStorage.getItem(key);
+  if(saved==='1') document.documentElement.classList.add('dark');
+  tgl.checked=(saved==='1');
+  tgl.addEventListener('change',()=>{
+    document.documentElement.classList.toggle('dark', tgl.checked);
+    localStorage.setItem(key, tgl.checked ? '1':'0');
+  });
+})();
+</script>
 </body>
 </html>
