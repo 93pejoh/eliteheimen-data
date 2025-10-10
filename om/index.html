@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Om Eliteheimen</title>
-<meta name="description" content="Om Eliteheimen – hva det er, hvordan det virker, kontakt og bidrag." />
+<title>Om Eliteheimen Fantasy</title>
+<meta name="description" content="Om Eliteheimen Fantasy – bakgrunn, utvikler og kontaktinformasjon." />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="/logo.png">
 
@@ -13,7 +13,7 @@
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
-  /* Hero (samme look som forsiden) */
+  /* Hero */
   .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:12px;color:#fff;
     background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
                radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
@@ -30,7 +30,6 @@
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
 
-  /* Knapper/lenker i toppbaren – samme stil som nedlastingsknappen på forsiden */
   .btn {
     display:inline-flex;align-items:center;gap:6px;
     background:#f8fafc;border:1px solid #d1d5db;border-radius:999px;
@@ -39,21 +38,20 @@
   }
   .btn:hover { background:#e0f2fe;border-color:#93c5fd;color:#0c4a6e; }
 
-  /* Innhold */
   .container{max-width:920px;margin:16px auto;padding:0 10px}
-  .lede{font-size:1.05rem;color:#334155}
   section.card{
     background:#fff;border:1px solid #e5e7eb;border-radius:12px;
     padding:16px;margin:12px 0;box-shadow:0 6px 20px rgba(2,8,23,.06)
   }
   h2{font-size:1.3rem;margin:0 0 8px}
-  h3{font-size:1.05rem;margin:12px 0 6px;color:#0f172a}
+  p{margin:8px 0;line-height:1.55}
+  .lede{font-size:1.05rem;color:#334155}
+  .muted{color:#64748b}
   ul{margin:8px 0 0 18px}
   li{margin:6px 0}
-  .muted{color:#64748b}
 
-  /* Footer */
-  .footer-wrap{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .footer-wrap{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   .footer-wrap a{color:#64748b;text-decoration:none}
   .footer-wrap a:hover{color:#0ea5e9}
 
@@ -63,7 +61,6 @@
   html.dark .footer-wrap{color:#a3adc2;border-top-color:#1f2a44}
   html.dark .btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#f8fafc}
   html.dark .btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);color:#fff}
-  html.dark .hero{border-color:rgba(255,255,255,.12)}
   html.dark h3{color:#f1f5f9}
 
   @media (max-width:780px){
@@ -81,8 +78,8 @@
     <div class="brand">
       <img src="/logo.png" alt="Eliteheimen logo" />
       <div>
-        <h1>Om Eliteheimen</h1>
-        <h2 class="muted">Bakgrunn, data og kontakt</h2>
+        <h1>Om Eliteheimen Fantasy</h1>
+        <h2 class="muted">Bakgrunn, utvikler og kontakt</h2>
       </div>
     </div>
     <div class="toolbar">
@@ -94,60 +91,54 @@
 
 <main class="container">
 
-  <p class="lede">
-    Eliteheimen er en uoffisiell, interaktiv spilleroversikt for Fantasy Eliteserien.
-    Målet er å gjøre det raskt og enkelt å filtrere, sortere og sammenligne spillere på tvers av runder, posisjoner og pris.
-  </p>
-
   <section class="card">
-    <h2>Hva tilbyr siden?</h2>
-    <ul>
-      <li><strong>Kjapp filtrering</strong> på posisjon, klubb og pris.</li>
-      <li><strong>Sortering</strong> på alle kolonner – med smart håndtering av tall, prosenter og tekst.</li>
-      <li><strong>Betinget formatering</strong> (varme/kulde-kart) for runde-verdier og «Neste 6».</li>
-      <li><strong>Mørk modus</strong> med husk av valg i nettleseren.</li>
-      <li><strong>CSV-støtte</strong> – dataene lastes direkte fra GitHub-repoet.</li>
-    </ul>
+    <h2>Om Eliteheimen Fantasy</h2>
+    <p>
+      Eliteheimen Fantasy er et nettsted med verktøy som forhåpentligvis kan gjøre Eliteserien Fantasy både morsommere og enklere å engasjere seg i.
+      Hovedattraksjonen er min egenutviklede modell, inspirert av <strong>FPL Review</strong> og <strong>The Transfer Algorithm</strong>,
+      som hyppig oppdateres med forventede poeng til rundene som kommer.
+    </p>
+    <p>
+      Målet er å videreutvikle siden til sesongstart for <strong>2026-sesongen</strong>, slik at Eliteheimen Fantasy blir et naturlig sted å oppsøke før hver runde.
+    </p>
   </section>
 
   <section class="card">
-    <h2>Data og oppdateringer</h2>
+    <h2>Om meg</h2>
     <p>
-      Datasettet ligger i repoet <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">eliteheimen-data</a>.
-      Når CSV-filen oppdateres, vil nettsiden hente de nye verdiene ved neste innlasting.
+      Mitt navn er <strong>Pernille Joheim</strong>, og jeg er en 32 år gammel kvinne som bruker litt for mye av livet mitt på fotball og fantasy.
+      Jeg er utdannet <strong>journalist fra OsloMet</strong> (datidens Høgskolen i Oslo og Akershus), har jobbet over 10 år i <strong>NRK</strong>,
+      og studerer for tiden <strong>dataanalyse ved Noroff</strong> på deltid.
     </p>
-    <h3>Hvordan beregnes fargene?</h3>
-    <p>
-      For runde-kolonnene brukes en delt skala der <em>3</em> er midtpunkt (magenta → hvit → grønn). «Neste 6» har egen blå skala.
-    </p>
+    <h3>Meritter</h3>
+    <ul>
+      <li>#62 i <strong>Eliteserien Fantasy Hall of Fame</strong></li>
+      <li>#459 i <strong>Fantasy Premier League</strong> (FPL Research Manager Ratings)</li>
+      <li>2× topp 50 siste tre sesonger (ESF)</li>
+      <li>3× topp 1000 på rad siste tre sesonger (ESF)</li>
+    </ul>
   </section>
 
   <section class="card">
     <h2>Kontakt</h2>
     <p>
-      Har du forslag, feil eller ønsker om nye funksjoner?
-      Opprett gjerne et issue i repoet, eller send en e-post til <a href="mailto:ditnavn@domene.no">ditnavn@domene.no</a>.
-    </p>
-  </section>
-
-  <section class="card">
-    <h2>Åpen kildekode og kreditering</h2>
-    <p>
-      Nettstedet bruker <strong>PapaParse</strong> for CSV-parsing og ren JavaScript for UI-logikk. Fonten er <strong>Inter</strong> via Google Fonts.
+      📧 <strong>E-post:</strong> <a href="mailto:pernillejoheim@gmail.com">pernillejoheim@gmail.com</a><br>
+      📱 <strong>Mobil:</strong> 971 74 415<br>
+      💡 <strong>Patreon:</strong> <a href="https://patreon.com/Eliteheimen" target="_blank" rel="noopener">patreon.com/Eliteheimen</a>
     </p>
   </section>
 
 </main>
 
 <footer class="footer-wrap">
-  <div>© 2025 Eliteheimen.</div>
+  <div>© 2025 Eliteheimen Fantasy.</div>
   <div>
     <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
     &nbsp;•&nbsp;<a href="#top">Til toppen ↑</a>
   </div>
 </footer>
 
-<!-- Mørk modus – samme oppsett som forsiden -->
+<!-- Mørk modus -->
 <script>
 (() => {
   const key='eh_dark2';
