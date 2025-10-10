@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Om Eliteheimen Fantasy</title>
-<meta name="description" content="Om Eliteheimen Fantasy – bakgrunn, utvikler og kontaktinformasjon." />
+<title>Eliteheimen Fantasy</title>
+<meta name="description" content="Eliteheimen Fantasy" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="/logo.png">
 
@@ -44,11 +44,33 @@
     padding:16px;margin:12px 0;box-shadow:0 6px 20px rgba(2,8,23,.06)
   }
   h2{font-size:1.3rem;margin:0 0 8px}
+  h3{font-size:1.05rem;margin:12px 0 6px}
   p{margin:8px 0;line-height:1.55}
   .lede{font-size:1.05rem;color:#334155}
-  .muted{color:#64748b}
   ul{margin:8px 0 0 18px}
   li{margin:6px 0}
+
+  /* Profilseksjon */
+  .profile {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+  }
+  html.dark .profile-pic {
+    border-color: #1f2a44;
+  }
+  .profile-text {
+    flex: 1;
+    min-width: 240px;
+  }
 
   .footer-wrap{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;color:#64748b;
     display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
@@ -61,7 +83,6 @@
   html.dark .footer-wrap{color:#a3adc2;border-top-color:#1f2a44}
   html.dark .btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#f8fafc}
   html.dark .btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);color:#fff}
-  html.dark h3{color:#f1f5f9}
 
   @media (max-width:780px){
     .brand h1{font-size:1.1rem}
@@ -79,7 +100,7 @@
       <img src="/logo.png" alt="Eliteheimen logo" />
       <div>
         <h1>Om Eliteheimen Fantasy</h1>
-        <h2 class="muted">Bakgrunn, utvikler og kontakt</h2>
+        <h2>Bakgrunn, utvikler og kontakt</h2>
       </div>
     </div>
     <div class="toolbar">
@@ -95,36 +116,41 @@
     <h2>Om Eliteheimen Fantasy</h2>
     <p>
       Eliteheimen Fantasy er et nettsted med verktøy som forhåpentligvis kan gjøre Eliteserien Fantasy både morsommere og enklere å engasjere seg i.
-      Hovedattraksjonen er min egenutviklede modell, inspirert av <strong>FPL Review</strong> og <strong>The Transfer Algorithm</strong>,
+      Hovedattraksjonen er min egenutviklede modell, inspirert av FPL Review og The Transfer Algorithm,
       som hyppig oppdateres med forventede poeng til rundene som kommer.
     </p>
     <p>
-      Målet er å videreutvikle siden til sesongstart for <strong>2026-sesongen</strong>, slik at Eliteheimen Fantasy blir et naturlig sted å oppsøke før hver runde.
+      Målet er å videreutvikle siden til sesongstart for 2026-sesongen, slik at Eliteheimen Fantasy blir et naturlig sted å oppsøke før hver runde.
     </p>
   </section>
 
   <section class="card">
     <h2>Om meg</h2>
-    <p>
-      Mitt navn er <strong>Pernille Joheim</strong>, og jeg er en 32 år gammel kvinne som bruker litt for mye av livet mitt på fotball og fantasy.
-      Jeg er utdannet <strong>journalist fra OsloMet</strong> (datidens Høgskolen i Oslo og Akershus), har jobbet over 10 år i <strong>NRK</strong>,
-      og studerer for tiden <strong>dataanalyse ved Noroff</strong> på deltid.
-    </p>
-    <h3>Meritter</h3>
-    <ul>
-      <li>#62 i <strong>Eliteserien Fantasy Hall of Fame</strong></li>
-      <li>#459 i <strong>Fantasy Premier League</strong> (FPL Research Manager Ratings)</li>
-      <li>2× topp 50 siste tre sesonger (ESF)</li>
-      <li>3× topp 1000 på rad siste tre sesonger (ESF)</li>
-    </ul>
+    <div class="profile">
+      <img src="/om/pernille.jpg" alt="Pernille Joheim" class="profile-pic">
+      <div class="profile-text">
+        <p>
+          Mitt navn er Pernille Joheim, og jeg er en 32 år gammel kvinne som bruker litt for mye av livet mitt på fotball og fantasy.
+          Jeg er utdannet journalist fra OsloMet (datidens Høgskolen i Oslo og Akershus), har jobbet over 10 år i NRK,
+          og studerer for tiden dataanalyse ved Noroff på deltid.
+        </p>
+        <h3>Meritter</h3>
+        <ul>
+          <li>#62 i Eliteserien Fantasy Hall of Fame</li>
+          <li>#459 i Fantasy Premier League (FPL Research Manager Ratings)</li>
+          <li>2× topp 50 siste tre sesonger (ESF)</li>
+          <li>3× topp 1000 på rad siste tre sesonger (ESF)</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
   <section class="card">
     <h2>Kontakt</h2>
     <p>
-      📧 <strong>E-post:</strong> <a href="mailto:pernillejoheim@gmail.com">pernillejoheim@gmail.com</a><br>
-      📱 <strong>Mobil:</strong> 971 74 415<br>
-      💡 <strong>Patreon:</strong> <a href="https://patreon.com/Eliteheimen" target="_blank" rel="noopener">patreon.com/Eliteheimen</a>
+      📧 E-post: <a href="mailto:pernillejoheim@gmail.com">pernillejoheim@gmail.com</a><br>
+      📱 Mobil: 971 74 415<br>
+      💡 Patreon: <a href="https://patreon.com/Eliteheimen" target="_blank" rel="noopener">patreon.com/Eliteheimen</a>
     </p>
   </section>
 
