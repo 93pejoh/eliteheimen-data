@@ -32,9 +32,42 @@
     border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
   .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff}
   .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
-  .toolbar{display:flex;gap:8px;align-items:center}
+
+  /* Toolbar */
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
+
+  /* Nedlastningsknapp */
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    color: #0f172a;
+    padding: 6px 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .download-btn:hover {
+    background: #e0f2fe;
+    border-color: #93c5fd;
+    color: #0c4a6e;
+  }
+  /* Mørk modus – nedlastningsknapp */
+  html.dark .download-btn {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #f8fafc;
+  }
+  html.dark .download-btn:hover {
+    background: rgba(255,255,255,.25);
+    border-color: rgba(255,255,255,.6);
+    color: #fff;
+  }
 
   /* Filterbar (kompakt) */
   .filterbar{
@@ -171,7 +204,7 @@
       <div id="last-updated"></div>
       <a class="download-btn"
          href="https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv"
-         download>Last ned CSV</a>
+         download="data.csv">⬇️ Last ned CSV</a>
       <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
     </div>
   </div>
@@ -552,10 +585,7 @@ q.addEventListener('input', render);
   let last = meta?.content ? new Date(meta.content) : new Date(document.lastModified);
   const fmt = new Intl.DateTimeFormat('nb-NO', { dateStyle:'long', timeStyle:'short' });
   const el = document.getElementById('last-updated');
-  if (el) {
-    el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
-    el.title = last.toISOString();
-  }
+  if (el) el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
 })();
 </script>
 </body>
