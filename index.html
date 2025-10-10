@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen</title>
 <meta name="description" content="Eliteheimen – interaktiv spilleroversikt for Fantasy Eliteserien." />
-<meta name="data-last-updated" content="2025-10-10T07:11:00+02:00">
+<meta name="data-last-updated" content="2025-10-10T10:51:00+02:00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="logo.png">
@@ -32,6 +32,18 @@
     border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
   .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff}
   .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
+  .brand h2{
+    margin:2px 0 0;
+    font-size:.95rem;
+    font-weight:600;
+    letter-spacing:.2px;
+    color:#e5e7eb;
+    opacity:.9;
+  }
+  @media (max-width:780px){
+    .brand h1{ font-size:1.1rem; }
+    .brand h2{ font-size:.9rem; }
+  }
 
   /* Toolbar */
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
@@ -146,7 +158,6 @@
   /* Ekstra mobiljustering */
   @media (max-width: 780px){
     body{ margin:10px; }
-    .brand h1{ font-size:1.1rem; }
     .filterbar-row{
       grid-template-columns:1fr 1fr;
       grid-auto-flow:row;
@@ -193,7 +204,10 @@
   <div class="hero-inner">
     <div class="brand">
       <img src="logo.png" alt="Eliteheimen logo" />
-      <div><h1>Eliteheimen</h1></div>
+      <div>
+        <h1>Eliteheimen</h1>
+        <h2>Tallene som tar deg til toppen av Eliteserien Fantasy</h2>
+      </div>
     </div>
     <div class="toolbar">
       <div id="last-updated"></div>
