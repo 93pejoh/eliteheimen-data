@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Byttekalkulator – statisk ramme + CSV-nedtrekk</title>
+  <title>Byttekalkulator – rundeverdier koblet til navn</title>
   <style>
     :root{
       --bg:#0a1f44; --panel:#12356c; --panel2:#0d2a5f; --text:#f0f6ff;
@@ -32,17 +32,12 @@
     .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;justify-content:center;font-size:28px;font-weight:900}
 
     /* SELECT */
-select{
-  width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  background:var(--panel2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center;
-  border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;color:#fff;
-  font-weight:600;letter-spacing:.1px
-}
-
-    /* Footer paneler (visuelt – uten logikk) */
-    .footer{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;background:#0e2756;border-top:1px solid rgba(255,255,255,.12)}
-    .box{background:#0d2a5f;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:12px}
-    .box h3{margin:0 0 10px;font-size:13px;color:#b9c7e3;letter-spacing:.08em;text-transform:uppercase}
+    select{
+      width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:none;
+      background:var(--panel2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center;
+      border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;color:#fff;
+      font-weight:600;letter-spacing:.1px
+    }
   </style>
 </head>
 <body>
@@ -63,82 +58,52 @@ select{
         <div class="cell">R30</div>
       </div>
 
-      <!-- RADER (genereres i JS så de alltid eksisterer) -->
+      <!-- RADER (genereres i JS) -->
       <div id="rows"></div>
 
-      <!-- SUMMER (placeholder) -->
+      <!-- SUMMER -->
       <div class="grid sumrow red">
         <div class="cell">FØR BYTTER</div>
-        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong id="sumBeforeTotal">0,00</strong></div>
         <div class="cell"></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+        <div class="cell num" id="bR25">0,00</div>
+        <div class="cell num" id="bR26">0,00</div>
+        <div class="cell num" id="bR27">0,00</div>
+        <div class="cell num" id="bR28">0,00</div>
+        <div class="cell num" id="bR29">0,00</div>
+        <div class="cell num" id="bR30">0,00</div>
       </div>
       <div class="grid sumrow green">
         <div class="cell">ETTER BYTTER</div>
-        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong id="sumAfterTotal">0,00</strong></div>
         <div class="cell"></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+        <div class="cell num" id="aR25">0,00</div>
+        <div class="cell num" id="aR26">0,00</div>
+        <div class="cell num" id="aR27">0,00</div>
+        <div class="cell num" id="aR28">0,00</div>
+        <div class="cell num" id="aR29">0,00</div>
+        <div class="cell num" id="aR30">0,00</div>
       </div>
 
       <div class="grid diffrow">
         <div class="cell">DIFFERANSE</div>
-        <div class="big">0,00</div>
+        <div class="big" id="diffTotal">0,00</div>
         <div class="cell"></div>
-        <div class="cell num"><strong>0,00</strong></div>
-        <div class="cell num"><strong>0,00</strong></div>
-        <div class="cell num"><strong>0,00</strong></div>
-        <div class="cell num"><strong>0,00</strong></div>
-        <div class="cell num"><strong>0,00</strong></div>
-        <div class="cell num"><strong>0,00</strong></div>
-      </div>
-
-      <!-- ENKEL FOOTER (visuelt) -->
-      <div class="footer">
-        <div class="box">
-          <h3>Bytteinfo</h3>
-          <div class="cell" style="padding:0">
-            <span style="padding:12px 12px 12px 0;opacity:.85">Gratisbytter</span>
-            <select style="max-width:160px"><option>VELG HER</option></select>
-          </div>
-          <div class="cell" style="padding:8px 0 0"><span style="min-width:140px;opacity:.85">Endringer</span><strong>0</strong></div>
-          <div class="cell" style="padding:8px 0 0"><span style="min-width:140px;opacity:.85">Minuspoeng</span><strong>0</strong></div>
-        </div>
-        <div class="box">
-          <h3>Chips per runde</h3>
-          <div class="cell" style="gap:18px">
-            <div style="width:120px">Spissrush</div>
-            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px">
-              <input type="checkbox"><input type="checkbox"><input type="checkbox">
-              <input type="checkbox"><input type="checkbox"><input type="checkbox">
-            </div>
-          </div>
-          <div class="cell" style="gap:18px">
-            <div style="width:120px">To Kapteiner</div>
-            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px">
-              <input type="checkbox"><input type="checkbox"><input type="checkbox">
-              <input type="checkbox"><input type="checkbox"><input type="checkbox">
-            </div>
-          </div>
-          <div class="cell" style="gap:18px">
-            <div style="width:120px">Rik Onkel</div>
-            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px">
-              <input type="checkbox"><input type="checkbox"><input type="checkbox">
-              <input type="checkbox"><input type="checkbox"><input type="checkbox">
-            </div>
-          </div>
-        </div>
+        <div class="cell num" id="dR25"><strong>0,00</strong></div>
+        <div class="cell num" id="dR26"><strong>0,00</strong></div>
+        <div class="cell num" id="dR27"><strong>0,00</strong></div>
+        <div class="cell num" id="dR28"><strong>0,00</strong></div>
+        <div class="cell num" id="dR29"><strong>0,00</strong></div>
+        <div class="cell num" id="dR30"><strong>0,00</strong></div>
       </div>
     </div>
 
-    <p style="opacity:.8;margin:12px 0 24px">
-      Nedtrekk fylles fra <code>../data.csv</code> (i rotmappa). Kolonner: <em>Navn/Name</em> og <em>Pos/Posisjon/Position</em>.
-    </p>
+    <p style="opacity:.8;margin:12px 0 24px">Runde-verdier hentes fra <code>../data.csv</code> og kobles til valgte spillere. Kolonner: <em>Navn/Name</em>, <em>Pos/Posisjon/Position</em>, <em>R25–R30</em>.</p>
   </div>
 
   <script>
-    // --- 1) Bygg faste rader (alltid synlige) -------------------------------
+    // --------- Oppsett ---------
+    const ROUNDS = ['R25','R26','R27','R28','R29','R30'];
     const LAYOUT = [
       { pos:'Keeper',   count: 2 },
       { pos:'Forsvar',  count: 5 },
@@ -146,39 +111,70 @@ select{
       { pos:'Angrep',   count: 3 },
     ];
 
-    function makeRows() {
+    const state = {
+      players: [],           // {Navn, Pos, R25..R30}
+      byPos: {Keeper:[],Forsvar:[],Midtbane:[],Angrep:[]},
+      rows: []               // [{pos, beforeSel, afterSel, cells:{R25:el,..}}]
+    };
+
+    const currency = n => (Math.round((n||0)*100)/100).toFixed(2).replace('.', ',');
+    const toNum = v => { const s=String(v??'').replace(',','.'); const n=parseFloat(s); return isNaN(n)?0:n; };
+
+    // --------- Bygg rader ---------
+    function makeRows(){
       const host = document.getElementById('rows');
       host.innerHTML = '';
+      state.rows = [];
       LAYOUT.forEach(group => {
-        const grid = document.createElement('div');
-        grid.className = 'grid';
-        for (let i = 0; i < group.count; i++) {
+        const grid = document.createElement('div'); grid.className='grid';
+        for(let i=0;i<group.count;i++){
+          const row = document.createElement('div'); row.className='row';
           grid.insertAdjacentHTML('beforeend', `
             <div class="cell pos">${group.pos}</div>
-            <div class="cell"><select class="pick" data-pos="${group.pos}">
-              <option value="">VELG HER</option>
-            </select></div>
-            <div class="cell"><select class="pick" data-pos="${group.pos}">
-              <option value="">VELG HER</option>
-            </select></div>
-            <div class="cell num">0,00</div>
-            <div class="cell num">0,00</div>
-            <div class="cell num">0,00</div>
-            <div class="cell num">0,00</div>
-            <div class="cell num">0,00</div>
-            <div class="cell num">0,00</div>
+            <div class="cell"><select class="pick before"><option value="">VELG HER</option></select></div>
+            <div class="cell"><select class="pick after"><option value="">VELG HER</option></select></div>
+            ${ROUNDS.map(r=>`<div class="cell num"><span data-round="${r}">0,00</span></div>`).join('')}
           `);
         }
         host.appendChild(grid);
-        const div = document.createElement('div'); div.className = 'divider'; host.appendChild(div);
+        const div = document.createElement('div'); div.className='divider'; host.appendChild(div);
+      });
+
+      // registrer referanser pr. rad
+      // Finn alle "grid"-seksjoner vi nettopp lagde
+      const grids = Array.from(document.querySelectorAll('#rows > .grid'));
+      let gridIdx=0;
+      LAYOUT.forEach(group=>{
+        const g = grids[gridIdx++];
+        // i hvert grid er det group.count rader, hver rad har (1 pos + 2 selects + 6 rounds) = 9 celler
+        const cells = Array.from(g.children);
+        for(let r=0;r<group.count;r++){
+          const base = r*9;
+          const posCell = cells[base+0];
+          const beforeSel = cells[base+1].querySelector('select');
+          const afterSel  = cells[base+2].querySelector('select');
+          const cellMap = {};
+          ROUNDS.forEach((round,idx)=>{ cellMap[round] = cells[base+3+idx].querySelector('[data-round]'); });
+          state.rows.push({pos:group.pos, beforeSel, afterSel, cells:cellMap});
+        }
+      });
+
+      // change-handlere
+      state.rows.forEach(row=>{
+        row.beforeSel.addEventListener('change', render);
+        row.afterSel.addEventListener('change', render);
       });
     }
 
-    // --- 2) CSV parsing + fyll nedtrekk ------------------------------------
+    // --------- CSV ---------
     function parseCSV(text) {
-      const first = (text.split(/\r?\n/).find(Boolean) || '');
-      const sep = [',',';','\t'].sort((a,b) => (first.split(b).length) - (first.split(a).length))[0] || ',';
-      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      const first = (text.split(/
+?
+/).find(Boolean) || '');
+      const sep = [',',';','	'].sort((a,b) => (first.split(b).length) - (first.split(a).length))[0] || ',';
+      const lines = text.trim().split(/
+?
+/).filter(Boolean);
       const headers = (lines.shift() || '').split(sep).map(h => h.trim());
       const rows = lines.map(line => {
         const cells = line.split(sep).map(x => x.trim());
@@ -188,9 +184,7 @@ select{
       return { headers, rows };
     }
 
-    const pickHeader = (headers, names) =>
-      headers.find(h => new RegExp('^(' + names.join('|') + ')$', 'i').test(h));
-
+    const pickHeader = (headers, names) => headers.find(h => new RegExp('^(' + names.join('|') + ')$', 'i').test(h));
     const normalizePos = v => {
       const s = String(v || '').toLowerCase();
       if (/keep/.test(s)) return 'Keeper';
@@ -200,42 +194,79 @@ select{
       return v || '';
     };
 
-    async function fillFromCSV() {
+    async function loadCSV(){
       try {
         const res = await fetch('../data.csv', { cache: 'no-store' });
-        if (!res.ok) throw new Error('Fant ikke ../data.csv');
+        if(!res.ok) throw new Error('Fant ikke ../data.csv');
         const text = await res.text();
         const { headers, rows } = parseCSV(text);
-
         const colName = pickHeader(headers, ['Navn','Name']);
         const colPos  = pickHeader(headers, ['Pos','Posisjon','Position']);
-        if (!colName || !colPos) {
-          console.warn('Mangler kolonner Navn/Pos i data.csv');
-          return;
-        }
+        if(!colName || !colPos) return;
 
-        const byPos = { Keeper: [], Forsvar: [], Midtbane: [], Angrep: [] };
-        rows.forEach(r => {
-          const navn = r[colName];
-          const pos  = normalizePos(r[colPos]);
-          if (navn && byPos[pos]) byPos[pos].push(navn);
-        });
-        Object.values(byPos).forEach(list => list.sort((a,b) => a.localeCompare(b, 'no')));
+        // hvilke runde-kolonner finnes faktisk i fila
+        const roundCols = ROUNDS.filter(r => headers.includes(r) || headers.map(h=>h.toUpperCase()).includes(r));
 
-        document.querySelectorAll('select.pick').forEach(sel => {
-          const p = sel.getAttribute('data-pos');
-          const list = byPos[p] || [];
-          sel.innerHTML = '<option value="">VELG HER</option>' + list.map(n => `<option>${n}</option>`).join('');
+        state.players = rows.map(r => {
+          const o = { Navn: r[colName], Pos: normalizePos(r[colPos]) };
+          roundCols.forEach(k => o[k] = toNum(r[k]));
+          return o;
+        }).filter(p=>p.Navn);
+
+        // grupper etter posisjon og sorter navn (behold original casing)
+        state.byPos = {Keeper:[],Forsvar:[],Midtbane:[],Angrep:[]};
+        state.players.forEach(p=>{ if(state.byPos[p.Pos]) state.byPos[p.Pos].push(p.Navn); });
+        Object.values(state.byPos).forEach(list=> list.sort((a,b)=> a.localeCompare(b,'no')));
+
+        // fyll alle selects
+        state.rows.forEach(row=>{
+          const names = state.byPos[row.pos] || [];
+          const options = ['<option value="">VELG HER</option>', ...names.map(n=>`<option>${n}</option>`)].join('');
+          row.beforeSel.innerHTML = options;
+          row.afterSel.innerHTML  = options;
         });
-      } catch (e) {
-        console.warn(e);
-        // bevar «VELG HER» om det feiler
-      }
+
+        // første render
+        render();
+      } catch(e){ console.warn(e); }
+    }
+
+    // --------- Render/summer ---------
+    function getPlayerByName(name){ return state.players.find(p=>p.Navn===name); }
+
+    function render(){
+      const totalsBefore = Object.fromEntries(ROUNDS.map(r=>[r,0]));
+      const totalsAfter  = Object.fromEntries(ROUNDS.map(r=>[r,0]));
+
+      state.rows.forEach(row=>{
+        const before = getPlayerByName(row.beforeSel.value);
+        const after  = getPlayerByName(row.afterSel.value);
+        ROUNDS.forEach(r=>{
+          const valAfter = after ? (after[r]||0) : 0;
+          row.cells[r].textContent = currency(valAfter); // vis etter-bytter i radene
+          totalsBefore[r] += before ? (before[r]||0) : 0;
+          totalsAfter[r]  += after  ? (after[r] ||0) : 0;
+        });
+      });
+
+      // skriv summer per runde
+      ROUNDS.forEach(r=>{
+        document.getElementById('b'+r).textContent = currency(totalsBefore[r]);
+        document.getElementById('a'+r).textContent = currency(totalsAfter[r]);
+        document.getElementById('d'+r).textContent = currency(totalsAfter[r] - totalsBefore[r]);
+      });
+
+      // totalsummer (sum over alle runder)
+      const sumB = Object.values(totalsBefore).reduce((a,b)=>a+b,0);
+      const sumA = Object.values(totalsAfter ).reduce((a,b)=>a+b,0);
+      document.getElementById('sumBeforeTotal').textContent = currency(sumB);
+      document.getElementById('sumAfterTotal').textContent  = currency(sumA);
+      document.getElementById('diffTotal').textContent      = currency(sumA - sumB);
     }
 
     // Init
     makeRows();
-    fillFromCSV();
+    loadCSV();
   </script>
 </body>
 </html>
