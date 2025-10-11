@@ -3,347 +3,256 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bytteplanlegger – Eliteserien Fantasy</title>
+  <title>Bytteplanlegger – Rammeverk</title>
   <style>
     :root{
-      --bg:#0f2b59; --panel:#143b7a; --panel2:#1e4a9a; --ok:#2cbf6e; --warn:#d9534f; --muted:#9fb4d0; --text:#f0f6ff; --shadow:0 8px 20px rgba(0,0,0,.25);
+      --bg:#0a1f44;        /* bakgrunn */
+      --panel:#12356c;     /* panelblå */
+      --panel-2:#0d2a5f;   /* mørkere blå */
+      --line:#2a4d8a;      /* linjer */
+      --text:#f0f6ff;      /* hvit tekst */
+      --muted:#b9c7e3;     
+      --red:#c23b50;       /* FØR BYTTER */
+      --green:#2aa764;     /* ETTER BYTTER */
+      --silver:#e9edf6;    /* lyse celler */
+      --shadow:0 10px 24px rgba(0,0,0,.35);
     }
-    html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#0a1f44;color:var(--text);} 
-    .wrap{max-width:1200px;margin:24px auto;padding:16px}
-    h1{font-weight:800;letter-spacing:.3px;margin:0 0 12px}
-    .card{background:var(--panel);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-    .toolbar{display:flex;flex-wrap:wrap;gap:12px;padding:12px;background:linear-gradient(0deg, var(--panel), var(--panel2));align-items:center}
-    .toolbar>*{margin-right:8px}
-    .btn{background:#1f6feb;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .file{color:#fff}
-    .note{color:var(--muted);font-size:12px}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:1220px;margin:28px auto;padding:0 16px}
+    h1{margin:0 0 14px;font-weight:800;letter-spacing:.2px}
+    .card{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
 
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08);padding:10px}
-    .header{background:#0c2b63;color:#fff}
-    .poscol{width:110px;font-weight:700}
-    .col-small{width:110px}
-    .grid{display:grid;grid-template-columns:110px 1fr 1fr repeat(6,110px);}
+    /* GRID */
+    .grid{display:grid;grid-template-columns:140px 1fr 1fr repeat(6,110px)}
+    .row{display:contents} /* så vi kan style celler per grid */
+    .cell{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center}
+    .pos{font-weight:700}
+    .head{background:#0c2b63;font-weight:800;letter-spacing:.4px}
+    .head .cell{border-bottom:0}
+    .head .cell:nth-child(2){background:var(--red)}
+    .head .cell:nth-child(3){background:var(--green)}
 
-    .posgroup{border-top:2px solid rgba(255,255,255,.15)}
-    .posgroup .row{display:grid;grid-template-columns:110px 1fr 1fr repeat(6,110px);align-items:center}
+    /* velger-stil for VELG HER */
+    .fake-select{width:100%;background:var(--panel-2);border:1px solid rgba(255,255,255,.18);padding:10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;display:flex;justify-content:space-between}
+    .fake-select span:last-child{opacity:.8}
 
-    select, input[type="number"], input[type="text"]{
-      width:100%;background:#0f2b59;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 10px;font-size:14px}
-    .sumrow{background:#153b7d;font-weight:800}
-    .sumrow.ok{background:#104b2f}
-    .sumcell{text-align:right;font-variant-numeric:tabular-nums}
-    .pill{display:inline-flex;align-items:center;gap:8px;background:#0e2756;border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:999px;font-size:13px}
+    /* tallceller */
+    .num{justify-content:flex-end;font-variant-numeric:tabular-nums;color:#e6edf9}
+    .num strong{font-weight:900}
 
-    .footer{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:12px;padding:14px;background:#0e2756}
-    .kpi{background:#0d2a5f;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px}
-    .kpi h3{margin:0 0 6px;font-size:12px;color:#b9c7e3;text-transform:uppercase;letter-spacing:.1em}
-    .kpi strong{font-size:22px}
-    .chips{display:flex;gap:18px;align-items:center}
-    .chips label{display:flex;gap:8px;align-items:center}
+    /* posisjonsgrupper */
+    .group-title{background:linear-gradient(0deg,var(--panel),#164087)}
+    .divider{grid-column:1/-1;height:2px;background:rgba(255,255,255,.12)}
 
-    .sticky-top{position:sticky;top:0;z-index:2}
-    .right{text-align:right}
+    /* summer */
+    .sumrow{background:#153b7d}
+    .sumrow.red  .cell:first-child{background:var(--red);font-weight:800}
+    .sumrow.green .cell:first-child{background:var(--green);font-weight:800}
+    .sumrow .num{font-weight:800}
+
+    .diffrow{background:#0e2756}
+    .diffrow .cell:first-child{font-size:22px;font-weight:900}
+    .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900}
+
+    /* footerpaneler */
+    .footer{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;background:#0e2756;border-top:1px solid rgba(255,255,255,.12)}
+    .box{background:#0d2a5f;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:12px}
+    .box h3{margin:0 0 10px;font-size:13px;color:#b9c7e3;letter-spacing:.08em;text-transform:uppercase}
+    .mini-grid{display:grid;grid-template-columns:160px repeat(6,110px);gap:10px;align-items:center}
+    .mini-grid .col-head{color:#b9c7e3;text-align:center;font-size:12px}
+    .mini-grid .chkcol{display:grid;gap:10px;justify-items:center}
+    .chip-labels{display:grid;gap:10px}
+
+    .pill-select{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
+    .pill{background:#0e2756;border:1px solid rgba(255,255,255,.15);padding:8px 10px;border-radius:999px}
+    .pill input,.pill select{background:transparent;border:0;color:#fff;font-weight:700}
+    .value-card{display:grid;grid-template-columns:120px 1fr;gap:8px;margin-top:10px}
+    .value{background:#0b214a;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 12px;font-weight:900}
     .muted{color:#b9c7e3}
-    .help{font-size:13px;color:#c9d6f5}
-    .hidden{display:none}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Bytteplanlegger – Eliteserien Fantasy</h1>
-    <p class="help">Last opp en CSV med spillerdata <em>(kolonner: Navn,Pos,Lag,Pris,R25,R26,R27,R28,R29,R30)</em>, eller bruk demo-dataene. Velg spillere i kolonnen <strong>Før bytter</strong> og <strong>Etter bytter</strong>. Summene og differansen oppdateres automatisk. «Endringer» er antall ulike navn mellom før og etter.</p>
+    <h1>Bytteplanlegger – Rammeverk</h1>
 
     <div class="card">
-      <div class="toolbar sticky-top">
-        <input id="file" class="file" type="file" accept=".csv,.txt" />
-        <button id="use-demo" class="btn">Bruk demo-data</button>
-        <span class="pill"><span>Gratisbytter</span>
-          <select id="freeTransfers">
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-            <option value="3">3</option>
-          </select>
-        </span>
-        <span class="pill">Minuspoeng per ekstra bytte
-          <input id="hitCost" type="number" value="4" min="0" step="1" style="width:64px"/>
-        </span>
-        <span class="chips">
-          <label><input type="checkbox" id="chip-spiss"/> Spissrush</label>
-          <label><input type="checkbox" id="chip-tokap"/> To kapteiner</label>
-          <label><input type="checkbox" id="chip-rik"/> Rik onkel</label>
-        </span>
+      <!-- HOVEDTABELL -->
+      <div class="grid head">
+        <div class="cell">POSISJON</div>
+        <div class="cell">FØR BYTTER</div>
+        <div class="cell">ETTER BYTTER</div>
+        <div class="cell">R25</div>
+        <div class="cell">R26</div>
+        <div class="cell">R27</div>
+        <div class="cell">R28</div>
+        <div class="cell">R29</div>
+        <div class="cell">R30</div>
       </div>
 
-      <div id="table"></div>
+      <!-- Keepere (2) -->
+      <div class="grid">
+        <div class="cell pos">Keeper</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
 
-      <div class="footer">
-        <div class="kpi"><h3>Før bytter</h3><strong id="sumBefore">0,00</strong></div>
-        <div class="kpi"><h3>Etter bytter</h3><strong id="sumAfter">0,00</strong></div>
-        <div class="kpi"><h3>Differanse</h3><strong id="diffTotal">0,00</strong></div>
-        <div class="kpi"><h3>R25</h3><strong id="sumR25">0,00</strong></div>
-        <div class="kpi"><h3>R26</h3><strong id="sumR26">0,00</strong></div>
-        <div class="kpi"><h3>R27</h3><strong id="sumR27">0,00</strong></div>
-        <div class="kpi"><h3>R28</h3><strong id="sumR28">0,00</strong></div>
+        <div class="cell pos">Keeper</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
       </div>
+
+      <div class="divider"></div>
+
+      <!-- Forsvar (5) -->
+      <div class="grid">
+        <!-- repeat 5 rows -->
+        <div class="cell pos">Forsvar</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Forsvar</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Forsvar</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Forsvar</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Forsvar</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Midtbane (5) -->
+      <div class="grid">
+        <!-- repeat 5 rows -->
+        <div class="cell pos">Midtbane</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Midtbane</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Midtbane</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Midtbane</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Midtbane</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Angrep (3) -->
+      <div class="grid">
+        <div class="cell pos">Angrep</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Angrep</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+
+        <div class="cell pos">Angrep</div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      </div>
+
+      <!-- Summering -->
+      <div class="grid sumrow red">
+        <div class="cell">FØR BYTTER</div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell"></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      </div>
+      <div class="grid sumrow green">
+        <div class="cell">ETTER BYTTER</div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell"></div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      </div>
+
+      <div class="grid diffrow">
+        <div class="cell">DIFFERANSE</div>
+        <div class="big">0,00</div>
+        <div class="cell"></div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong>0,00</strong></div>
+        <div class="cell num"><strong>0,00</strong></div>
+      </div>
+
+      <!-- FOOTER-FELTER -->
       <div class="footer">
-        <div class="kpi"><h3>R29</h3><strong id="sumR29">0,00</strong></div>
-        <div class="kpi"><h3>R30</h3><strong id="sumR30">0,00</strong></div>
-        <div class="kpi"><h3>Endringer</h3><strong id="changes">0</strong></div>
-        <div class="kpi"><h3>Minuspoeng</h3><strong id="hits">0</strong></div>
-        <div class="kpi"><h3>Valgte spillere</h3><strong id="pickedCount">0</strong><div class="note">(per kolonne)</div></div>
-        <div class="kpi"><h3>Datasett</h3><strong id="datasetName">Demo</strong></div>
-        <div class="kpi"><h3>Eksporter</h3>
-          <button class="btn" id="exportState">Last ned lagvalg</button>
+        <!-- Venstre: gratisbytter / endringer / minuspoeng -->
+        <div class="box">
+          <h3>Bytteinfo</h3>
+          <div class="pill-select">
+            <div class="muted">Gratisbytter</div>
+            <div class="pill"><select><option>VELG HER</option></select></div>
+          </div>
+          <div class="value-card">
+            <div class="muted">Endringer</div>
+            <div class="value">0</div>
+          </div>
+          <div class="value-card">
+            <div class="muted">Minuspoeng</div>
+            <div class="value">0</div>
+          </div>
+        </div>
+        
+        <!-- Høyre: chips pr runde -->
+        <div class="box">
+          <h3>Chips per runde</h3>
+          <div class="mini-grid">
+            <div></div>
+            <div class="col-head">R25</div><div class="col-head">R26</div><div class="col-head">R27</div><div class="col-head">R28</div><div class="col-head">R29</div><div class="col-head">R30</div>
+            <div class="chip-labels">
+              <div>Spissrush</div>
+              <div>To Kapteiner</div>
+              <div>Rik Onkel</div>
+            </div>
+            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <p class="note">Tips: Du kan lagre denne siden som <code>index.html</code> i et GitHub-repo og aktivere GitHub Pages for å få en offentlig nettside.</p>
+    <p class="muted" style="margin-top:10px">Rammeverk uten data/JS – klart for å kobles på senere. Lagre som <code>index.html</code> og bruk på GitHub Pages.</p>
   </div>
-
-  <template id="tableTemplate">
-    <div>
-      <div class="grid header" style="position:sticky;top:64px;z-index:1">
-        <div class="poscol">Posisjon</div>
-        <div class="col-small">Før bytter</div>
-        <div class="col-small">Etter bytter</div>
-        <div>R25</div><div>R26</div><div>R27</div><div>R28</div><div>R29</div><div>R30</div>
-      </div>
-      <div id="rows"></div>
-      <div class="row sumrow" id="sumRow">
-        <div class="poscol" style="padding:10px 10px">TOTAL</div>
-        <div></div><div></div>
-        <div class="sumcell" id="tR25">0,00</div>
-        <div class="sumcell" id="tR26">0,00</div>
-        <div class="sumcell" id="tR27">0,00</div>
-        <div class="sumcell" id="tR28">0,00</div>
-        <div class="sumcell" id="tR29">0,00</div>
-        <div class="sumcell" id="tR30">0,00</div>
-      </div>
-      <div class="row sumrow ok" id="diffRow">
-        <div class="poscol" style="padding:10px 10px">DIFFERANSE</div>
-        <div></div><div></div>
-        <div class="sumcell" id="dR25">0,00</div>
-        <div class="sumcell" id="dR26">0,00</div>
-        <div class="sumcell" id="dR27">0,00</div>
-        <div class="sumcell" id="dR28">0,00</div>
-        <div class="sumcell" id="dR29">0,00</div>
-        <div class="sumcell" id="dR30">0,00</div>
-      </div>
-    </div>
-  </template>
-
-  <script>
-    // ======= Demo dataset =======
-    const demoCSV = `Navn,Pos,Lag,Pris,R25,R26,R27,R28,R29,R30\n
-      Hansen,Keeper,ROS,5.5,6,2,7,4,5,3\n      Dyngeland,Keeper,BRN,5.0,2,6,3,4,2,7\n      Hedenstad,Forsvar,ROS,5.5,8,1,2,6,3,6\n      Dragsnes,Forsvar,LSK,6.0,5,2,9,6,4,5\n      Jøtta,Forsvar,VIK,4.5,2,6,2,3,2,5\n      Næss,Forsvar,ODD,5.0,4,2,2,7,1,2\n      Solbakken,Midtbane,BRN,8.5,3,9,2,11,4,8\n      Zacho,Midtbane,ROS,6.5,6,3,6,5,2,6\n      Håland,Midtbane,VIK,7.5,9,4,1,10,3,2\n      Tripic,Angrep,VIK,9.0,8,2,5,6,3,7\n      Finne,Angrep,BRN,9.5,6,1,8,5,4,2\n      Kjartansson,Angrep,ROS,10.0,2,6,7,3,6,5\n    `;
-
-    // ======= App State =======
-    const state = {
-      players: [], // {Navn,Pos,Lag,Pris,R25..R30}
-      positions: [
-        {key:'Keeper', slots:2},
-        {key:'Forsvar', slots:5},
-        {key:'Midtbane', slots:5},
-        {key:'Angrep', slots:3},
-      ],
-      picksBefore: {}, // slotKey -> name
-      picksAfter: {},  // slotKey -> name
-    };
-
-    const rounds = ['R25','R26','R27','R28','R29','R30'];
-
-    function parseCSV(text){
-      // simple CSV parser (no quoted commas)
-      const lines = text.trim().split(/\r?\n/).filter(Boolean);
-      const headers = lines.shift().split(',').map(h=>h.trim());
-      return lines.map(line => {
-        const cells = line.split(',').map(x=>x.trim());
-        const obj = {};
-        headers.forEach((h,i)=> obj[h] = cells[i] ?? '');
-        // coerce numbers
-        obj.Pris = Number(obj.Pris || 0);
-        rounds.forEach(r=> obj[r] = Number(obj[r]||0));
-        return obj;
-      });
-    }
-
-    function byName(name){
-      return state.players.find(p=>p.Navn===name);
-    }
-
-    function currency(n){
-      return (Math.round(n*100)/100).toFixed(2).replace('.', ',');
-    }
-
-    function rebuildTable(){
-      const container = document.getElementById('table');
-      container.innerHTML = '';
-      const tpl = document.getElementById('tableTemplate');
-      const node = tpl.content.cloneNode(true);
-      const rowsHost = node.getElementById ? node.getElementById('rows') : node.querySelector('#rows');
-
-      const makeRow = (pos, idx)=>{
-        const slotKey = pos.key + '_' + (idx+1);
-        const row = document.createElement('div');
-        row.className = 'row posgroup';
-        row.style.gridTemplateColumns = '110px 1fr 1fr repeat(6,110px)';
-
-        const posCell = document.createElement('div');
-        posCell.className = 'poscol';
-        posCell.textContent = idx===0 ? pos.key : '';
-        row.appendChild(posCell);
-
-        const beforeSel = document.createElement('select');
-        const afterSel = document.createElement('select');
-        [beforeSel, afterSel].forEach(sel=>{
-          const empty = document.createElement('option'); empty.value=''; empty.textContent='VELG HER'; sel.appendChild(empty);
-          state.players.filter(p=>p.Pos===pos.key).forEach(p=>{ const o=document.createElement('option'); o.value=p.Navn; o.textContent=p.Navn; sel.appendChild(o); });
-          sel.addEventListener('change',()=>{ onPickChange(slotKey); });
-        });
-
-        // init values if any
-        if(state.picksBefore[slotKey]) beforeSel.value = state.picksBefore[slotKey];
-        if(state.picksAfter[slotKey]) afterSel.value = state.picksAfter[slotKey];
-
-        const beforeWrap = document.createElement('div'); beforeWrap.appendChild(beforeSel); row.appendChild(beforeWrap);
-        const afterWrap = document.createElement('div');  afterWrap.appendChild(afterSel);  row.appendChild(afterWrap);
-
-        // round cells
-        rounds.forEach(r=>{
-          const c = document.createElement('div'); c.className='sumcell'; c.id = slotKey+'_'+r; c.textContent='0,00'; row.appendChild(c);
-        });
-
-        rowsHost.appendChild(row);
-      };
-
-      state.positions.forEach(pos=>{ for(let i=0;i<pos.slots;i++) makeRow(pos,i); });
-
-      container.appendChild(node);
-      refresh();
-    }
-
-    function onPickChange(slotKey){
-      // read DOM selects back into state
-      const rowsContainer = document.getElementById('rows');
-      const selects = rowsContainer.querySelectorAll('select');
-      // selects come in pairs per row: before, after
-      let i=0; state.positions.forEach(pos=>{
-        for(let s=0;s<pos.slots;s++){
-          const key = pos.key+'_'+(s+1);
-          const beforeSel = selects[i++];
-          const afterSel  = selects[i++];
-          state.picksBefore[key] = beforeSel.value;
-          state.picksAfter[key]  = afterSel.value;
-        }
-      });
-      refresh();
-    }
-
-    function refresh(){
-      // update per-row round numbers
-      const totalsBefore = Object.fromEntries(rounds.map(r=>[r,0]));
-      const totalsAfter  = Object.fromEntries(rounds.map(r=>[r,0]));
-
-      const rowsContainer = document.getElementById('rows');
-      let pickedPerCol = 0;
-
-      let rowIndex = 0;
-      state.positions.forEach(pos=>{
-        for(let s=0;s<pos.slots;s++){
-          const key = pos.key+'_'+(s+1);
-          const beforeName = state.picksBefore[key]||'';
-          const afterName  = state.picksAfter[key]||'';
-          rounds.forEach(r=>{
-            const cell = document.getElementById(key+'_'+r);
-            const pB = byName(beforeName) || { [r]:0 };
-            const pA = byName(afterName)  || { [r]:0 };
-            cell.textContent = currency((pA[r]||0)); // show AFTER in table cells
-            totalsBefore[r] += (pB[r]||0);
-            totalsAfter[r]  += (pA[r]||0);
-          });
-          if(state.picksBefore[key]) pickedPerCol++; // approximate count (same for after, layout fixed)
-          rowIndex++;
-        }
-      });
-
-      // write totals
-      rounds.forEach(r=>{
-        document.getElementById('t'+r).textContent = currency(totalsAfter[r]);
-        document.getElementById('d'+r).textContent = currency(totalsAfter[r] - totalsBefore[r]);
-        document.getElementById('sum'+r).textContent = currency(totalsAfter[r]);
-      });
-
-      // footer sums
-      const sumBefore = Object.values(totalsBefore).reduce((a,b)=>a+b,0);
-      const sumAfter  = Object.values(totalsAfter).reduce((a,b)=>a+b,0);
-      document.getElementById('sumBefore').textContent = currency(sumBefore);
-      document.getElementById('sumAfter').textContent  = currency(sumAfter);
-      document.getElementById('diffTotal').textContent = currency(sumAfter - sumBefore);
-      document.getElementById('pickedCount').textContent = pickedPerCol;
-
-      // changes & hits
-      let changes = 0;
-      state.positions.forEach(pos=>{
-        for(let s=0;s<pos.slots;s++){
-          const key = pos.key+'_'+(s+1);
-          if((state.picksBefore[key]||'') !== (state.picksAfter[key]||'')) changes++;
-        }
-      });
-      document.getElementById('changes').textContent = changes;
-      const free = Number(document.getElementById('freeTransfers').value||0);
-      const hitCost = Number(document.getElementById('hitCost').value||4);
-      const hits = Math.max(0, changes - free) * hitCost;
-      document.getElementById('hits').textContent = hits.toString();
-    }
-
-    function loadDatasetFromCSV(text, label='Egendefinert'){
-      try{
-        const rows = parseCSV(text);
-        // basic validation
-        const need = ['Navn','Pos','Pris',...rounds];
-        const ok = need.every(k => k in rows[0]);
-        if(!ok) throw new Error('CSV mangler noen av kolonnene: ' + need.join(', '));
-        state.players = rows;
-        document.getElementById('datasetName').textContent = label;
-        rebuildTable();
-      }catch(err){
-        alert('Kunne ikke lese CSV: '+ err.message);
-      }
-    }
-
-    function init(){
-      // dataset
-      loadDatasetFromCSV(demoCSV, 'Demo');
-
-      document.getElementById('use-demo').addEventListener('click',()=>{
-        loadDatasetFromCSV(demoCSV, 'Demo');
-      });
-
-      document.getElementById('file').addEventListener('change', (e)=>{
-        const f = e.target.files[0]; if(!f) return;
-        const reader = new FileReader();
-        reader.onload = ()=> loadDatasetFromCSV(reader.result, f.name);
-        reader.readAsText(f);
-      });
-
-      document.getElementById('freeTransfers').addEventListener('change', refresh);
-      document.getElementById('hitCost').addEventListener('change', refresh);
-
-      document.getElementById('exportState').addEventListener('click', ()=>{
-        const out = { picksBefore: state.picksBefore, picksAfter: state.picksAfter, freeTransfers: document.getElementById('freeTransfers').value, hitCost: document.getElementById('hitCost').value };
-        const blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href=url; a.download='bytteplan.json'; a.click();
-        URL.revokeObjectURL(url);
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
 </body>
 </html>
-
