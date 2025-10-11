@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Byttekalkulator</title>
+  <title>Byttekalkulator – rundeverdier koblet til navn</title>
   <style>
     :root{
       --bg:#0a1f44; --panel:#12356c; --panel2:#0d2a5f; --text:#f0f6ff;
@@ -31,16 +31,13 @@
     .diffrow{background:#0e2756}
     .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;justify-content:center;font-size:28px;font-weight:900}
 
-    /* SELECTS */
+    /* SELECT */
     select{
       width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:none;
       background:var(--panel2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center;
       border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;color:#fff;
       font-weight:600;letter-spacing:.1px
     }
-
-    .status{max-width:1220px;margin:10px auto 30px;padding:8px 12px;color:#cfe1ff;opacity:.9}
-    .muted{opacity:.8}
   </style>
 </head>
 <body>
@@ -53,11 +50,15 @@
         <div class="cell">POSISJON</div>
         <div class="cell">FØR BYTTER</div>
         <div class="cell">ETTER BYTTER</div>
-        <div class="cell">R25</div><div class="cell">R26</div><div class="cell">R27</div>
-        <div class="cell">R28</div><div class="cell">R29</div><div class="cell">R30</div>
+        <div class="cell">R25</div>
+        <div class="cell">R26</div>
+        <div class="cell">R27</div>
+        <div class="cell">R28</div>
+        <div class="cell">R29</div>
+        <div class="cell">R30</div>
       </div>
 
-      <!-- RADER: JS lager disse alltid -->
+      <!-- RADER (genereres i JS) -->
       <div id="rows"></div>
 
       <!-- SUMMER -->
@@ -65,197 +66,209 @@
         <div class="cell">FØR BYTTER</div>
         <div class="cell num"><strong id="sumBeforeTotal">0,00</strong></div>
         <div class="cell"></div>
-        <div class="cell num" id="bR25">0,00</div><div class="cell num" id="bR26">0,00</div><div class="cell num" id="bR27">0,00</div>
-        <div class="cell num" id="bR28">0,00</div><div class="cell num" id="bR29">0,00</div><div class="cell num" id="bR30">0,00</div>
+        <div class="cell num" id="bR25">0,00</div>
+        <div class="cell num" id="bR26">0,00</div>
+        <div class="cell num" id="bR27">0,00</div>
+        <div class="cell num" id="bR28">0,00</div>
+        <div class="cell num" id="bR29">0,00</div>
+        <div class="cell num" id="bR30">0,00</div>
       </div>
       <div class="grid sumrow green">
         <div class="cell">ETTER BYTTER</div>
         <div class="cell num"><strong id="sumAfterTotal">0,00</strong></div>
         <div class="cell"></div>
-        <div class="cell num" id="aR25">0,00</div><div class="cell num" id="aR26">0,00</div><div class="cell num" id="aR27">0,00</div>
-        <div class="cell num" id="aR28">0,00</div><div class="cell num" id="aR29">0,00</div><div class="cell num" id="aR30">0,00</div>
+        <div class="cell num" id="aR25">0,00</div>
+        <div class="cell num" id="aR26">0,00</div>
+        <div class="cell num" id="aR27">0,00</div>
+        <div class="cell num" id="aR28">0,00</div>
+        <div class="cell num" id="aR29">0,00</div>
+        <div class="cell num" id="aR30">0,00</div>
       </div>
 
       <div class="grid diffrow">
         <div class="cell">DIFFERANSE</div>
         <div class="big" id="diffTotal">0,00</div>
         <div class="cell"></div>
-        <div class="cell num" id="dR25"><strong>0,00</strong></div><div class="cell num" id="dR26"><strong>0,00</strong></div><div class="cell num" id="dR27"><strong>0,00</strong></div>
-        <div class="cell num" id="dR28"><strong>0,00</strong></div><div class="cell num" id="dR29"><strong>0,00</strong></div><div class="cell num" id="dR30"><strong>0,00</strong></div>
+        <div class="cell num" id="dR25"><strong>0,00</strong></div>
+        <div class="cell num" id="dR26"><strong>0,00</strong></div>
+        <div class="cell num" id="dR27"><strong>0,00</strong></div>
+        <div class="cell num" id="dR28"><strong>0,00</strong></div>
+        <div class="cell num" id="dR29"><strong>0,00</strong></div>
+        <div class="cell num" id="dR30"><strong>0,00</strong></div>
       </div>
     </div>
 
-    <div class="status muted" id="status">Nedtrekk fylles fra <code>../data.csv</code> når siden er lastet.</div>
+    <p style="opacity:.8;margin:12px 0 24px">Runde-verdier hentes fra <code>../data.csv</code> og kobles til valgte spillere. Kolonner: <em>Navn/Name</em>, <em>Pos/Posisjon/Position</em>, <em>R25–R30</em>.</p>
   </div>
 
   <script>
-    // ------- Konstanter og helpers -------
+    // --------- Oppsett ---------
     const ROUNDS = ['R25','R26','R27','R28','R29','R30'];
     const LAYOUT = [
-      { pos:'Keeper', count:2 },
-      { pos:'Forsvar', count:5 },
-      { pos:'Midtbane', count:5 },
-      { pos:'Angrep', count:3 },
+      { pos:'Keeper',   count: 2 },
+      { pos:'Forsvar',  count: 5 },
+      { pos:'Midtbane', count: 5 },
+      { pos:'Angrep',   count: 3 },
     ];
+
+    const state = {
+      players: [],           // {Navn, Pos, R25..R30}
+      byPos: {Keeper:[],Forsvar:[],Midtbane:[],Angrep:[]},
+      rows: []               // [{pos, beforeSel, afterSel, cells:{R25:el,..}}]
+    };
+
     const currency = n => (Math.round((n||0)*100)/100).toFixed(2).replace('.', ',');
     const toNum = v => { const s=String(v??'').replace(',','.'); const n=parseFloat(s); return isNaN(n)?0:n; };
 
-    const state = { players: [], byPos: {}, rows: [] };
-
-    function setStatus(msg){ const el=document.getElementById('status'); if(el) el.innerHTML = msg; }
-
-    // ------- Bygg rader (ALLTID) -------
+    // --------- Bygg rader ---------
     function makeRows(){
       const host = document.getElementById('rows');
       host.innerHTML = '';
       state.rows = [];
-
-      LAYOUT.forEach(group=>{
-        const grid = document.createElement('div');
-        grid.className = 'grid';
-
+      LAYOUT.forEach(group => {
+        const grid = document.createElement('div'); grid.className='grid';
         for(let i=0;i<group.count;i++){
-          // pos
-          const posCell = document.createElement('div');
-          posCell.className = 'cell pos';
-          posCell.textContent = group.pos;
-          grid.appendChild(posCell);
-
-          // before select
-          const beforeCell = document.createElement('div'); beforeCell.className='cell';
-          const beforeSel = document.createElement('select'); beforeSel.className='pick before';
-          beforeSel.innerHTML = '<option value="">VELG HER</option>';
-          beforeCell.appendChild(beforeSel); grid.appendChild(beforeCell);
-
-          // after select
-          const afterCell = document.createElement('div'); afterCell.className='cell';
-          const afterSel = document.createElement('select'); afterSel.className='pick after';
-          afterSel.innerHTML = '<option value="">VELG HER</option>';
-          afterCell.appendChild(afterSel); grid.appendChild(afterCell);
-
-          // round cells
-          const cellMap = {};
-          ROUNDS.forEach(r=>{
-            const c = document.createElement('div'); c.className='cell num';
-            const span = document.createElement('span'); span.dataset.round = r; span.textContent = '0,00';
-            c.appendChild(span); grid.appendChild(c);
-            cellMap[r] = span;
-          });
-
-          state.rows.push({ pos: group.pos, beforeSel, afterSel, cells: cellMap });
+          const row = document.createElement('div'); row.className='row';
+          grid.insertAdjacentHTML('beforeend', `
+            <div class="cell pos">${group.pos}</div>
+            <div class="cell"><select class="pick before"><option value="">VELG HER</option></select></div>
+            <div class="cell"><select class="pick after"><option value="">VELG HER</option></select></div>
+            ${ROUNDS.map(r=>`<div class="cell num"><span data-round="${r}">0,00</span></div>`).join('')}
+          `);
         }
-
         host.appendChild(grid);
         const div = document.createElement('div'); div.className='divider'; host.appendChild(div);
       });
 
+      // registrer referanser pr. rad
+      // Finn alle "grid"-seksjoner vi nettopp lagde
+      const grids = Array.from(document.querySelectorAll('#rows > .grid'));
+      let gridIdx=0;
+      LAYOUT.forEach(group=>{
+        const g = grids[gridIdx++];
+        // i hvert grid er det group.count rader, hver rad har (1 pos + 2 selects + 6 rounds) = 9 celler
+        const cells = Array.from(g.children);
+        for(let r=0;r<group.count;r++){
+          const base = r*9;
+          const posCell = cells[base+0];
+          const beforeSel = cells[base+1].querySelector('select');
+          const afterSel  = cells[base+2].querySelector('select');
+          const cellMap = {};
+          ROUNDS.forEach((round,idx)=>{ cellMap[round] = cells[base+3+idx].querySelector('[data-round]'); });
+          state.rows.push({pos:group.pos, beforeSel, afterSel, cells:cellMap});
+        }
+      });
+
+      // change-handlere
       state.rows.forEach(row=>{
         row.beforeSel.addEventListener('change', render);
         row.afterSel.addEventListener('change', render);
       });
     }
 
-    // ------- CSV utils -------
-    function parseCSV(text){
-      const first = (text.split(/\r?\n/).find(Boolean) || '');
-      const sep = [',',';','\t'].sort((a,b)=>(first.split(b).length)-(first.split(a).length))[0] || ',';
-      const lines = text.trim().split(/\r?\n/).filter(Boolean);
-      const headers = (lines.shift() || '').split(sep).map(h=>h.trim());
-      const rows = lines.map(line=>{
-        const cells = line.split(sep).map(x=>x.trim());
-        const o = {}; headers.forEach((h,i)=> o[h] = (cells[i] ?? ''));
+    // --------- CSV ---------
+    function parseCSV(text) {
+      const first = (text.split(/
+?
+/).find(Boolean) || '');
+      const sep = [',',';','	'].sort((a,b) => (first.split(b).length) - (first.split(a).length))[0] || ',';
+      const lines = text.trim().split(/
+?
+/).filter(Boolean);
+      const headers = (lines.shift() || '').split(sep).map(h => h.trim());
+      const rows = lines.map(line => {
+        const cells = line.split(sep).map(x => x.trim());
+        const o = {}; headers.forEach((h, i) => o[h] = (cells[i] ?? ''));
         return o;
       });
       return { headers, rows };
     }
-    const pickHeader = (headers, names)=> headers.find(h => new RegExp('^(' + names.join('|') + ')$', 'i').test(h));
+
+    const pickHeader = (headers, names) => headers.find(h => new RegExp('^(' + names.join('|') + ')$', 'i').test(h));
     const normalizePos = v => {
-      const s = String(v||'').toLowerCase();
-      if(/keep/.test(s)) return 'Keeper';
-      if(/fors|def/.test(s)) return 'Forsvar';
-      if(/midt|mid/.test(s)) return 'Midtbane';
-      if(/ang|spiss|forw|strik/.test(s)) return 'Angrep';
-      return v||'';
+      const s = String(v || '').toLowerCase();
+      if (/keep/.test(s)) return 'Keeper';
+      if (/fors|def/.test(s)) return 'Forsvar';
+      if (/midt|mid/.test(s)) return 'Midtbane';
+      if (/ang|spiss|forw|strik/.test(s)) return 'Angrep';
+      return v || '';
     };
 
     async function loadCSV(){
-      try{
-        setStatus('Laster <code>../data.csv</code> …');
-        const res = await fetch('../data.csv', { cache:'no-store' });
-        if(!res.ok) throw new Error('Fant ikke ../data.csv ('+res.status+')');
+      try {
+        const res = await fetch('../data.csv', { cache: 'no-store' });
+        if(!res.ok) throw new Error('Fant ikke ../data.csv');
         const text = await res.text();
         const { headers, rows } = parseCSV(text);
+        const colName = pickHeader(headers, ['Navn','Name']);
+        const colPos  = pickHeader(headers, ['Pos','Posisjon','Position']);
+        if(!colName || !colPos) return;
 
-        const colName = pickHeader(headers,['Navn','Name']);
-        const colPos  = pickHeader(headers,['Pos','Posisjon','Position']);
-        if(!colName || !colPos){
-          setStatus('Fant ikke kolonner <em>Navn/Name</em> og <em>Pos/Posisjon/Position</em> i <code>data.csv</code>. Nedtrekk står tomme.');
-          return;
-        }
-
+        // hvilke runde-kolonner finnes faktisk i fila
         const roundCols = ROUNDS.filter(r => headers.includes(r) || headers.map(h=>h.toUpperCase()).includes(r));
+
         state.players = rows.map(r=>{
-          const obj = { Navn: r[colName], Pos: normalizePos(r[colPos]) };
-          roundCols.forEach(k => obj[k] = toNum(r[k]));
+          const obj = { Navn: r[colName], Pos: normalizePos(r[colPos]), raw:{} };
+          roundCols.forEach(k => { obj[k] = toNum(r[k]); obj.raw[k] = (r[k] ?? '').toString().trim(); });
           return obj;
-        }).filter(p => p.Navn);
+        }).filter(p=>p.Navn);
 
-        state.byPos = { Keeper:[], Forsvar:[], Midtbane:[], Angrep:[] };
-        state.players.forEach(p => { if(state.byPos[p.Pos]) state.byPos[p.Pos].push(p.Navn); });
-        Object.values(state.byPos).forEach(list => list.sort((a,b)=>a.localeCompare(b,'no')));
+        // grupper etter posisjon og sorter navn (behold original casing)
+        state.byPos = {Keeper:[],Forsvar:[],Midtbane:[],Angrep:[]};
+        state.players.forEach(p=>{ if(state.byPos[p.Pos]) state.byPos[p.Pos].push(p.Navn); });
+        Object.values(state.byPos).forEach(list=> list.sort((a,b)=> a.localeCompare(b,'no')));
 
-        // fyll selects
+        // fyll alle selects
         state.rows.forEach(row=>{
           const names = state.byPos[row.pos] || [];
-          const opts = ['<option value="">VELG HER</option>', ...names.map(n=>`<option>${n}</option>`)].join('');
-          row.beforeSel.innerHTML = opts;
-          row.afterSel.innerHTML  = opts;
+          const options = ['<option value="">VELG HER</option>', ...names.map(n=>`<option>${n}</option>`)].join('');
+          row.beforeSel.innerHTML = options;
+          row.afterSel.innerHTML  = options;
         });
 
-        setStatus('Klar ✅ – navn lastet fra <code>../data.csv</code>.');
+        // første render
         render();
-      }catch(err){
-        console.error(err);
-        setStatus('Klar ⚠️ – fikk ikke lastet <code>../data.csv</code>. Nedtrekk står tomme.');
-      }
+      } catch(e){ console.warn(e); }
     }
 
-    // ------- Rendering / summer -------
-    function getPlayer(name){ return state.players.find(p => p.Navn === name); }
+    // --------- Render/summer ---------
+    function getPlayerByName(name){ return state.players.find(p=>p.Navn===name); }
 
     function render(){
-      const totalsB = Object.fromEntries(ROUNDS.map(r=>[r,0]));
-      const totalsA = Object.fromEntries(ROUNDS.map(r=>[r,0]));
+      const totalsBefore = Object.fromEntries(ROUNDS.map(r=>[r,0]));
+      const totalsAfter  = Object.fromEntries(ROUNDS.map(r=>[r,0]));
 
       state.rows.forEach(row=>{
-        const b = getPlayer(row.beforeSel.value);
-        const a = getPlayer(row.afterSel.value);
+        const before = getPlayerByName(row.beforeSel.value);
+        const after  = getPlayerByName(row.afterSel.value);
         ROUNDS.forEach(r=>{
-          const vA = a ? (a[r]||0) : 0;
-          row.cells[r].textContent = currency(vA); // per rad viser vi ETTER-verdi
+          // Vis rå verdi fra CSV for spilleren valgt i "ETTER BYTTER"
+          const raw = a ? (a.raw?.[r] ?? '') : '';
+          row.cells[r].textContent = raw || '0,00';
+          // Summering bruker tallverdien (komma eller punkt aksepteres)
           totalsB[r] += b ? (b[r]||0) : 0;
           totalsA[r] += a ? (a[r]||0) : 0;
         });
       });
 
+      // skriv summer per runde
       ROUNDS.forEach(r=>{
-        document.getElementById('b'+r).textContent = currency(totalsB[r]);
-        document.getElementById('a'+r).textContent = currency(totalsA[r]);
-        document.getElementById('d'+r).textContent = currency(totalsA[r] - totalsB[r]);
+        document.getElementById('b'+r).textContent = currency(totalsBefore[r]);
+        document.getElementById('a'+r).textContent = currency(totalsAfter[r]);
+        document.getElementById('d'+r).textContent = currency(totalsAfter[r] - totalsBefore[r]);
       });
 
-      const sumB = Object.values(totalsB).reduce((x,y)=>x+y,0);
-      const sumA = Object.values(totalsA).reduce((x,y)=>x+y,0);
+      // totalsummer (sum over alle runder)
+      const sumB = Object.values(totalsBefore).reduce((a,b)=>a+b,0);
+      const sumA = Object.values(totalsAfter ).reduce((a,b)=>a+b,0);
       document.getElementById('sumBeforeTotal').textContent = currency(sumB);
       document.getElementById('sumAfterTotal').textContent  = currency(sumA);
       document.getElementById('diffTotal').textContent      = currency(sumA - sumB);
     }
 
-    // Init – bygg rader alltid, så last CSV
-    document.addEventListener('DOMContentLoaded', () => {
-      try { makeRows(); } catch(e) { console.error('Feil i makeRows', e); }
-      loadCSV();
-    });
+    // Init
+    makeRows();
+    loadCSV();
   </script>
 </body>
 </html>
