@@ -3,19 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bytteplanlegger – Rammeverk</title>
+  <title>Bytteplanlegger – Rammeverk m/ data.csv</title>
   <style>
     :root{
-      --bg:#0a1f44;        /* bakgrunn */
-      --panel:#12356c;     /* panelblå */
-      --panel-2:#0d2a5f;   /* mørkere blå */
-      --line:#2a4d8a;      /* linjer */
-      --text:#f0f6ff;      /* hvit tekst */
-      --muted:#b9c7e3;     
-      --red:#c23b50;       /* FØR BYTTER */
-      --green:#2aa764;     /* ETTER BYTTER */
-      --silver:#e9edf6;    /* lyse celler */
-      --shadow:0 10px 24px rgba(0,0,0,.35);
+      --bg:#0a1f44; --panel:#12356c; --panel-2:#0d2a5f; --text:#f0f6ff; --muted:#b9c7e3;
+      --red:#c23b50; --green:#2aa764; --shadow:0 10px 24px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
@@ -25,59 +17,43 @@
 
     /* GRID */
     .grid{display:grid;grid-template-columns:140px 1fr 1fr repeat(6,110px)}
-    .row{display:contents} /* så vi kan style celler per grid */
-    .cell{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center}
+    .row{display:contents}
+    .cell{padding:12px;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center}
     .pos{font-weight:700}
     .head{background:#0c2b63;font-weight:800;letter-spacing:.4px}
     .head .cell{border-bottom:0}
     .head .cell:nth-child(2){background:var(--red)}
     .head .cell:nth-child(3){background:var(--green)}
 
-    /* velger-stil for VELG HER */
-    .fake-select{width:100%;background:var(--panel-2);border:1px solid rgba(255,255,255,.18);padding:10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;display:flex;justify-content:space-between}
-    .fake-select span:last-child{opacity:.8}
+    /* SELECT-stil */
+    .select{width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:none;
+      background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg>') no-repeat right 10px center;
+      border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:#fff}
+    .select:disabled{opacity:.6}
 
-    /* tallceller */
     .num{justify-content:flex-end;font-variant-numeric:tabular-nums;color:#e6edf9}
-    .num strong{font-weight:900}
 
-    /* posisjonsgrupper */
-    .group-title{background:linear-gradient(0deg,var(--panel),#164087)}
     .divider{grid-column:1/-1;height:2px;background:rgba(255,255,255,.12)}
 
-    /* summer */
     .sumrow{background:#153b7d}
     .sumrow.red  .cell:first-child{background:var(--red);font-weight:800}
     .sumrow.green .cell:first-child{background:var(--green);font-weight:800}
-    .sumrow .num{font-weight:800}
 
     .diffrow{background:#0e2756}
     .diffrow .cell:first-child{font-size:22px;font-weight:900}
     .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900}
 
-    /* footerpaneler */
     .footer{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;background:#0e2756;border-top:1px solid rgba(255,255,255,.12)}
     .box{background:#0d2a5f;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:12px}
     .box h3{margin:0 0 10px;font-size:13px;color:#b9c7e3;letter-spacing:.08em;text-transform:uppercase}
-    .mini-grid{display:grid;grid-template-columns:160px repeat(6,110px);gap:10px;align-items:center}
-    .mini-grid .col-head{color:#b9c7e3;text-align:center;font-size:12px}
-    .mini-grid .chkcol{display:grid;gap:10px;justify-items:center}
-    .chip-labels{display:grid;gap:10px}
-
-    .pill-select{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
-    .pill{background:#0e2756;border:1px solid rgba(255,255,255,.15);padding:8px 10px;border-radius:999px}
-    .pill input,.pill select{background:transparent;border:0;color:#fff;font-weight:700}
-    .value-card{display:grid;grid-template-columns:120px 1fr;gap:8px;margin-top:10px}
-    .value{background:#0b214a;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 12px;font-weight:900}
-    .muted{color:#b9c7e3}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Bytteplanlegger – Rammeverk</h1>
 
-    <div class="card">
-      <!-- HOVEDTABELL -->
+    <div class="card" id="app">
+      <!-- Header -->
       <div class="grid head">
         <div class="cell">POSISJON</div>
         <div class="cell">FØR BYTTER</div>
@@ -90,102 +66,10 @@
         <div class="cell">R30</div>
       </div>
 
-      <!-- Keepere (2) -->
-      <div class="grid">
-        <div class="cell pos">Keeper</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      <!-- Rader genereres i JS -->
+      <div id="rows"></div>
 
-        <div class="cell pos">Keeper</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Forsvar (5) -->
-      <div class="grid">
-        <!-- repeat 5 rows -->
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Midtbane (5) -->
-      <div class="grid">
-        <!-- repeat 5 rows -->
-        <div class="cell pos">Midtbane</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Midtbane</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Midtbane</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Midtbane</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Midtbane</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Angrep (3) -->
-      <div class="grid">
-        <div class="cell pos">Angrep</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Angrep</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Angrep</div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell"><div class="fake-select"><span>VELG HER</span><span>▾</span></div></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-
-      <!-- Summering -->
+      <!-- Summering (placeholder, uten logikk foreløpig) -->
       <div class="grid sumrow red">
         <div class="cell">FØR BYTTER</div>
         <div class="cell num"><strong>0,00</strong></div>
@@ -211,48 +95,132 @@
         <div class="cell num"><strong>0,00</strong></div>
       </div>
 
-      <!-- FOOTER-FELTER -->
+      <!-- Footer (kun visuell) -->
       <div class="footer">
-        <!-- Venstre: gratisbytter / endringer / minuspoeng -->
         <div class="box">
           <h3>Bytteinfo</h3>
-          <div class="pill-select">
-            <div class="muted">Gratisbytter</div>
-            <div class="pill"><select><option>VELG HER</option></select></div>
-          </div>
-          <div class="value-card">
-            <div class="muted">Endringer</div>
-            <div class="value">0</div>
-          </div>
-          <div class="value-card">
-            <div class="muted">Minuspoeng</div>
-            <div class="value">0</div>
-          </div>
+          <div class="cell" style="padding:0"><span class="muted" style="padding:12px 12px 12px 0">Gratisbytter</span><select class="select" style="max-width:160px"><option>VELG HER</option></select></div>
+          <div class="cell" style="padding:8px 0 0"><span class="muted" style="min-width:140px">Endringer</span><span style="font-weight:900">0</span></div>
+          <div class="cell" style="padding:8px 0 0"><span class="muted" style="min-width:140px">Minuspoeng</span><span style="font-weight:900">0</span></div>
         </div>
-        
-        <!-- Høyre: chips pr runde -->
         <div class="box">
           <h3>Chips per runde</h3>
-          <div class="mini-grid">
-            <div></div>
-            <div class="col-head">R25</div><div class="col-head">R26</div><div class="col-head">R27</div><div class="col-head">R28</div><div class="col-head">R29</div><div class="col-head">R30</div>
-            <div class="chip-labels">
-              <div>Spissrush</div>
-              <div>To Kapteiner</div>
-              <div>Rik Onkel</div>
-            </div>
-            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
-            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
-            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
-            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
-            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
-            <div class="chkcol"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">Spissrush</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          </div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">To Kapteiner</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          </div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">Rik Onkel</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <p class="muted" style="margin-top:10px">Rammeverk uten data/JS – klart for å kobles på senere. Lagre som <code>index.html</code> og bruk på GitHub Pages.</p>
+    <p class="muted" style="margin-top:10px">Denne undersiden forventer <code>../data.csv</code> (i rotmappa til repoet). Kolonner: <em>Navn/Name</em> og <em>Pos/Posisjon/Position</em>.</p>
   </div>
+
+  <script>
+    // --- Konfig ---
+    const POSITIONS = [
+      { key:'Keeper',   slots:2 },
+      { key:'Forsvar',  slots:5 },
+      { key:'Midtbane', slots:5 },
+      { key:'Angrep',   slots:3 },
+    ];
+
+    // --- Bygg rader ---
+    function buildRows(){
+      const host = document.getElementById('rows');
+      host.innerHTML = '';
+      POSITIONS.forEach(pos => {
+        for(let i=0;i<pos.slots;i++){
+          const row = document.createElement('div');
+          row.className = 'grid';
+          row.innerHTML = `
+            <div class="cell pos">${pos.key}</div>
+            <div class="cell"><select class="select pick" data-col="before" data-pos="${pos.key}"><option value="">VELG HER</option></select></div>
+            <div class="cell"><select class="select pick" data-col="after"  data-pos="${pos.key}"><option value="">VELG HER</option></select></div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+          `;
+          host.appendChild(row);
+        }
+        const div = document.createElement('div'); div.className='divider'; host.appendChild(div);
+      });
+    }
+
+    // --- CSV utils ---
+    function parseCSV(text){
+      const firstLine = text.split(/
+?
+/).find(Boolean) || '';
+      const sep = [',',';','	'].sort((a,b)=> (firstLine.split(b).length) - (firstLine.split(a).length))[0] || ',';
+      const lines = text.trim().split(/
+?
+/).filter(Boolean);
+      const headers = lines.shift().split(sep).map(h=>h.trim());
+      return {
+        headers,
+        rows: lines.map(line => {
+          const cells = line.split(sep).map(x=>x.trim());
+          const o = {}; headers.forEach((h,i)=> o[h] = cells[i] ?? '');
+          return o;
+        })
+      };
+    }
+
+    function pickColumn(headers, candidates, fallback=''){
+      const rx = new RegExp('^(' + candidates.join('|') + ')$', 'i');
+      return headers.find(h=> rx.test(h)) || fallback;
+    }
+
+    function normalizePos(value){
+      const v = String(value||'').toLowerCase();
+      if(/keep/.test(v)) return 'Keeper';
+      if(/fors/.test(v) || /def/.test(v)) return 'Forsvar';
+      if(/midt/.test(v) || /mid/.test(v)) return 'Midtbane';
+      if(/ang/.test(v) || /spiss/.test(v) || /forw|strik/.test(v)) return 'Angrep';
+      return value || '';
+    }
+
+    async function loadCSV(){
+      try{
+        // siden ligger i /byttekalkulator/index.html, data.csv i rot → gå ett nivå opp
+        const res = await fetch('../data.csv', {cache:'no-store'});
+        if(!res.ok) throw new Error('Kunne ikke hente ../data.csv');
+        const text = await res.text();
+        const { headers, rows } = parseCSV(text);
+        const colName = pickColumn(headers, ['Navn','Name']);
+        const colPos  = pickColumn(headers, ['Pos','Posisjon','Position']);
+        if(!colName || !colPos){ console.warn('Finner ikke Navn/Pos-kolonner i data.csv'); return; }
+        const players = rows.map(r => ({ Navn: r[colName], Pos: normalizePos(r[colPos]) })).filter(p=>p.Navn);
+
+        const byPos = POSITIONS.reduce((acc,p)=> (acc[p.key]=[], acc), {});
+        players.forEach(p=>{ if(byPos[p.Pos]) byPos[p.Pos].push(p.Navn); });
+        Object.values(byPos).forEach(list=> list.sort((a,b)=> a.localeCompare(b,'no')));
+
+        document.querySelectorAll('select.pick').forEach(sel => {
+          const needPos = sel.getAttribute('data-pos');
+          const names = byPos[needPos] || [];
+          sel.innerHTML = '<option value="">VELG HER</option>' + names.map(n=>`<option>${n}</option>`).join('');
+        });
+      }catch(err){
+        console.error(err);
+      }
+    }
+
+    // Init
+    buildRows();
+    loadCSV();
+  </script>
 </body>
 </html>
