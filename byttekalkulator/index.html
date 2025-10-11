@@ -1,146 +1,86 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Byttekalkulator – statisk ramme</title>
+  <title>Bytteplanlegger – Rammeverk m/ data.csv</title>
   <style>
     :root{
-      --bg:#0a1f44; --panel:#12356c; --panel2:#0d2a5f; --text:#f0f6ff;
-      --red:#c23b50; --green:#2aa764; --line:rgba(255,255,255,.09);
+      --bg:#0a1f44; --panel:#12356c; --panel-2:#0d2a5f; --text:#f0f6ff; --muted:#b9c7e3;
+      --red:#c23b50; --green:#2aa764; --shadow:0 10px 24px rgba(0,0,0,.35);
     }
-    *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1220px;margin:28px auto;padding:0 16px}
-    h1{margin:0 0 14px;font-weight:800}
-    .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 24px rgba(0,0,0,.35);overflow:hidden}
+    h1{margin:0 0 14px;font-weight:800;letter-spacing:.2px}
+    .card{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+
+    /* GRID */
     .grid{display:grid;grid-template-columns:140px 1fr 1fr repeat(6,110px)}
-    .cell{padding:12px;border-bottom:1px solid var(--line);display:flex;align-items:center}
-    .head{background:#0c2b63;font-weight:800;letter-spacing:.3px}
-    .head .cell:nth-child(2){background:var(--red)} .head .cell:nth-child(3){background:var(--green)}
+    .row{display:contents}
+    .cell{padding:12px;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center}
     .pos{font-weight:700}
-    .num{justify-content:flex-end;font-variant-numeric:tabular-nums}
+    .head{background:#0c2b63;font-weight:800;letter-spacing:.4px}
+    .head .cell{border-bottom:0}
+    .head .cell:nth-child(2){background:var(--red)}
+    .head .cell:nth-child(3){background:var(--green)}
+
+    /* SELECT-stil */
+    .select{width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:none;
+      background:var(--panel-2) url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg>') no-repeat right 10px center;
+      border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:#fff}
+    .select:disabled{opacity:.6}
+
+    .num{justify-content:flex-end;font-variant-numeric:tabular-nums;color:#e6edf9}
+
     .divider{grid-column:1/-1;height:2px;background:rgba(255,255,255,.12)}
-    .sumrow{background:#153b7d} .sumrow .cell:first-child{font-weight:800}
-    .sumrow.red  .cell:first-child{background:var(--red)} .sumrow.green .cell:first-child{background:var(--green)}
-    .diffrow{background:#0e2756} .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;justify-content:center;font-size:28px;font-weight:900}
-    select{width:100%;appearance:none;background:var(--panel2);border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.2px}
+
+    .sumrow{background:#153b7d}
+    .sumrow.red  .cell:first-child{background:var(--red);font-weight:800}
+    .sumrow.green .cell:first-child{background:var(--green);font-weight:800}
+
+    .diffrow{background:#0e2756}
+    .diffrow .cell:first-child{font-size:22px;font-weight:900}
+    .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900}
+
+    .footer{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;background:#0e2756;border-top:1px solid rgba(255,255,255,.12)}
+    .box{background:#0d2a5f;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:12px}
+    .box h3{margin:0 0 10px;font-size:13px;color:#b9c7e3;letter-spacing:.08em;text-transform:uppercase}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Byttekalkulator – statisk ramme</h1>
+    <h1>Bytteplanlegger – Rammeverk</h1>
 
-    <div class="card">
-      <!-- header -->
+    <div class="card" id="app">
+      <!-- Header -->
       <div class="grid head">
         <div class="cell">POSISJON</div>
         <div class="cell">FØR BYTTER</div>
         <div class="cell">ETTER BYTTER</div>
-        <div class="cell">R25</div><div class="cell">R26</div><div class="cell">R27</div>
-        <div class="cell">R28</div><div class="cell">R29</div><div class="cell">R30</div>
+        <div class="cell">R25</div>
+        <div class="cell">R26</div>
+        <div class="cell">R27</div>
+        <div class="cell">R28</div>
+        <div class="cell">R29</div>
+        <div class="cell">R30</div>
       </div>
 
-      <!-- helper: funksjon som lager en rad (kopier manuelt hvis du ikke bruker JS) -->
-      <!-- Keepere (2) -->
-      <div class="grid">
-        <div class="cell pos">Keeper</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+      <!-- Rader genereres i JS -->
+      <div id="rows"></div>
 
-        <div class="cell pos">Keeper</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-      <div class="divider"></div>
-
-      <!-- Forsvar (5) -->
-      <div class="grid">
-        <!-- kopier blokka under 5 ganger -->
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Forsvar</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-      <div class="divider"></div>
-
-      <!-- Midtbane (5) – samme mønster -->
-      <div class="grid">
-        <!-- kopier 5 ganger -->
-        <!-- ... (samme som over, men med 'Midtbane' i posisjonscellen) ... -->
-        <div class="cell pos">Midtbane</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <!-- legg til 4 til rader som over -->
-      </div>
-      <div class="divider"></div>
-
-      <!-- Angrep (3) -->
-      <div class="grid">
-        <div class="cell pos">Angrep</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Angrep</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-
-        <div class="cell pos">Angrep</div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell"><select><option>VELG HER</option></select></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-      </div>
-
-      <!-- summer/ differanse -->
+      <!-- Summering (placeholder, uten logikk foreløpig) -->
       <div class="grid sumrow red">
         <div class="cell">FØR BYTTER</div>
         <div class="cell num"><strong>0,00</strong></div>
         <div class="cell"></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
       </div>
       <div class="grid sumrow green">
         <div class="cell">ETTER BYTTER</div>
         <div class="cell num"><strong>0,00</strong></div>
         <div class="cell"></div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+        <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
       </div>
 
       <div class="grid diffrow">
@@ -154,9 +94,203 @@
         <div class="cell num"><strong>0,00</strong></div>
         <div class="cell num"><strong>0,00</strong></div>
       </div>
+
+      <!-- Footer (kun visuell) -->
+      <div class="footer">
+        <div class="box">
+          <h3>Bytteinfo</h3>
+          <div class="cell" style="padding:0"><span class="muted" style="padding:12px 12px 12px 0">Gratisbytter</span><select class="select" style="max-width:160px"><option>VELG HER</option></select></div>
+          <div class="cell" style="padding:8px 0 0"><span class="muted" style="min-width:140px">Endringer</span><span style="font-weight:900">0</span></div>
+          <div class="cell" style="padding:8px 0 0"><span class="muted" style="min-width:140px">Minuspoeng</span><span style="font-weight:900">0</span></div>
+        </div>
+        <div class="box">
+          <h3>Chips per runde</h3>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">Spissrush</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          </div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">To Kapteiner</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          </div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">Rik Onkel</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <p style="opacity:.8;margin:12px 0 24px">Statisk ramme (ingen JS/data ennå). Når dette vises riktig på GitHub Pages, kobler vi på data i neste steg.</p>
+    <p class="muted" style="margin-top:10px">Denne undersiden forventer <code>../data.csv</code> (i rotmappa til repoet). Kolonner: <em>Navn/Name</em> og <em>Pos/Posisjon/Position</em>.</p>
   </div>
+
+  <script>
+    // --- Konfig ---
+    const POSITIONS = [
+      { key:'Keeper',   slots:2 },
+      { key:'Forsvar',  slots:5 },
+      { key:'Midtbane', slots:5 },
+      { key:'Angrep',   slots:3 },
+    ];
+
+    // --- Bygg rader ---
+    function buildRows(){
+      const host = document.getElementById('rows');
+      host.innerHTML = '';
+      POSITIONS.forEach(pos => {
+        for(let i=0;i<pos.slots;i++){
+          const row = document.createElement('div');
+          row.className = 'grid';
+          row.innerHTML = `
+            <div class="cell pos">${pos.key}</div>
+            <div class="cell"><select class="select pick" data-col="before" data-pos="${pos.key}"><option value="">VELG HER</option></select></div>
+            <div class="cell"><select class="select pick" data-col="after"  data-pos="${pos.key}"><option value="">VELG HER</option></select></div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+          `;
+          host.appendChild(row);
+        }
+        const div = document.createElement('div'); div.className='divider'; host.appendChild(div);
+      });
+    }
+
+    // --- CSV utils ---
+    function parseCSV(text){
+      const firstLine = text.split(/
+?
+/).find(Boolean) || '';
+      const sep = [',',';','	'].sort((a,b)=> (firstLine.split(b).length) - (firstLine.split(a).length))[0] || ',';
+      const lines = text.trim().split(/
+?
+/).filter(Boolean);
+      const headers = lines.shift().split(sep).map(h=>h.trim());
+      return {
+        headers,
+        rows: lines.map(line => {
+          const cells = line.split(sep).map(x=>x.trim());
+          const o = {}; headers.forEach((h,i)=> o[h] = cells[i] ?? '');
+          return o;
+        })
+      };
+    }
+
+    function pickColumn(headers, candidates, fallback=''){
+      const rx = new RegExp('^(' + candidates.join('|') + ')$', 'i');
+      return headers.find(h=> rx.test(h)) || fallback;
+    }
+
+    function normalizePos(value){
+      const v = String(value||'').toLowerCase();
+      if(/keep/.test(v)) return 'Keeper';
+      if(/fors/.test(v) || /def/.test(v)) return 'Forsvar';
+      if(/midt/.test(v) || /mid/.test(v)) return 'Midtbane';
+      if(/ang/.test(v) || /spiss/.test(v) || /forw|strik/.test(v)) return 'Angrep';
+      return value || '';
+    }
+
+    async function loadCSV(){
+      try{
+        // siden ligger i /byttekalkulator/index.html, data.csv i rot → gå ett nivå opp
+        const res = await fetch('../data.csv', {cache:'no-store'});
+        if(!res.ok) throw new Error('Kunne ikke hente ../data.csv');
+        const text = await res.text();
+        const { headers, rows } = parseCSV(text);
+        const colName = pickColumn(headers, ['Navn','Name']);
+        const colPos  = pickColumn(headers, ['Pos','Posisjon','Position']);
+        if(!colName || !colPos){ console.warn('Finner ikke Navn/Pos-kolonner i data.csv'); return; }
+        const players = rows.map(r => ({ Navn: r[colName], Pos: normalizePos(r[colPos]) })).filter(p=>p.Navn);
+
+        const byPos = POSITIONS.reduce((acc,p)=> (acc[p.key]=[], acc), {});
+        players.forEach(p=>{ if(byPos[p.Pos]) byPos[p.Pos].push(p.Navn); });
+        Object.values(byPos).forEach(list=> list.sort((a,b)=> a.localeCompare(b,'no')));
+
+        document.querySelectorAll('select.pick').forEach(sel => {
+          const needPos = sel.getAttribute('data-pos');
+          const names = byPos[needPos] || [];
+          sel.innerHTML = '<option value="">VELG HER</option>' + names.map(n=>`<option>${n}</option>`).join('');
+        });
+      }catch(err){
+        console.error(err);
+      }
+    }
+
+    // Init
+    buildRows();
+    loadCSV();
+  </script>
+  <script>
+    // Steg 2: fyll nedtrekk fra ../data.csv (rotmappa)
+    function parseCSV(text){
+      const firstLine = (text.split(/
+?
+/).find(Boolean) || '');
+      const sep = [',',';','	'].sort((a,b)=> (firstLine.split(b).length) - (firstLine.split(a).length))[0] || ',';
+      const lines = text.trim().split(/
+?
+/).filter(Boolean);
+      const headers = (lines.shift()||'').split(sep).map(h=>h.trim());
+      const rows = lines.map(line=>{
+        const cells = line.split(sep).map(x=>x.trim());
+        const o = {}; headers.forEach((h,i)=> o[h]=cells[i] ?? '');
+        return o;
+      });
+      return {headers, rows};
+    }
+
+    function pick(headers, names){
+      const rx = new RegExp('^(' + names.join('|') + ')$', 'i');
+      return headers.find(h=> rx.test(h));
+    }
+
+    function normalizePos(v){
+      const s = String(v||'').toLowerCase();
+      if(/keep/.test(s)) return 'Keeper';
+      if(/fors|def/.test(s)) return 'Forsvar';
+      if(/midt|mid/.test(s)) return 'Midtbane';
+      if(/ang|spiss|forw|strik/.test(s)) return 'Angrep';
+      return v||'';
+    }
+
+    async function fillSelects(){
+      try{
+        const res = await fetch('../data.csv', { cache:'no-store' });
+        if(!res.ok) throw new Error('Kunne ikke hente ../data.csv');
+        const text = await res.text();
+        const {headers, rows} = parseCSV(text);
+        const colName = pick(headers, ['Navn','Name']);
+        const colPos  = pick(headers, ['Pos','Posisjon','Position']);
+        if(!colName || !colPos) return;
+
+        const players = rows.map(r=>({ Navn: r[colName], Pos: normalizePos(r[colPos]) })).filter(p=>p.Navn);
+        const byPos = { Keeper:[], Forsvar:[], Midtbane:[], Angrep:[] };
+        players.forEach(p=>{ if(byPos[p.Pos]) byPos[p.Pos].push(p.Navn); });
+        Object.values(byPos).forEach(list=> list.sort((a,b)=> a.localeCompare(b,'no')));
+
+        // Finn hver rad og fyll tilsvarende selects
+        document.querySelectorAll('.grid').forEach(grid=>{
+          const cells = Array.from(grid.children);
+          // hopp over header/sum/diff-rader (som ikke har .pos)
+          const posIdxs = cells.map((c,i)=> c.classList.contains('pos') ? i : -1).filter(i=> i>=0);
+          posIdxs.forEach(i=>{
+            const posName = cells[i].textContent.trim();
+            const list = byPos[posName] || [];
+            // Forvent at to neste celler er select-celler
+            const sel1 = cells[i+1]?.querySelector('select');
+            const sel2 = cells[i+2]?.querySelector('select');
+            [sel1, sel2].forEach(sel => {
+              if(!sel) return;
+              sel.innerHTML = '<option value="">VELG HER</option>' + list.map(n=>`<option>${n}</option>`).join('');
+            });
+          });
+        });
+      }catch(e){ console.error(e); }
+    }
+
+    document.addEventListener('DOMContentLoaded', fillSelects);
+  </script>
 </body>
 </html>
