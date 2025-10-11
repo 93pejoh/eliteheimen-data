@@ -5,42 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Byttekalkulator – statisk ramme + CSV-nedtrekk</title>
   <style>
-    :root{--bg:#0a1f44;--panel:#12356c;--panel2:#0d2a5f;--text:#f0f6ff;--red:#c23b50;--green:#2aa764;--line:rgba(255,255,255,.09)}
-    *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    :root{
+      --bg:#0a1f44; --panel:#12356c; --panel2:#0d2a5f; --text:#f0f6ff;
+      --red:#c23b50; --green:#2aa764; --line:rgba(255,255,255,.09);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1220px;margin:28px auto;padding:0 16px}
-    h1{margin:0 0 14px;font-weight:800}
+    h1{margin:0 0 14px;font-weight:800;letter-spacing:.2px}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 24px rgba(0,0,0,.35);overflow:hidden}
+
+    /* GRID */
     .grid{display:grid;grid-template-columns:140px 1fr 1fr repeat(6,110px)}
     .cell{padding:12px;border-bottom:1px solid var(--line);display:flex;align-items:center}
     .head{background:#0c2b63;font-weight:800;letter-spacing:.3px}
-    .head .cell:nth-child(2){background:var(--red)} .head .cell:nth-child(3){background:var(--green)}
+    .head .cell:nth-child(2){background:var(--red)}
+    .head .cell:nth-child(3){background:var(--green)}
     .pos{font-weight:700}
     .num{justify-content:flex-end;font-variant-numeric:tabular-nums}
     .divider{grid-column:1/-1;height:2px;background:rgba(255,255,255,.12)}
-    .sumrow{background:#153b7d} .sumrow .cell:first-child{font-weight:800}
-    .sumrow.red  .cell:first-child{background:var(--red)} .sumrow.green .cell:first-child{background:var(--green)}
-    .diffrow{background:#0e2756} .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;justify-content:center;font-size:28px;font-weight:900}
-    select{width:100%;appearance:none;background:var(--panel2);border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.2px}
+    .sumrow{background:#153b7d}
+    .sumrow .cell:first-child{font-weight:800}
+    .sumrow.red  .cell:first-child{background:var(--red)}
+    .sumrow.green .cell:first-child{background:var(--green)}
+    .diffrow{background:#0e2756}
+    .diffrow .big{grid-column:2/4;background:#e9f5ee;color:#052d13;border-radius:12px;margin:6px;padding:14px 16px;display:flex;justify-content:center;font-size:28px;font-weight:900}
+
+    /* SELECT */
+    select{
+      width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:none;
+      background:var(--panel2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center;
+      border:1px solid rgba(255,255,255,.18);padding:10px 36px 10px 12px;border-radius:12px;color:#fff;
+      font-weight:700;text-transform:uppercase;letter-spacing:.2px
+    }
+
+    /* Footer paneler (visuelt – uten logikk) */
+    .footer{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;background:#0e2756;border-top:1px solid rgba(255,255,255,.12)}
+    .box{background:#0d2a5f;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:12px}
+    .box h3{margin:0 0 10px;font-size:13px;color:#b9c7e3;letter-spacing:.08em;text-transform:uppercase}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Byttekalkulator – statisk ramme</h1>
 
-    <div class="card">
-      <!-- header -->
+    <div class="card" id="app">
+      <!-- HEADER -->
       <div class="grid head">
         <div class="cell">POSISJON</div>
         <div class="cell">FØR BYTTER</div>
         <div class="cell">ETTER BYTTER</div>
-        <div class="cell">R25</div><div class="cell">R26</div><div class="cell">R27</div>
-        <div class="cell">R28</div><div class="cell">R29</div><div class="cell">R30</div>
+        <div class="cell">R25</div>
+        <div class="cell">R26</div>
+        <div class="cell">R27</div>
+        <div class="cell">R28</div>
+        <div class="cell">R29</div>
+        <div class="cell">R30</div>
       </div>
 
-      <!-- Rader genereres i JS slik at de alltid finnes, uansett CSV -->
+      <!-- RADER (genereres i JS så de alltid eksisterer) -->
       <div id="rows"></div>
 
-      <!-- summer/ differanse -->
+      <!-- SUMMER (placeholder) -->
       <div class="grid sumrow red">
         <div class="cell">FØR BYTTER</div>
         <div class="cell num"><strong>0,00</strong></div>
@@ -67,76 +93,144 @@
         <div class="cell num"><strong>0,00</strong></div>
         <div class="cell num"><strong>0,00</strong></div>
       </div>
+
+      <!-- ENKEL FOOTER (visuelt) -->
+      <div class="footer">
+        <div class="box">
+          <h3>Bytteinfo</h3>
+          <div class="cell" style="padding:0">
+            <span style="padding:12px 12px 12px 0;opacity:.85">Gratisbytter</span>
+            <select style="max-width:160px"><option>VELG HER</option></select>
+          </div>
+          <div class="cell" style="padding:8px 0 0"><span style="min-width:140px;opacity:.85">Endringer</span><strong>0</strong></div>
+          <div class="cell" style="padding:8px 0 0"><span style="min-width:140px;opacity:.85">Minuspoeng</span><strong>0</strong></div>
+        </div>
+        <div class="box">
+          <h3>Chips per runde</h3>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">Spissrush</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px">
+              <input type="checkbox"><input type="checkbox"><input type="checkbox">
+              <input type="checkbox"><input type="checkbox"><input type="checkbox">
+            </div>
+          </div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">To Kapteiner</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px">
+              <input type="checkbox"><input type="checkbox"><input type="checkbox">
+              <input type="checkbox"><input type="checkbox"><input type="checkbox">
+            </div>
+          </div>
+          <div class="cell" style="gap:18px">
+            <div style="width:120px">Rik Onkel</div>
+            <div style="display:grid;grid-template-columns:repeat(6,110px);gap:10px">
+              <input type="checkbox"><input type="checkbox"><input type="checkbox">
+              <input type="checkbox"><input type="checkbox"><input type="checkbox">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <p style="opacity:.8;margin:12px 0 24px">Nedtrekk lades fra <code>../data.csv</code> når siden er lastet.</p>
+    <p style="opacity:.8;margin:12px 0 24px">
+      Nedtrekk fylles fra <code>../data.csv</code> (i rotmappa). Kolonner: <em>Navn/Name</em> og <em>Pos/Posisjon/Position</em>.
+    </p>
   </div>
 
   <script>
-    // 1) Lag radene alltid (to keepere, fem forsvarere, fem midtbane, tre angrep)
+    // --- 1) Bygg faste rader (alltid synlige) -------------------------------
     const LAYOUT = [
-      {pos:'Keeper', count:2},
-      {pos:'Forsvar', count:5},
-      {pos:'Midtbane', count:5},
-      {pos:'Angrep', count:3},
+      { pos:'Keeper',   count: 2 },
+      { pos:'Forsvar',  count: 5 },
+      { pos:'Midtbane', count: 5 },
+      { pos:'Angrep',   count: 3 },
     ];
 
-    function makeRows(){
+    function makeRows() {
       const host = document.getElementById('rows');
       host.innerHTML = '';
-      LAYOUT.forEach(group =>{
+      LAYOUT.forEach(group => {
         const grid = document.createElement('div');
-        grid.className='grid';
-        for(let i=0;i<group.count;i++){
+        grid.className = 'grid';
+        for (let i = 0; i < group.count; i++) {
           grid.insertAdjacentHTML('beforeend', `
             <div class="cell pos">${group.pos}</div>
-            <div class="cell"><select class="pick" data-pos="${group.pos}"><option value="">VELG HER</option></select></div>
-            <div class="cell"><select class="pick" data-pos="${group.pos}"><option value="">VELG HER</option></select></div>
-            <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
-            <div class="cell num">0,00</div><div class="cell num">0,00</div><div class="cell num">0,00</div>
+            <div class="cell"><select class="pick" data-pos="${group.pos}">
+              <option value="">VELG HER</option>
+            </select></div>
+            <div class="cell"><select class="pick" data-pos="${group.pos}">
+              <option value="">VELG HER</option>
+            </select></div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
+            <div class="cell num">0,00</div>
           `);
         }
         host.appendChild(grid);
-        const div = document.createElement('div'); div.className='divider'; host.appendChild(div);
+        const div = document.createElement('div'); div.className = 'divider'; host.appendChild(div);
       });
     }
 
-    // 2) Hent og fyll fra ../data.csv
-    function parseCSV(text){
-      const firstLine = (text.split(/
-?
-/).find(Boolean) || '');
-      const sep = [',',';','	'].sort((a,b)=> (firstLine.split(b).length) - (firstLine.split(a).length))[0] || ',';
-      const lines = text.trim().split(/
-?
-/).filter(Boolean);
-      const headers = (lines.shift()||'').split(sep).map(h=>h.trim());
-      const rows = lines.map(line=>{const cells=line.split(sep).map(x=>x.trim());const o={};headers.forEach((h,i)=>o[h]=cells[i]??'');return o;});
-      return {headers, rows};
+    // --- 2) CSV parsing + fyll nedtrekk ------------------------------------
+    function parseCSV(text) {
+      const first = (text.split(/\r?\n/).find(Boolean) || '');
+      const sep = [',',';','\t'].sort((a,b) => (first.split(b).length) - (first.split(a).length))[0] || ',';
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      const headers = (lines.shift() || '').split(sep).map(h => h.trim());
+      const rows = lines.map(line => {
+        const cells = line.split(sep).map(x => x.trim());
+        const o = {}; headers.forEach((h, i) => o[h] = (cells[i] ?? ''));
+        return o;
+      });
+      return { headers, rows };
     }
-    const pick = (headers, names)=> headers.find(h=> new RegExp('^('+names.join('|')+')$','i').test(h));
-    const normPos = v=>{ const s=String(v||'').toLowerCase(); if(/keep/.test(s))return 'Keeper'; if(/fors|def/.test(s))return 'Forsvar'; if(/midt|mid/.test(s))return 'Midtbane'; if(/ang|spiss|forw|strik/.test(s))return 'Angrep'; return v||''; };
 
-    async function fillFromCSV(){
-      try{
-        const res = await fetch('../data.csv', {cache:'no-store'});
-        if(!res.ok) throw new Error('Får ikke tak i ../data.csv');
+    const pickHeader = (headers, names) =>
+      headers.find(h => new RegExp('^(' + names.join('|') + ')$', 'i').test(h));
+
+    const normalizePos = v => {
+      const s = String(v || '').toLowerCase();
+      if (/keep/.test(s)) return 'Keeper';
+      if (/fors|def/.test(s)) return 'Forsvar';
+      if (/midt|mid/.test(s)) return 'Midtbane';
+      if (/ang|spiss|forw|strik/.test(s)) return 'Angrep';
+      return v || '';
+    };
+
+    async function fillFromCSV() {
+      try {
+        const res = await fetch('../data.csv', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Fant ikke ../data.csv');
         const text = await res.text();
-        const {headers, rows} = parseCSV(text);
-        const cName = pick(headers,['Navn','Name']);
-        const cPos  = pick(headers,['Pos','Posisjon','Position']);
-        if(!cName || !cPos) return; // ikke krasj – radene står der med "VELG HER"
+        const { headers, rows } = parseCSV(text);
 
-        const byPos = {Keeper:[],Forsvar:[],Midtbane:[],Angrep:[]};
-        rows.forEach(r=>{ const n=r[cName]; const p=normPos(r[cPos]); if(n && byPos[p]) byPos[p].push(n); });
-        Object.values(byPos).forEach(arr=>arr.sort((a,b)=>a.localeCompare(b,'no')));
+        const colName = pickHeader(headers, ['Navn','Name']);
+        const colPos  = pickHeader(headers, ['Pos','Posisjon','Position']);
+        if (!colName || !colPos) {
+          console.warn('Mangler kolonner Navn/Pos i data.csv');
+          return;
+        }
 
-        document.querySelectorAll('select.pick').forEach(sel=>{
-          const p = sel.getAttribute('data-pos');
-          const list = byPos[p]||[];
-          sel.innerHTML = '<option value="">VELG HER</option>' + list.map(n=>`<option>${n}</option>`).join('');
+        const byPos = { Keeper: [], Forsvar: [], Midtbane: [], Angrep: [] };
+        rows.forEach(r => {
+          const navn = r[colName];
+          const pos  = normalizePos(r[colPos]);
+          if (navn && byPos[pos]) byPos[pos].push(navn);
         });
-      }catch(e){ console.warn(e); }
+        Object.values(byPos).forEach(list => list.sort((a,b) => a.localeCompare(b, 'no')));
+
+        document.querySelectorAll('select.pick').forEach(sel => {
+          const p = sel.getAttribute('data-pos');
+          const list = byPos[p] || [];
+          sel.innerHTML = '<option value="">VELG HER</option>' + list.map(n => `<option>${n}</option>`).join('');
+        });
+      } catch (e) {
+        console.warn(e);
+        // bevar «VELG HER» om det feiler
+      }
     }
 
     // Init
