@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen Fantasy</title>
-<meta name="description" content="Eliteheimen Fantasy – interaktiv spilleroversikt for Fantasy Eliteserien." />
+<meta name="description" content="Eliteheimen – interaktiv spilleroversikt for Fantasy Eliteserien." />
 <meta name="data-last-updated" content="2025-10-14T11:33:00+02:00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -32,20 +32,15 @@
     border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
   .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff}
   .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
-  .brand h2{
-    margin:2px 0 0;
-    font-size:.95rem;
-    font-weight:600;
-    letter-spacing:.2px;
-    color:#e5e7eb;
-    opacity:.9;
-  }
+  /* Tittel + småknapper på samme rad */
+  .brand-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .brand-links{display:inline-flex;gap:6px;flex-wrap:wrap}
+
   @media (max-width:780px){
     .brand h1{ font-size:1.1rem; }
-    .brand h2{ font-size:.9rem; }
   }
 
-  /* Toolbar */
+  /* Toolbar (høyre side) */
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
@@ -74,6 +69,22 @@
     background: rgba(255,255,255,.25);
     border-color: rgba(255,255,255,.6);
     color: #fff;
+  }
+
+  /* Små hero-lenker (Om / Patreon) */
+  .nav-link{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.2);
+    color:#e5e7eb; font-weight:600; text-decoration:none;
+    transition:background .2s, border-color .2s, color .2s;
+    white-space:nowrap;
+  }
+  .nav-link:hover{
+    background:rgba(255,255,255,.12);
+    border-color:rgba(255,255,255,.45);
+    color:#fff;
   }
 
   /* Filterbar (kompakt) */
@@ -195,20 +206,6 @@
     font-size: 1rem;
     opacity: 0.9;
   }
-  /* Hero-nav-lenke */
-.nav-link{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:6px 10px; border-radius:999px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.2);
-  color:#e5e7eb; font-weight:600; text-decoration:none;
-  transition:background .2s, border-color .2s, color .2s;
-}
-.nav-link:hover{
-  background:rgba(255,255,255,.12);
-  border-color:rgba(255,255,255,.45);
-  color:#fff;
-}
 </style>
 </head>
 <body>
@@ -218,17 +215,16 @@
   <div class="hero-inner">
     <div class="brand">
       <img src="logo.png" alt="Eliteheimen logo" />
-      <div>
+      <div class="brand-title-row">
         <h1>Eliteheimen Fantasy</h1>
+        <div class="brand-links">
+          <a class="nav-link" href="https://eliteheimen.no/om/" aria-label="Om Eliteserien Fantasy">Om Eliteserien Fantasy</a>
+          <a class="nav-link" href="https://patreon.com/Eliteheimen" target="_blank" rel="noopener" aria-label="Støtt på Patreon">Patreon</a>
+        </div>
       </div>
     </div>
+
     <div class="toolbar">
-      <div class="toolbar">
-  <a class="nav-link" href="https://eliteheimen.no/om/" aria-label="Om Eliteheimen Fantasy">Om</a>
-  <div id="last-updated"></div>
-  <a id="downloadCsvBtn" class="download-btn" href="#" role="button">⬇️ Last ned CSV</a>
-  <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
-</div>
       <div id="last-updated"></div>
       <a id="downloadCsvBtn" class="download-btn" href="#" role="button">⬇️ Last ned CSV</a>
       <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
@@ -267,7 +263,7 @@
 
 <!-- FOOTER -->
 <footer class="footer-wrap" id="about">
-  <div>© 2025 Eliteheimen Fantasy.</div>
+  <div>© 2025 Eliteheimen.</div>
   <div>
     <a href="https://github.com/93pejoh/eliteheimen-data" target="_blank" rel="noopener">GitHub</a>
     &nbsp;•&nbsp;<a href="#top">Til toppen ↑</a>
