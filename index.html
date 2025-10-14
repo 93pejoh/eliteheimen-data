@@ -195,6 +195,20 @@
     font-size: 1rem;
     opacity: 0.9;
   }
+  /* Hero-nav-lenke */
+.nav-link{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.2);
+  color:#e5e7eb; font-weight:600; text-decoration:none;
+  transition:background .2s, border-color .2s, color .2s;
+}
+.nav-link:hover{
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,255,255,.45);
+  color:#fff;
+}
 </style>
 </head>
 <body>
@@ -209,6 +223,12 @@
       </div>
     </div>
     <div class="toolbar">
+      <div class="toolbar">
+  <a class="nav-link" href="https://eliteheimen.no/om/" aria-label="Om Eliteheimen">Om</a>
+  <div id="last-updated"></div>
+  <a id="downloadCsvBtn" class="download-btn" href="#" role="button">⬇️ Last ned CSV</a>
+  <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
+</div>
       <div id="last-updated"></div>
       <a id="downloadCsvBtn" class="download-btn" href="#" role="button">⬇️ Last ned CSV</a>
       <label class="toggle"><input type="checkbox" id="darkToggle"> Mørk modus</label>
