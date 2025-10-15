@@ -11,7 +11,7 @@
 <link rel="icon" href="logo.png">
 
 <style>
-  :root { --radius:14px; --surface:#fff; --text:#0f172a; --muted:#667085; --border:#e5e7eb; }
+  :root { --radius:14px; --surface:#fff; --text:#0f172a; --muted:#667085; --border:#e5e7eb; --name-col-width:240px; }
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
@@ -210,10 +210,10 @@
   /* Favorittstjerne i navnecella */
   .fav-btn{
     display:inline-flex; align-items:center; justify-content:center;
-    width:26px; height:26px; margin-right:6px;
+    width:26px; height:26px; margin-right:0;
     border-radius:999px; border:1px solid #e5e7eb; background:#fff;
     cursor:pointer; vertical-align:middle;
-    flex:0 0 26px; /* stabil bredde for perfekt vertikal linje */
+    flex:0 0 26px;
   }
   .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
   .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
@@ -221,9 +221,21 @@
   html.dark .fav-btn{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-btn[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
-  /* Radlig layout i navnecella for perfekt venstrejustering */
+  /* Navne-blokk: fast bredde, sentrert i cella; grid = stjerne + navn */
+  table thead th:first-child,
+  table tbody td:first-child{
+    text-align:center;
+    padding-left:6px; /* mindre luft mot kant, kan settes til 0 */
+  }
   .name-cell{
-    display:flex; align-items:center; justify-content:flex-start; gap:6px;
+    display:grid;
+    grid-template-columns:26px 1fr;
+    align-items:center;
+    column-gap:6px;
+
+    width:var(--name-col-width);
+    max-width:calc(100% - 8px);
+    margin:0 auto; /* sentrer blokka i kolonnen */
   }
 
   /* Filterknapp: vis kun favoritter (stjerne uten tekst) */
@@ -238,42 +250,10 @@
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
-  /* Sentrer innholdet i første kolonne */
-table tbody td:first-child{ text-align:center; }
-
-/* Første kolonne: venstrejustert med litt innrykk */
-table thead th:first-child,
-table tbody td:first-child{
-  text-align:left;
-  padding-left: 14px; /* justér ved behov */
-}
-
-/* Navnecelle som grid: fast stjerne + navn */
-.name-cell{
-  display:grid;
-  grid-template-columns: 26px auto;
-  align-items:center;
-  column-gap:6px;
-}
-
-/* Stjerne fast bredde (grid tar spacing, så ingen margin trengs) */
-.fav-btn{
-  width:26px; height:26px;
-  flex:0 0 26px; /* ufarlig å la stå for sikkerhets skyld */
-  margin-right:0; /* null ut hvis du hadde margin fra før */
-}
-
-/* Selve raden med stjerne + navn er venstrejustert inni den sentrerte blokka */
-.name-cell{
-  display:flex; 
-  align-items:center; 
-  justify-content:flex-start; 
-  gap:6px;
-}
-
-/* Behold fast bredde på stjerna for perfekt vertikal linje */
-.fav-btn{ flex:0 0 26px; }
-
+  /* Litt smalere på mobil */
+  @media (max-width:780px){
+    :root{ --name-col-width:200px; }
+  }
 </style>
 </head>
 <body>
@@ -657,7 +637,7 @@ function render(){
         val = `<strong>${val}</strong>`;
       }
 
-      // Navn med favoritt-stjerne, samlet i venstrejustert rad
+      // Navn med favoritt-stjerne, i sentrert fast-bredde blokk
       if (detectedNameCol && c === detectedNameCol){
         const key = favKeyFromRow(row);
         const pressed = isFavKey(key);
@@ -688,7 +668,7 @@ tbody.addEventListener('click', (e) => {
   btn.setAttribute('aria-pressed', nowPressed ? 'true' : 'false');
   btn.setAttribute('aria-label', nowPressed ? 'Fjern favoritt' : 'Marker som favoritt');
   toggleFavKey(key);
-  if (favoritesOnly) render(); // hvis filteret er aktivt, oppdater listen
+  if (favoritesOnly) render(); // oppdater hvis filteret er aktivt
 });
 
 /* INIT */
