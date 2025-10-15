@@ -15,11 +15,7 @@
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:14px;color:var(--text);background:#fafafa}
 
-  /* Tall: tabulære sifre for pen kolonnejustering */
-  table, th, td {
-    font-variant-numeric: tabular-nums lining-nums;
-    font-feature-settings: "tnum" 1, "lnum" 1;
-  }
+  table, th, td { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1; }
 
   /* Hero */
   .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:6px;color:#fff;
@@ -34,86 +30,48 @@
   .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
   .brand-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .brand-links{display:inline-flex;gap:6px;flex-wrap:wrap}
-  @media (max-width:780px){
-    .brand h1{ font-size:1.1rem; }
-  }
+  @media (max-width:780px){ .brand h1{ font-size:1.1rem; } }
 
-  /* Toolbar (høyre side) */
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
 
-  /* Nedlastningsknapp */
   .download-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #f8fafc;
-    border: 1px solid #d1d5db;
-    border-radius: 999px;
-    color: #0f172a;
-    padding: 6px 12px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #d1d5db; border-radius: 999px;
+    color: #0f172a; padding: 6px 12px; font-weight: 600; text-decoration: none; transition: background .2s, border-color .2s, color .2s;
   }
   .download-btn:hover { background:#e0f2fe; border-color:#93c5fd; color:#0c4a6e; }
-  html.dark .download-btn {
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.3);
-    color: #f8fafc;
-  }
-  html.dark .download-btn:hover {
-    background: rgba(255,255,255,.25);
-    border-color: rgba(255,255,255,.6);
-    color: #fff;
-  }
+  html.dark .download-btn { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); color: #f8fafc; }
+  html.dark .download-btn:hover { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.6); color: #fff; }
 
-  /* Små hero-lenker (Om / Patreon) */
   .nav-link{
-    display:inline-flex; align-items:center; gap:6px;
-    padding:6px 10px; border-radius:999px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.2);
-    color:#e5e7eb; font-weight:600; text-decoration:none;
-    transition:background .2s, border-color .2s, color .2s;
-    white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.2); color:#e5e7eb; font-weight:600; text-decoration:none;
+    transition:background .2s, border-color .2s, color .2s; white-space:nowrap;
   }
-  .nav-link:hover{
-    background:rgba(255,255,255,.12);
-    border-color:rgba(255,255,255,.45);
-    color:#fff;
-  }
+  .nav-link:hover{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.45); color:#fff; }
 
-  /* Filterbar (kompakt) */
+  /* Filterbar */
   .filterbar{
-    position:sticky; top:0; z-index:5;
-    background:#fff; border:1px solid #e5e7eb; border-radius:10px;
-    box-shadow:0 6px 20px rgba(2,8,23,.06);
-    padding:6px 8px; margin:6px 0;
+    position:sticky; top:0; z-index:5; background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+    box-shadow:0 6px 20px rgba(2,8,23,.06); padding:6px 8px; margin:6px 0;
   }
   .filterbar-row{
-    display:grid; align-items:center;
-    grid-auto-flow:column; grid-template-columns:auto 1fr auto auto auto auto auto auto;
+    display:grid; align-items:center; grid-auto-flow:column; grid-template-columns:auto 1fr auto auto auto auto auto auto;
     gap:8px;
   }
   .filterbar .label{ color:#64748b; font-size:.85rem; white-space:nowrap; }
-  .gap{ width:6px; }
   .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .chip{border:none;border-radius:999px;padding:2px 8px;background:#f2f4f7;cursor:pointer;user-select:none}
-  .chip[aria-pressed="true"]{background:#e5effe;outline:2px solid #93c5fd}
-  .pill.kpi-mini{background:#f8fafc;border:1px solid #e5e7eb;border-radius:999px;padding:4px 8px;white-space:nowrap}
-  .filterbar input[type="search"]{
-    height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;width:100%;
-  }
-  .filterbar select{
-    height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff;
-  }
+  .chip{border:1px solid #d1d5db;border-radius:999px;padding:2px 8px;background:#fff;cursor:pointer;user-select:none;color:#0f172a}
+  .chip[aria-pressed="true"]{background:#e5effe;border-color:#93c5fd;color:#0c4a6e}
+  .filterbar input[type="search"]{ height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;width:100%; }
+  .filterbar select{ height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff; }
 
-  /* Pris – kompakt */
   .price-compact{display:inline-flex;align-items:center;gap:6px}
   .price-compact input[type="range"]{width:150px;height:3px}
   .muted{color:#666;font-size:.82rem}
+  .filterbar .divider { width:1px; height:22px; background:#e5e7eb; }
+  html.dark .filterbar .divider { background:#1f2a44; }
 
   /* Tabell */
   .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #e5e5e5;border-radius:10px;background:#fff;position:relative;margin-top:6px}
@@ -124,15 +82,12 @@
   .sort-ind{opacity:1;font-size:.9em;margin-left:6px;color:#475569}
   tbody td{border-top:1px solid #f0f0f0;padding:4px 6px;white-space:nowrap;text-align:center}
 
-  /* Zebra/hover – ikke overstyr celler som allerede har bakgrunn */
   tbody tr:nth-child(even) td:not([style*="background"]) { background:#fcfcfc; }
   tbody tr:hover td:not([style*="background"])            { background:#f3f7ff; }
 
-  /* Sticky første kolonne (NAVN flyttes først i JS) */
   tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:3;background:#fff;box-shadow:1px 0 0 #eee}
   .pos-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;color:#111827}
 
-  .legend{font-size:.85rem;color:#666;margin-top:4px}
   .footer-wrap{margin-top:12px;padding-top:8px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   .footer-wrap a{color:#64748b;text-decoration:none}
   .footer-wrap a:hover{color:#0ea5e9}
@@ -142,8 +97,8 @@
   html.dark .filterbar{background:#0f172a;border-color:#1f2a44;box-shadow:0 6px 24px rgba(0,0,0,.35)}
   html.dark .filterbar input[type="search"]{background:#0b1325;color:#e5e7eb;border-color:#1f2a44}
   html.dark .filterbar select{background:#0b1325;color:#e5e7eb;border-color:#1f2a44}
-  html.dark .chip{background:#111827;color:#e5e7eb}
-  html.dark .chip[aria-pressed="true"]{background:#1f2937;outline-color:#334155}
+  html.dark .chip{background:#0b1325;border-color:#1f2a44;color:#e5e7eb}
+  html.dark .chip[aria-pressed="true"]{background:#1f263a;border-color:#334155;color:#cfe1ff}
   html.dark .table-wrap{border-color:#1f2a44;background:#0f172a}
   html.dark thead th{background:#0b1325 !important;color:#f1f5f9 !important;border-bottom-color:#223356 !important;box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
   html.dark thead th:first-child{background:#0b1325 !important;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
@@ -151,36 +106,17 @@
   html.dark tbody tr:nth-child(even) td:not([style*="background"]) { background:#0e172a; }
   html.dark tbody tr:hover td:not([style*="background"])            { background:#122038; }
   html.dark tbody td:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
-  html.dark .legend, html.dark .footer-wrap{color:#a3adc2}
 
-  /* Liten visuell hint om horisontal scroll */
-  .table-wrap::after{
-    content:"";position:absolute;right:0;top:0;bottom:0;width:18px;pointer-events:none;
-    background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.95));
-  }
-  html.dark .table-wrap::after{
-    background:linear-gradient(to right, rgba(15,23,42,0), rgba(15,23,42,.95));
-  }
-
-  /* Ekstra mobiljustering */
   @media (max-width: 780px){
     body{ margin:10px; }
-    .filterbar-row{
-      grid-template-columns:1fr 1fr;
-      grid-auto-flow:row;
-      gap:8px;
-    }
-    .pill.kpi-mini{ grid-column:1 / 2; }
-    #q{ grid-column:2 / 3; }
+    .filterbar-row{ grid-template-columns:1fr 1fr; grid-auto-flow:row; gap:8px; }
+    #q{ grid-column:1 / -1; }
     #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact, #totalChipsWrap{ grid-column:1 / -1; }
     .price-compact input[type="range"]{ width:100%; height:3px; }
     table{ font-size:.9rem; }
     thead th{ padding:6px; }
     tbody td{ padding:4px 6px; }
   }
-
-  .cards, section.cards, .cards .card { display:none !important;height:0 !important;margin:0 !important;padding:0 !important;border:0 !important; }
-  html.dark .pill.kpi-mini { color: #000 !important; background: #fff !important; }
 
   /* Sist oppdatert */
   #last-updated { font-size: 0.9rem; opacity: 0.85; color: #e7e7e7; margin-left: auto; display: flex; align-items: center; gap: 0.4rem; }
@@ -191,8 +127,7 @@
     display:inline-flex; align-items:center; justify-content:center;
     width:26px; height:26px; margin-right:0;
     border-radius:999px; border:1px solid #e5e7eb; background:#fff;
-    cursor:pointer; vertical-align:middle;
-    flex:0 0 26px;
+    cursor:pointer; vertical-align:middle; flex:0 0 26px;
   }
   .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
   .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
@@ -214,10 +149,6 @@
   .fav-filter[aria-pressed="true"]::before{ content:"★"; }
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
-
-  /* Delere og runde-chips rad uten teller */
-  .filterbar .divider { width:1px; height:22px; background:#e5e7eb; }
-  html.dark .filterbar .divider { background:#1f2a44; }
 </style>
 
 <!-- Google tag (gtag.js) -->
@@ -255,30 +186,24 @@
 
 <!-- FILTERBAR -->
 <section id="filters" class="filterbar">
-  <!-- Rad 1: primærfiltre -->
   <div class="filterbar-row">
-    <!-- Favorittfilter-ikon -->
     <button id="favFilter" class="fav-filter" title="Vis kun favoritter" aria-pressed="false"></button>
 
-    <!-- Søk -->
     <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
 
     <span class="divider"></span>
 
-    <!-- Posisjoner -->
     <span class="label">Posisjoner</span>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
-    <div id="pos-chips" class="row microgap" style="margin:0;"></div>
+    <div id="pos-chips" class="row" style="margin:0;"></div>
 
     <span class="divider"></span>
 
-    <!-- Klubb -->
     <span class="label" id="clubLabel">Klubb</span>
     <select id="clubSelect"><option value="">Alle</option></select>
 
     <span class="divider"></span>
 
-    <!-- Pris -->
     <span class="label">Pris ≤</span>
     <div id="price-compact" class="price-compact" style="display:none;">
       <input id="priceCapRange" type="range" step="0.1" />
@@ -286,7 +211,7 @@
     </div>
   </div>
 
-  <!-- Rad 2: runde-chips for TOTALT (ingen teller-boks) -->
+  <!-- Runde-chips for TOTALT -->
   <div class="filterbar-row" style="margin-top:6px;">
     <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
   </div>
@@ -319,7 +244,7 @@ window.CSV_URL = CSV_URL;
 /* Skjul kolonner etter Excel-bokstav: */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
-/* Betinget formatering / grupper */
+/* Runde-kolonner og TOTALT */
 const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"];
 const TOTAL_COLUMN  = "TOTALT";
 
@@ -341,7 +266,7 @@ let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 let favoritesOnly = false;
 
-/* Persist for TOTALT (hvilke runder teller) */
+/* Persist for TOTALT */
 const TOTAL_KEY = 'eh_total_cols_v1';
 let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
 if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
@@ -358,16 +283,13 @@ function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return 
 function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
 function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
 function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
-const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 
 /* Navn/posisjon/klubb deteksjon */
 function detectNameColumn(columns){
   const cands = ["navn","name","spiller","player","full name","fullname"];
   const lower = columns.map(c => String(c||"").toLowerCase());
-  for (let i=0;i<lower.length;i++){
-    if (cands.includes(lower[i])) return columns[i];
-  }
+  for (let i=0;i<lower.length;i++){ if (cands.includes(lower[i])) return columns[i]; }
   return columns[0] || "";
 }
 function detectPositionColumn(columns){
@@ -401,33 +323,21 @@ function toggleFavKey(key){
   localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES]));
 }
 
-/* Farger */
+/* Farger og ranges */
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
 function colorGroup(val, min, max){
   if(!isNumericLike(val))return '';
-  const x=toNumber(val);
-  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
   const mid=3; let r,g,b;
-  if (x<=mid){
-    const t=(x-min)/(mid-min);
-    r=Math.round(0xd2 + (0xff-0xd2)*t);
-    g=Math.round(0x25 + (0xff-0x25)*t);
-    b=Math.round(0x5d + (0xff-0x5d)*t);
-  } else {
-    const t=(x-mid)/(max-mid);
-    r=Math.round(0xff + (0x04-0xff)*t);
-    g=Math.round(0xff + (0xb1-0xff)*t);
-    b=Math.round(0xff + (0x55-0xff)*t);
-  }
+  if (x<=mid){ const t=(x-min)/(mid-min); r=Math.round(0xd2 + (0xff-0xd2)*t); g=Math.round(0x25 + (0xff-0x25)*t); b=Math.round(0x5d + (0xff-0x5d)*t); }
+  else        { const t=(x-mid)/(max-mid); r=Math.round(0xff + (0x04-0xff)*t); g=Math.round(0xff + (0xb1-0xff)*t); b=Math.round(0xff + (0x55-0xff)*t); }
   const text=luminance([r,g,b])<0.55?'#fff':'#000';
   return `background:rgb(${r}, ${g}, ${b}) !important;color:${text} !important;`;
 }
 function colorTotalBlue(val,min,max){
   if(!isNumericLike(val))return '';
-  const x=toNumber(val);
-  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-  let t=(x-min)/(max-min);
-  const hue=210, sat=90, light=92 - t*32;
+  const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  let t=(x-min)/(max-min); const hue=210, sat=90, light=92 - t*32;
   return `background:hsl(${hue} ${sat}% ${light}% ) !important;color:#000 !important;`;
 }
 function computeGroupRange(rows, cols){
@@ -443,6 +353,13 @@ function computeSingleRange(rows, col){
     if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
   }
   return any && max>min ? {min,max} : null;
+}
+function computePriceRange(rows,col){
+  let min=Infinity,max=-Infinity,any=false;
+  for(const r of rows){const v=r[col];
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+  }
+  return any?{min,max}:null;
 }
 
 /* Header */
@@ -460,7 +377,7 @@ function renderHeader(){
   thead.innerHTML=''; thead.appendChild(tr);
 }
 
-/* Filtrering av rader */
+/* Filtrering */
 function rowMatches(row){
   const query=(q.value||'').toLowerCase();
   if (query){
@@ -487,7 +404,7 @@ function rowMatches(row){
   return true;
 }
 
-/* TOTALT */
+/* TOTALT UI */
 function buildTotalChips(){
   totalChipsWrap.innerHTML = '';
   for (const col of GROUP_COLUMNS){
@@ -514,6 +431,7 @@ function buildTotalChips(){
   }
 }
 
+/* TOTALT beregning */
 function computeTotalForRow(row){
   let sum = 0; let any=false;
   INCLUDED_IN_TOTAL.forEach(c=>{
@@ -522,15 +440,14 @@ function computeTotalForRow(row){
   });
   return any ? Math.round(sum*100)/100 : '';
 }
-function computeTotalsForData(){
-  for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); }
-}
+function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); } }
 
 /* Synlige kolonner */
 function rebuildVisibleColumns(){
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
   const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
 
+  // Fjern evt. "NESTE 6" fra CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
   // Skjul ekskluderte runder ALLTID
@@ -551,7 +468,7 @@ function rebuildVisibleColumns(){
   VISIBLE_COLUMNS = cols;
 }
 
-/* Render tabell */
+/* Render */
 function render(){
   renderHeader();
   let rows=DATA.filter(rowMatches);
@@ -605,7 +522,7 @@ function render(){
   tbody.appendChild(frag);
 }
 
-/* Klikk på stjerna (delegation på tbody) */
+/* Klikk på stjerna (delegation) */
 tbody.addEventListener('click', (e) => {
   const btn = e.target.closest('.fav-btn');
   if (!btn) return;
@@ -615,7 +532,6 @@ tbody.addEventListener('click', (e) => {
   const nowPressed = btn.getAttribute('aria-pressed') !== 'true';
   btn.setAttribute('aria-pressed', nowPressed ? 'true' : 'false');
   btn.setAttribute('aria-label', nowPressed ? 'Fjern favoritt' : 'Marker som favoritt');
-
   toggleFavKey(key);
   if (favoritesOnly) render();
 });
@@ -643,6 +559,7 @@ Papa.parse(CSV_URL,{
       });
     }
 
+    // Bygg UI
     buildPositionChips(DATA, detectedPositionCol);
     buildClubSelect(DATA, detectedClubCol);
 
@@ -682,8 +599,56 @@ Papa.parse(CSV_URL,{
   error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
 });
 
-/* Interaksjon */
+/* Søkelytter */
 q.addEventListener('input', render);
+
+/* Posisjon/klubb helpers */
+function buildPositionChips(data, col){
+  posChipsWrap.innerHTML='';
+  const posAllBtnEl = posAllBtn;
+  if(!col){ if (posAllBtnEl) posAllBtnEl.disabled=true; return; }
+  if (posAllBtnEl) { posAllBtnEl.disabled=false; posAllBtnEl.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false'); }
+
+  const seen=new Set(), values=[];
+  for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
+  const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
+  values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b); if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1; return a.localeCompare(b,'no',{numeric:true});});
+
+  for(const val of values){
+    const btn=document.createElement('button');
+    btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+    btn.addEventListener('click',()=>{
+      if (posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','false');
+      if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
+      if(activePositions.size===0 && posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','true');
+      btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+      render();
+    });
+    posChipsWrap.appendChild(btn);
+  }
+  if (posAllBtnEl){
+    posAllBtnEl.onclick=()=>{
+      activePositions.clear();
+      posAllBtnEl.setAttribute('aria-pressed','true');
+      [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
+      render();
+    };
+  }
+}
+
+function buildClubSelect(data, col){
+  if (!clubSelect || !clubLabel) return;
+  if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
+
+  const seen=new Set(), values=[];
+  for (const r of data){
+    const v=String(r[col]??'').trim();
+    if (v && !seen.has(v)){ seen.add(v); values.push(v); }
+  }
+  values.sort((a,b)=> a.localeCompare(b,'no',{numeric:true,sensitivity:'base'}));
+  clubSelect.innerHTML = `<option value="">Alle</option>` + values.map(v=>`<option value="${v}">${v}</option>`).join('');
+  clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
+}
 
 /* Mørk modus – husk valg */
 (function(){
@@ -701,21 +666,18 @@ q.addEventListener('input', render);
 })();
 </script>
 
-<!-- EGEN SCRIPT FOR "SIST OPPDATERT" -->
+<!-- "Sist oppdatert" -->
 <script>
 (() => {
   const meta = document.querySelector('meta[name="data-last-updated"]');
   let last = meta?.content ? new Date(meta.content) : new Date(document.lastModified);
   const fmt = new Intl.DateTimeFormat('nb-NO', { dateStyle:'long', timeStyle:'short' });
   const el = document.getElementById('last-updated');
-  if (el) {
-    el.textContent = `Sist oppdatert: ${fmt.format(last)}`;
-    el.title = last.toISOString();
-  }
+  if (el) { el.textContent = `Sist oppdatert: ${fmt.format(last)}`; el.title = last.toISOString(); }
 })();
 </script>
 
-<!-- TVING LOKAL NEDLASTING AV CSV (fetch + Blob) -->
+<!-- Tving lokal nedlasting av CSV -->
 <script>
 (() => {
   const btn = document.getElementById('downloadCsvBtn');
