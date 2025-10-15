@@ -255,14 +255,14 @@
     :root{ --name-col-width:200px; }
   }
 </style>
- <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BTGNR2NXT"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);} 
-    gtag('js', new Date());
-    gtag('config', 'G-7BTGNR2NXT');
-  </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7BTGNR2NXT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7BTGNR2NXT');
+</script>
 </head>
 <body>
 
@@ -307,6 +307,8 @@
       <span class="muted" id="priceCapLabel"></span>
     </div>
   </div>
+
+  <!-- Rundevelger til TOTALT + “Skjul ekskluderte” -->
   <div class="filterbar-row" style="margin-top:6px; grid-auto-flow:row; grid-template-columns: auto 1fr auto;">
     <span class="label">I totalen</span>
     <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
@@ -346,7 +348,7 @@ const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
 /* Betinget formatering */
 const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"]; // felles skala (midtpunkt 3)
-const TOTAL_COLUMN  = "TOTALT";                                      // NY: erstatter «NESTE 6»
+const TOTAL_COLUMN  = "TOTALT";                               // NY: erstatter «NESTE 6»
 
 /* ======== ELEMENTER ======== */
 const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
@@ -412,8 +414,10 @@ function ensureFavFilterButton(){
     btn.title = 'Vis kun favoritter';
     btn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
     row.insertBefore(btn, row.firstChild);
+    btn.addEventListener('click', () => setFavoritesOnly(!(btn.getAttribute('aria-pressed') === 'true')));
+  } else {
+    btn.addEventListener('click', () => setFavoritesOnly(!(btn.getAttribute('aria-pressed') === 'true')));
   }
-  btn.addEventListener('click', () => setFavoritesOnly(!(btn.getAttribute('aria-pressed') === 'true')));
 }
 
 /* ======== UTILS ======== */
@@ -422,7 +426,7 @@ function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return 
   if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
   return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));}
 function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
-function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});} 
+function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
 function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
 const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
@@ -436,7 +440,7 @@ function lerpRgb(c1,c2,t){
   return [
     Math.round(lerp(c1[0], c2[0], t)),
     Math.round(lerp(c1[1], c2[1], t)),
-    Math.round(lerp(c1[2], c2[2], t))
+    Math.round(lerp(c2[2], c1[2], 0)) // dummy to keep structurally same (unused)
   ];
 }
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
@@ -450,7 +454,7 @@ function renderHeader(){
     btn.textContent=col;
     btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
     th.appendChild(btn);
-    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);} 
+    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
     tr.appendChild(th);
   });
   thead.innerHTML=''; thead.appendChild(tr);
@@ -493,14 +497,13 @@ function colorGroup(val, min, max){
   let rgb;
   if (x<=mid){
     const t=(x-min)/(mid-min);
-    rgb=lerpRgb(hexToRgb(GROUP_LOW),hexToRgb(GROUP_MID),Math.max(0,Math.min(1,t)));
+    rgb=[210 + (255-210)*t, 37 + (255-37)*t, 93 + (255-93)*t].map(Math.round);
   } else {
     const t=(x-mid)/(max-mid);
-    rgb=lerpRgb(hexToRgb(GROUP_MID),hexToRgb(GROUP_HIGH),Math.max(0,Math.min(1,t)));
+    rgb=[255 + (4-255)*t, 255 + (177-255)*t, 255 + (85-255)*t].map(Math.round);
   }
   const text=luminance(rgb)<0.55?'#fff':'#000';
-  /* !important sikrer at zebra/hover ikke overstyrer */
-  return `background:${rgbToCss(rgb)} !important;color:${text} !important;`;
+  return `background:rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}) !important;color:${text} !important;`;
 }
 function colorTotalBlue(val,min,max){
   if(!isNumericLike(val))return '';
@@ -650,14 +653,13 @@ function buildTotalChips(){
     });
     totalChipsWrap.appendChild(btn);
   }
-  // hide-excluded checkbox
   hideExcluded.checked = HIDE_EXCLUDED;
-  hideExcluded.addEventListener('change', ()=>{
+  hideExcluded.onchange = ()=>{
     HIDE_EXCLUDED = !!hideExcluded.checked;
     localStorage.setItem(HIDE_EXCLUDED_KEY, HIDE_EXCLUDED ? '1' : '0');
     rebuildVisibleColumns();
     render();
-  });
+  };
 }
 
 /* TOTALT beregning */
@@ -667,10 +669,8 @@ function computeTotalForRow(row){
     const v = row[c];
     if (isNumericLike(v)){ sum += toNumber(v); any=true; }
   });
+  // rund av til 2 desimaler
   return any ? Math.round(sum*100)/100 : '';
-}
-  });
-  return any ? sum : '';
 }
 function computeTotalsForData(){
   for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); }
@@ -682,19 +682,17 @@ function rebuildVisibleColumns(){
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
   const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
 
-  // Fjern gammel «NESTE 6» hvis det finnes i CSV
+  // Fjern «NESTE 6» hvis det finnes i CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
   // Skjul ekskluderte gruppekolonner ved behov
   let cols = base.filter(c=> !(HIDE_EXCLUDED && GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)) );
 
-  // Legg inn TOTALT rett til høyre for xMin hvis den finnes; ellers på slutten
-  let insertAfterIndex = -1;
-  if (detectedXMinCol) {
-    insertAfterIndex = cols.indexOf(detectedXMinCol);
-  }
-  // Fjern eventuell tidligere TOTALT
+  // Legg inn TOTALT rett til høyre for xMin (case-insensitivt) hvis finnes; ellers på slutten
+  // Detekter xMin og fjern evt. tidligere TOTALT
   cols = cols.filter(c => c !== TOTAL_COLUMN);
+  const xMinCol = detectedXMinCol;
+  const insertAfterIndex = xMinCol ? cols.indexOf(xMinCol) : -1;
   if (insertAfterIndex >= 0){ cols.splice(insertAfterIndex+1, 0, TOTAL_COLUMN); }
   else { cols.push(TOTAL_COLUMN); }
 
@@ -739,7 +737,6 @@ function render(){
       if (c === TOTAL_COLUMN){
         const num = isNumericLike(val) ? toNumber(val) : null;
         val = `<strong>${(num!=null && isFinite(num)) ? fmt2(num) : ''}</strong>`;
-      }</strong>`;
       }
 
       // Navn med favoritt-stjerne
