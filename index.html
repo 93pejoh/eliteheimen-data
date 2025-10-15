@@ -213,12 +213,18 @@
     width:26px; height:26px; margin-right:6px;
     border-radius:999px; border:1px solid #e5e7eb; background:#fff;
     cursor:pointer; vertical-align:middle;
+    flex:0 0 26px; /* stabil bredde for perfekt vertikal linje */
   }
   .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
   .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-btn[aria-pressed="true"] .star::before{ content:"★"; }
   html.dark .fav-btn{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-btn[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
+
+  /* Radlig layout i navnecella for perfekt venstrejustering */
+  .name-cell{
+    display:flex; align-items:center; justify-content:flex-start; gap:6px;
+  }
 
   /* Filterknapp: vis kun favoritter (stjerne uten tekst) */
   .fav-filter{
@@ -231,6 +237,10 @@
   .fav-filter[aria-pressed="true"]::before{ content:"★"; }
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
+
+  /* Venstrestill første kolonne (header + celler) for stjerne/tekst */
+  table thead th:first-child,
+  table tbody td:first-child{ text-align:left; }
 </style>
 </head>
 <body>
@@ -614,7 +624,7 @@ function render(){
         val = `<strong>${val}</strong>`;
       }
 
-      // Navn med favoritt-stjerne først i samme sticky celle
+      // Navn med favoritt-stjerne, samlet i venstrejustert rad
       if (detectedNameCol && c === detectedNameCol){
         const key = favKeyFromRow(row);
         const pressed = isFavKey(key);
@@ -622,7 +632,7 @@ function render(){
         const starBtn = `<button class="fav-btn" type="button" aria-label="${label}" aria-pressed="${pressed}" data-favkey="${key}">
                            <span class="star" aria-hidden="true"></span>
                          </button>`;
-        val = `${starBtn}<strong>${row[c] ?? ''}</strong>`;
+        val = `<div class="name-cell">${starBtn}<strong>${row[c] ?? ''}</strong></div>`;
       }
 
       const cellStyle = style ? ` style="${style}"` : "";
