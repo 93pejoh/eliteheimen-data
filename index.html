@@ -240,6 +240,11 @@
   html.dark .price-compact .pill{ background:#0b1325; border-color:#1f2a44; }
   .reset-link{ color:#64748b; text-decoration:underline; cursor:pointer; font-size:.9rem; }
   .reset-link:hover{ color:#0c4a6e; }
+  
+  /* gjør sliders mer stabile på touch */
+.price-compact input[type="range"] {
+  touch-action: none;
+}
 </style>
 
 <!-- Google tag (gtag.js) -->
@@ -510,27 +515,65 @@ function computePriceRange(rows,col){
   }
   return any?{min,max}:null;
 }
+let _rafPrice = null;
+function scheduleRenderOnce(){
+  if (_rafPrice) cancelAnimationFrame(_rafPrice);
+  _rafPrice = requestAnimationFrame(() => {
+    _rafPrice = null;
+    render();
+  });
+}
+function round1(n){
+  return Math.round(n * 10) / 10; // unngå flyttallsstøy
+}
+  
 function setupPriceCompact(){
-  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
-  if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
+  // Finn pris-kolonne og range
+  const detected = detectPriceColumn(RAW_COLUMNS);
+  if(!detected){ priceCompactWrap.style.display='none'; return; }
+  detectedPriceCol = detected;
+
   const r = computePriceRange(DATA, detectedPriceCol);
-  if(!r){priceCompactWrap.style.display='none';return;}
+  if(!r || !isFinite(r.min) || !isFinite(r.max) || r.min === r.max){
+    // Ingen meningsfull variasjon -> skjul
+    priceCompactWrap.style.display='none';
+    return;
+  }
 
-  priceGlobalMin = r.min;
-  priceGlobalMax = r.max;
-  priceCapVal = priceGlobalMax;
+  // Init bounds + valgt verdi
+  priceGlobalMin = round1(r.min);
+  priceGlobalMax = round1(r.max);
+  priceCapVal   = round1(priceGlobalMax);
 
-  priceCapRange.min = priceGlobalMin.toFixed(1);
-  priceCapRange.max = priceGlobalMax.toFixed(1);
+  // Sett opp input-range stabilt
+  priceCapRange.min  = priceGlobalMin.toFixed(1);
+  priceCapRange.max  = priceGlobalMax.toFixed(1);
   priceCapRange.step = 0.1;
   priceCapRange.value = priceCapVal.toFixed(1);
   priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
 
   priceCompactWrap.style.display = 'inline-flex';
-  priceCapRange.oninput = () => {
-    priceCapVal = Number(priceCapRange.value);
-    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
-    render();
+
+  // ÉN stabil handler (overskriver gamle, så vi unngår dobbel-lytter)
+  priceCapRange.oninput = (e) => {
+    const raw = Number(e.target.value);
+    if (Number.isNaN(raw)) return;
+
+    const next = round1(raw);
+    // Oppdater label alltid (føles responsivt)
+    priceCapLabel.textContent = next.toFixed(1).replace('.', ',');
+
+    // Bare trigge render når terskel passeres
+    if (next !== priceCapVal){
+      priceCapVal = next;
+      // Throttle tung render mens du drar
+      scheduleRenderOnce();
+    }
+  };
+
+  // Siste “snap” når brukeren slipper slideren (garanter en render)
+  priceCapRange.onchange = () => {
+    scheduleRenderOnce();
   };
 }
 
