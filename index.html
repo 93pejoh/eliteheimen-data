@@ -245,6 +245,7 @@
 .price-compact input[type="range"] {
   touch-action: none;
 }
+  #resetFilters{ display:none !important; }
 </style>
 
 <!-- Google tag (gtag.js) -->
@@ -619,17 +620,7 @@ function rebuildVisibleColumns(){
 }
 
 /* Nullstill-lenke synlighet */
-function updateResetLinkVisibility(){
-  if (!resetFiltersEl) return;
-  const somethingFiltered =
-    (q?.value || '') !== '' ||
-    activePositions.size > 0 ||
-    (selectedClub || '') !== '' ||
-    (priceCapVal != null && priceGlobalMax != null && priceCapVal < priceGlobalMax) ||
-    (INCLUDED_IN_TOTAL.size > 0 && INCLUDED_IN_TOTAL.size < GROUP_COLUMNS.length) ||
-    favoritesOnly;
-  resetFiltersEl.style.display = somethingFiltered ? 'inline' : 'none';
-}
+function updateResetLinkVisibility(){ /* deaktivert */ }
 
 /* ================== RENDER ================== */
 function render(){
