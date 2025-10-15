@@ -206,6 +206,31 @@
     font-size: 1rem;
     opacity: 0.9;
   }
+
+  /* Favorittstjerne i navnecella */
+  .fav-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; margin-right:6px;
+    border-radius:999px; border:1px solid #e5e7eb; background:#fff;
+    cursor:pointer; vertical-align:middle;
+  }
+  .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
+  .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
+  .fav-btn[aria-pressed="true"] .star::before{ content:"★"; }
+  html.dark .fav-btn{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
+  html.dark .fav-btn[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
+
+  /* Filterknapp: vis kun favoritter (stjerne uten tekst) */
+  .fav-filter{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:32px; height:32px; border-radius:999px; border:1px solid #d1d5db;
+    background:#fff; cursor:pointer; user-select:none;
+  }
+  .fav-filter::before{ content:"☆"; font-size:18px; line-height:1; }
+  .fav-filter[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
+  .fav-filter[aria-pressed="true"]::before{ content:"★"; }
+  html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
+  html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 </style>
 </head>
 <body>
@@ -300,6 +325,49 @@ let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClu
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 
+/* ======== FAVORITTER ======== */
+const FAVORITES_KEY = 'eh_favorites_v1';
+let FAVORITES = new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'));
+
+function favKeyFromRow(row){
+  const name = detectedNameCol ? String(row[detectedNameCol] ?? '') : '';
+  const club = detectedClubCol ? String(row[detectedClubCol] ?? '') : '';
+  return `${name}::${club}`;
+}
+function isFavKey(key){ return FAVORITES.has(key); }
+function toggleFavKey(key){
+  if (FAVORITES.has(key)) FAVORITES.delete(key); else FAVORITES.add(key);
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES]));
+}
+
+/* ======== FAVORITT-FILTER ======== */
+const FAVFILTER_KEY = 'eh_favorites_filter_v1';
+let favoritesOnly = localStorage.getItem(FAVFILTER_KEY) === '1';
+
+function setFavoritesOnly(on){
+  favoritesOnly = !!on;
+  localStorage.setItem(FAVFILTER_KEY, favoritesOnly ? '1' : '0');
+  const btn = document.getElementById('favFilter');
+  if (btn) btn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
+  render();
+}
+function ensureFavFilterButton(){
+  let btn = document.getElementById('favFilter');
+  if (!btn){
+    const row = document.querySelector('.filterbar-row');
+    if (!row) return;
+    btn = document.createElement('button');
+    btn.id = 'favFilter';
+    btn.className = 'fav-filter';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Vis kun favoritter');
+    btn.title = 'Vis kun favoritter';
+    btn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
+    row.insertBefore(btn, row.firstChild);
+  }
+  btn.addEventListener('click', () => setFavoritesOnly(!(btn.getAttribute('aria-pressed') === 'true')));
+}
+
 /* ======== UTILS ======== */
 function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
 function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
@@ -358,6 +426,11 @@ function rowMatches(row){
     const v=row[detectedPriceCol];
     if(!isNumericLike(v))return false;
     if(toNumber(v)>priceCapVal)return false;
+  }
+  // Kun favoritter når filteret er på
+  if (favoritesOnly){
+    const key = favKeyFromRow(row);
+    if (!isFavKey(key)) return false;
   }
   return true;
 }
@@ -528,12 +601,30 @@ function render(){
         style = colorNeste6(row[c], neste6Range.min, neste6Range.max);
       }
       let val = row[c] ?? '';
+
+      // Posisjons-badge
       if (detectedPositionCol && c === detectedPositionCol){
         const pos = String(val);
         const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
-      if ((detectedNameCol && c === detectedNameCol) || c === NESTE6_COLUMN) val = `<strong>${val}</strong>`;
+
+      // NESTE 6 i bold
+      if (c === NESTE6_COLUMN){
+        val = `<strong>${val}</strong>`;
+      }
+
+      // Navn med favoritt-stjerne først i samme sticky celle
+      if (detectedNameCol && c === detectedNameCol){
+        const key = favKeyFromRow(row);
+        const pressed = isFavKey(key);
+        const label = pressed ? 'Fjern favoritt' : 'Marker som favoritt';
+        const starBtn = `<button class="fav-btn" type="button" aria-label="${label}" aria-pressed="${pressed}" data-favkey="${key}">
+                           <span class="star" aria-hidden="true"></span>
+                         </button>`;
+        val = `${starBtn}<strong>${row[c] ?? ''}</strong>`;
+      }
+
       const cellStyle = style ? ` style="${style}"` : "";
       return `<td${cellStyle}>${val}</td>`;
     }).join('');
@@ -542,6 +633,20 @@ function render(){
   tbody.appendChild(frag);
   updateKPIs(rows);
 }
+
+/* Klikk på stjerna i tabellen (event delegation) */
+tbody.addEventListener('click', (e) => {
+  const btn = e.target.closest('.fav-btn');
+  if (!btn) return;
+  const key = btn.getAttribute('data-favkey');
+  if (!key) return;
+
+  const nowPressed = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', nowPressed ? 'true' : 'false');
+  btn.setAttribute('aria-label', nowPressed ? 'Fjern favoritt' : 'Marker som favoritt');
+  toggleFavKey(key);
+  if (favoritesOnly) render(); // hvis filteret er aktivt, oppdater listen
+});
 
 /* INIT */
 Papa.parse(CSV_URL,{
@@ -570,6 +675,7 @@ Papa.parse(CSV_URL,{
     buildClubSelect(DATA, detectedClubCol);
     setupPriceCompact();
 
+    ensureFavFilterButton(); // legg inn stjernefilter i UI
     render();
   },
   error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
