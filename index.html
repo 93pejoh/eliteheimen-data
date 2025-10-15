@@ -341,20 +341,21 @@
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-/* ======== KONFIG ======== */
+/* ================== KONFIG ================== */
 const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv";
-window.CSV_URL = CSV_URL; // gjør tilgjengelig for andre <script>-blokker
+window.CSV_URL = CSV_URL;
 
-/* Skjul kolonner etter Excel-bokstav: */
+/* Skjul kolonner etter Excel-bokstav (indeksbasert) */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
-/* Betinget formatering */
-const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"]; // felles skala (midtpunkt 3)
-const TOTAL_COLUMN  = "TOTALT";                               // erstatter «NESTE 6»
+/* Runde-kolonner og TOTALT */
+const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"];
+const TOTAL_COLUMN  = "TOTALT";
 
-/* ======== ELEMENTER ======== */
+/* ================== ELEMENTER ================== */
 const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
-const q=document.getElementById('q'), posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
+const q=document.getElementById('q');
+const posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
 const priceCompactWrap=document.getElementById('price-compact');
 const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
 const clubSelect=document.getElementById('clubSelect'), clubLabel=document.getElementById('clubLabel');
@@ -362,8 +363,9 @@ const miniKPI=document.getElementById('kpi-count-mini');
 const totalChipsWrap=document.getElementById('totalChipsWrap');
 const roundCountBadge=document.getElementById('roundCountBadge');
 const resetFiltersEl=document.getElementById('resetFilters');
+const favFilterBtn=document.getElementById('favFilter');
 
-/* ======== STATE ======== */
+/* ================== STATE ================== */
 let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
 let sortCol=null, sortDir=1;
 let activePositions=new Set();
@@ -372,27 +374,16 @@ let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 let favoritesOnly = false;
 
-/* TOTALT-innstillinger */
+/* TOTALT-innstillinger (persist) */
 const TOTAL_KEY = 'eh_total_cols_v1';
 let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
-if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS); // default: alle
+if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
 
-/* ======== FAVORITTER ======== */
+/* Favoritter (persist) */
 const FAVORITES_KEY = 'eh_favorites_v1';
 let FAVORITES = new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'));
 
-function favKeyFromRow(row){
-  const name = detectedNameCol ? String(row[detectedNameCol] ?? '') : '';
-  const club = detectedClubCol ? String(row[detectedClubCol] ?? '') : '';
-  return `${name}::${club}`;
-}
-function isFavKey(key){ return FAVORITES.has(key); }
-function toggleFavKey(key){
-  if (FAVORITES.has(key)) FAVORITES.delete(key); else FAVORITES.add(key);
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES]));
-}
-
-/* ======== UTILS ======== */
+/* ================== UTILS ================== */
 function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
 function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
   if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
@@ -403,31 +394,31 @@ function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCa
 const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 
-/* Fargeskala (magenta→hvit→grønn; midt=3) */
-const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
+/* Favoritter */
+function favKeyFromRow(row){
+  const name = detectedNameCol ? String(row[detectedNameCol] ?? '') : '';
+  const club = detectedClubCol ? String(row[detectedClubCol] ?? '') : '';
+  return `${name}::${club}`;
+}
+function isFavKey(k){ return FAVORITES.has(k); }
+function toggleFavKey(k){ if(FAVORITES.has(k)) FAVORITES.delete(k); else FAVORITES.add(k);
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES])); }
+
+/* Fargeskala */
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
-function colorGroup(val, min, max){
+function colorGroup(val,min,max){
   if(!isNumericLike(val))return '';
-  const x=toNumber(val);
-  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-  const mid=3;
-  let r,g,b;
-  if (x<=mid){
-    const t=(x-min)/(mid-min);
-    r=Math.round(0xd2 + (0xff-0xd2)*t); g=Math.round(0x25 + (0xff-0x25)*t); b=Math.round(0x5d + (0xff-0x5d)*t);
-  } else {
-    const t=(x-mid)/(max-mid);
-    r=Math.round(0xff + (0x04-0xff)*t); g=Math.round(0xff + (0xb1-0xff)*t); b=Math.round(0xff + (0x55-0xff)*t);
-  }
+  const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  const mid=3; let r,g,b;
+  if (x<=mid){ const t=(x-min)/(mid-min); r=Math.round(0xd2+(0xff-0xd2)*t); g=Math.round(0x25+(0xff-0x25)*t); b=Math.round(0x5d+(0xff-0x5d)*t); }
+  else        { const t=(x-mid)/(max-mid); r=Math.round(0xff+(0x04-0xff)*t); g=Math.round(0xff+(0xb1-0xff)*t); b=Math.round(0xff+(0x55-0xff)*t); }
   const text=luminance([r,g,b])<0.55?'#fff':'#000';
   return `background:rgb(${r}, ${g}, ${b}) !important;color:${text} !important;`;
 }
 function colorTotalBlue(val,min,max){
   if(!isNumericLike(val))return '';
-  const x=toNumber(val);
-  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-  let t=(x-min)/(max-min);
-  const hue=210, sat=90, light=92 - t*32; // lys → mørk blå
+  const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  const t=(x-min)/(max-min); const hue=210, sat=90, light=92 - t*32;
   return `background:hsl(${hue} ${sat}% ${light}% ) !important;color:#000 !important;`;
 }
 function computeGroupRange(rows, cols){
@@ -445,27 +436,21 @@ function computeSingleRange(rows, col){
   return any && max>min ? {min,max} : null;
 }
 
-/* Deteksjoner */
-function detectPositionColumn(columns){
-  const cands=["posisjon","position","pos","rolle","role"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
-  return "";
-}
-function detectPriceColumn(columns){
-  const prefs=["pris","price","kostnad","cost"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
-  return "";
-}
-function detectClubColumn(columns){
-  const cands=["klubb","lag","team","club"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
-  return "";
+/* ================== UI BYGG ================== */
+function renderHeader(){
+  const tr=document.createElement('tr');
+  VISIBLE_COLUMNS.forEach(col=>{
+    const th=document.createElement('th');
+    const btn=document.createElement('button');
+    btn.textContent=col;
+    btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
+    th.appendChild(btn);
+    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
+    tr.appendChild(th);
+  });
+  thead.innerHTML=''; thead.appendChild(tr);
 }
 
-/* UI-bygging */
 function buildPositionChips(data, col){
   posChipsWrap.innerHTML='';
   posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
@@ -497,6 +482,7 @@ function buildPositionChips(data, col){
     render();
   };
 }
+
 function buildClubSelect(data, col){
   if (!clubSelect || !clubLabel) return;
   if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
@@ -508,13 +494,12 @@ function buildClubSelect(data, col){
   }
   values.sort((a,b)=> a.localeCompare(b,'no',{numeric:true,sensitivity:'base'}));
   clubSelect.innerHTML = `<option value="">Alle</option>` + values.map(v=>`<option value="${v}">${v}</option>`).join('');
-  clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
+  clubSelect.onchange = ()=>{ selectedClub = clubSelect.value || ""; render(); };
 }
 
 /* KPI */
 function updateKPIs(rows){
-  const text = `${fmtInt(rows.length)} spillere`;
-  if (miniKPI) miniKPI.textContent = text;
+  if (miniKPI) miniKPI.textContent = `${fmtInt(rows.length)} spillere`;
 }
 
 /* Pris */
@@ -526,9 +511,8 @@ function computePriceRange(rows,col){
   return any?{min,max}:null;
 }
 function setupPriceCompact(){
-  const detected = detectPriceColumn(RAW_COLUMNS);
-  if(!detected){priceCompactWrap.style.display='none';return;}
-  detectedPriceCol = detected;
+  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
+  if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
   const r = computePriceRange(DATA, detectedPriceCol);
   if(!r){priceCompactWrap.style.display='none';return;}
 
@@ -543,21 +527,20 @@ function setupPriceCompact(){
   priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
 
   priceCompactWrap.style.display = 'inline-flex';
-  priceCapRange.addEventListener('input', () => {
+  priceCapRange.oninput = () => {
     priceCapVal = Number(priceCapRange.value);
     priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
     render();
-  });
+  };
 }
 
-/* TOTALT UI */
+/* ================== TOTALT ================== */
 function updateRoundCountBadge(){
   if (!roundCountBadge) return;
-  const total = GROUP_COLUMNS.length;
-  const on = INCLUDED_IN_TOTAL.size;
-  roundCountBadge.textContent = `${on}/${total}`;
+  roundCountBadge.textContent = `${INCLUDED_IN_TOTAL.size}/${GROUP_COLUMNS.length}`;
 }
 function buildTotalChips(){
+  if (!totalChipsWrap) return;
   totalChipsWrap.innerHTML = '';
   for (const col of GROUP_COLUMNS){
     const btn = document.createElement('button');
@@ -585,40 +568,34 @@ function buildTotalChips(){
   updateRoundCountBadge();
 }
 
-/* TOTALT beregning */
 function computeTotalForRow(row){
   let sum = 0; let any=false;
   INCLUDED_IN_TOTAL.forEach(c=>{
     const v = row[c];
     if (isNumericLike(v)){ sum += toNumber(v); any=true; }
   });
-  // rund av til 2 desimaler
   return any ? Math.round(sum*100)/100 : '';
 }
-function computeTotalsForData(){
-  for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); }
-}
+function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); } }
 
-/* Kolonneoppsett (synlige) */
+/* Synlige kolonner */
 function rebuildVisibleColumns(){
-  // Start fra original rekkefølge, minus skjulte via bokstaver
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
   const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
 
-  // Fjern «NESTE 6» hvis det finnes i CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
-  // Skjul ekskluderte R25–R30 ALLTID
+  // Skjul ekskluderte runder ALLTID
   let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
 
-  // Legg inn TOTALT rett til høyre for xMin (case-insensitivt) hvis finnes; ellers på slutten
+  // Sett inn TOTALT rett etter xMin (case-insensitivt), ellers på slutten
   cols = cols.filter(c => c !== TOTAL_COLUMN);
   const xMinCol = detectedXMinCol;
   const insertAfterIndex = xMinCol ? cols.indexOf(xMinCol) : -1;
   if (insertAfterIndex >= 0){ cols.splice(insertAfterIndex+1, 0, TOTAL_COLUMN); }
   else { cols.push(TOTAL_COLUMN); }
 
-  // Flytt NAVN først (sticky)
+  // Flytt NAVN først
   if (detectedNameCol){
     const i=cols.indexOf(detectedNameCol);
     if(i>0){ cols.splice(i,1); cols.unshift(detectedNameCol); }
@@ -626,11 +603,11 @@ function rebuildVisibleColumns(){
   VISIBLE_COLUMNS = cols;
 }
 
-/* Filter-tilstand → vis/skim Nullstill-lenke */
+/* Nullstill-lenke synlighet */
 function updateResetLinkVisibility(){
   if (!resetFiltersEl) return;
   const somethingFiltered =
-    (q.value || '') !== '' ||
+    (q?.value || '') !== '' ||
     activePositions.size > 0 ||
     (selectedClub || '') !== '' ||
     (priceCapVal != null && priceGlobalMax != null && priceCapVal < priceGlobalMax) ||
@@ -639,33 +616,28 @@ function updateResetLinkVisibility(){
   resetFiltersEl.style.display = somethingFiltered ? 'inline' : 'none';
 }
 
-/* Render */
+/* ================== RENDER ================== */
 function render(){
   renderHeader();
   let rows=DATA.filter(row=>{
-    // tekstsøk
-    const query=(q.value||'').toLowerCase();
+    const query=(q?.value||'').toLowerCase();
     if (query){
       const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
       if(!hit)return false;
     }
-    // posisjon
     if (detectedPositionCol && activePositions.size>0){
       const pv=String(row[detectedPositionCol]??'').trim();
       if (!activePositions.has(pv)) return false;
     }
-    // klubb
     if (detectedClubCol && selectedClub){
       const cv=String(row[detectedClubCol]??'').trim();
       if (cv !== selectedClub) return false;
     }
-    // pris
     if (detectedPriceCol && priceCapVal!=null){
       const v=row[detectedPriceCol];
       if(!isNumericLike(v))return false;
       if(toNumber(v)>priceCapVal)return false;
     }
-    // favoritter
     if (favoritesOnly){
       const key = favKeyFromRow(row);
       if (!isFavKey(key)) return false;
@@ -698,7 +670,7 @@ function render(){
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
 
-      // TOTALT i bold med to desimaler
+      // TOTALT i bold 2 desimaler
       if (c === TOTAL_COLUMN){
         const num = isNumericLike(val) ? toNumber(val) : null;
         val = `<strong>${(num!=null && isFinite(num)) ? fmt2(num) : ''}</strong>`;
@@ -726,100 +698,77 @@ function render(){
   updateResetLinkVisibility();
 }
 
-/* Klikk på stjerna i tabellen (event delegation) */
-tbody.addEventListener('click', (e) => {
-  const btn = e.target.closest('.fav-btn');
-  if (!btn) return;
-  const key = btn.getAttribute('data-favkey');
-  if (!key) return;
+/* ================== INIT ================== */
+function detectPositionColumn(columns){
+  const cands=["posisjon","position","pos","rolle","role"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
+  return "";
+}
+function detectPriceColumn(columns){
+  const prefs=["pris","price","kostnad","cost"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
+  return "";
+}
+function detectClubColumn(columns){
+  const cands=["klubb","lag","team","club"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
+  return "";
+}
 
-  const nowPressed = btn.getAttribute('aria-pressed') !== 'true';
-  btn.setAttribute('aria-pressed', nowPressed ? 'true' : 'false');
-  btn.setAttribute('aria-label', nowPressed ? 'Fjern favoritt' : 'Marker som favoritt');
-  toggleFavKey(key);
-  if (favoritesOnly) render(); // oppdater hvis filteret er aktivt
-});
-
-/* INIT */
-Papa.parse(CSV_URL,{
-  download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
-  complete:(res)=>{
-    const data=res.data||[];
-    RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
-
-    detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
-    detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
-    detectedClubCol=detectClubColumn(RAW_COLUMNS);
-    detectedXMinCol=detectInsensitive(RAW_COLUMNS,"xmin");
-
-    DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
-
-    // Favorittfilter-knapp (koble til)
-    const favBtn = document.getElementById('favFilter');
-    if (favBtn){
-      favoritesOnly = favBtn.getAttribute('aria-pressed') === 'true';
-      favBtn.addEventListener('click', ()=>{
-        favoritesOnly = !(favBtn.getAttribute('aria-pressed') === 'true');
-        favBtn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
-        render();
-      });
-    }
-
-    // TOTALT
-    computeTotalsForData();
-    rebuildVisibleColumns();
-
-    // UI
-    buildPositionChips(DATA, detectedPositionCol);
-    buildClubSelect(DATA, detectedClubCol);
-    setupPriceCompact();
-    buildTotalChips();
-
-    render();
-  },
-  error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
-});
-
-/* Interaksjon */
-q.addEventListener('input', render);
-clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
-
-/* Nullstill */
-resetFiltersEl?.addEventListener('click', ()=>{
-  q.value = '';
-  activePositions.clear();
-  selectedClub = '';
-  if (detectedPriceCol && priceGlobalMax != null){
-    priceCapVal = priceGlobalMax;
-    priceCapRange.value = priceGlobalMax.toFixed(1);
-    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+(function start(){
+  // Favorittfilter-knapp
+  if (favFilterBtn){
+    favFilterBtn.addEventListener('click', ()=>{
+      favoritesOnly = !(favFilterBtn.getAttribute('aria-pressed') === 'true');
+      favFilterBtn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
+      render();
+    });
   }
-  favoritesOnly = false;
-  document.getElementById('favFilter')?.setAttribute('aria-pressed','false');
 
-  INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
-  localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
-  buildTotalChips();
-  computeTotalsForData();
-  rebuildVisibleColumns();
-  render();
-});
+  q?.addEventListener('input', render);
 
-/* Mørk modus – husk valg */
-(function(){
-  const key='eh_dark2';
-  const tgl=document.getElementById('darkToggle');
-  if(!tgl)return;
-  const saved=localStorage.getItem(key);
-  if(saved==='1') document.documentElement.classList.add('dark');
-  tgl.checked=(saved==='1');
-  tgl.addEventListener('change',()=>{
-    document.documentElement.classList.toggle('dark', tgl.checked);
-    localStorage.setItem(key, tgl.checked ? '1':'0');
-    render();
+  Papa.parse(CSV_URL,{
+    download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
+    complete:(res)=>{
+      try{
+        const data=res.data||[];
+        RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
+        if (!RAW_COLUMNS || RAW_COLUMNS.length===0) throw new Error("Fant ingen kolonner i CSV");
+
+        detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
+        detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
+        detectedClubCol=detectClubColumn(RAW_COLUMNS);
+        detectedXMinCol=detectInsensitive(RAW_COLUMNS,"xmin");
+
+        DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
+
+        buildPositionChips(DATA, detectedPositionCol);
+        buildClubSelect(DATA, detectedClubCol);
+        setupPriceCompact();
+
+        computeTotalsForData();
+        rebuildVisibleColumns();
+        buildTotalChips();
+
+        render();
+      }catch(err){
+        console.error(err);
+        thead.innerHTML='<tr><th class="error">Feil i data/JS</th></tr>';
+        tbody.innerHTML=`<tr><td>Kunne ikke bygge tabell: ${String(err.message||err)}</td></tr>`;
+      }
+    },
+    error:(err)=>{
+      console.error(err);
+      thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>';
+      tbody.innerHTML='<tr><td>Sjekk at CSV_URL er tilgjengelig.</td></tr>';
+    }
   });
 })();
 </script>
+
 
 <!-- EGEN SCRIPT FOR "SIST OPPDATERT" -->
 <script>
