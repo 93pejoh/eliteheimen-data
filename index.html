@@ -515,37 +515,24 @@ function computePriceRange(rows,col){
   }
   return any?{min,max}:null;
 }
-let _rafPrice = null;
-function scheduleRenderOnce(){
-  if (_rafPrice) cancelAnimationFrame(_rafPrice);
-  _rafPrice = requestAnimationFrame(() => {
-    _rafPrice = null;
-    render();
-  });
-}
-function round1(n){
-  return Math.round(n * 10) / 10; // unngå flyttallsstøy
-}
   
 function setupPriceCompact(){
-  // Finn pris-kolonne og range
-  const detected = detectPriceColumn(RAW_COLUMNS);
-  if(!detected){ priceCompactWrap.style.display='none'; return; }
-  detectedPriceCol = detected;
-
-  const r = computePriceRange(DATA, detectedPriceCol);
-  if(!r || !isFinite(r.min) || !isFinite(r.max) || r.min === r.max){
-    // Ingen meningsfull variasjon -> skjul
-    priceCompactWrap.style.display='none';
+  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
+  if(!detectedPriceCol){
+    priceCompactWrap.style.display = 'none';
     return;
   }
 
-  // Init bounds + valgt verdi
-  priceGlobalMin = round1(r.min);
-  priceGlobalMax = round1(r.max);
-  priceCapVal   = round1(priceGlobalMax);
+  const r = computePriceRange(DATA, detectedPriceCol);
+  if(!r){
+    priceCompactWrap.style.display = 'none';
+    return;
+  }
 
-  // Sett opp input-range stabilt
+  priceGlobalMin = r.min;
+  priceGlobalMax = r.max;
+  priceCapVal    = priceGlobalMax;
+
   priceCapRange.min  = priceGlobalMin.toFixed(1);
   priceCapRange.max  = priceGlobalMax.toFixed(1);
   priceCapRange.step = 0.1;
@@ -554,27 +541,12 @@ function setupPriceCompact(){
 
   priceCompactWrap.style.display = 'inline-flex';
 
-  // ÉN stabil handler (overskriver gamle, så vi unngår dobbel-lytter)
-  priceCapRange.oninput = (e) => {
-    const raw = Number(e.target.value);
-    if (Number.isNaN(raw)) return;
-
-    const next = round1(raw);
-    // Oppdater label alltid (føles responsivt)
-    priceCapLabel.textContent = next.toFixed(1).replace('.', ',');
-
-    // Bare trigge render når terskel passeres
-    if (next !== priceCapVal){
-      priceCapVal = next;
-      // Throttle tung render mens du drar
-      scheduleRenderOnce();
-    }
-  };
-
-  // Siste “snap” når brukeren slipper slideren (garanter en render)
-  priceCapRange.onchange = () => {
-    scheduleRenderOnce();
-  };
+  // ← original adferd: oppdater og render for hvert input
+  priceCapRange.addEventListener('input', () => {
+    priceCapVal = Number(priceCapRange.value);
+    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+    render();
+  });
 }
 
 /* ================== TOTALT ================== */
