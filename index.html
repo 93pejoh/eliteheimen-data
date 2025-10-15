@@ -186,35 +186,14 @@
   /* Fjern eventuell gammel KPI-seksjon hvis den skulle dukke opp */
   .cards, section.cards, .cards .card { display:none !important;height:0 !important;margin:0 !important;padding:0 !important;border:0 !important; }
 
-  html.dark .pill.kpi-mini {
-    color: #000 !important;
-    background: #fff !important;
-  }
+  html.dark .pill.kpi-mini { color: #000 !important; background: #fff !important; }
 
   /* Sist oppdatert */
-  #last-updated {
-    font-size: 0.9rem;
-    opacity: 0.85;
-    color: #e7e7e7;
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  #last-updated::before {
-    content: "⏱️";
-    font-size: 1rem;
-    opacity: 0.9;
-  }
+  #last-updated { font-size: 0.9rem; opacity: 0.85; color: #e7e7e7; margin-left: auto; display: flex; align-items: center; gap: 0.4rem; }
+  #last-updated::before { content: "⏱️"; font-size: 1rem; opacity: 0.9; }
 
   /* Favorittstjerne i navnecella */
-  .fav-btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:26px; height:26px; margin-right:0;
-    border-radius:999px; border:1px solid #e5e7eb; background:#fff;
-    cursor:pointer; vertical-align:middle;
-    flex:0 0 26px;
-  }
+  .fav-btn{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; margin-right:0; border-radius:999px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; vertical-align:middle; flex:0 0 26px; }
   .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
   .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-btn[aria-pressed="true"] .star::before{ content:"★"; }
@@ -222,39 +201,47 @@
   html.dark .fav-btn[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
   /* Navne-blokk: fast bredde, sentrert i cella; grid = stjerne + navn */
-  table thead th:first-child,
-  table tbody td:first-child{
-    text-align:center;
-    padding-left:6px; /* mindre luft mot kant, kan settes til 0 */
-  }
-  .name-cell{
-    display:grid;
-    grid-template-columns:26px 1fr;
-    align-items:center;
-    column-gap:6px;
-
-    width:var(--name-col-width);
-    max-width:calc(100% - 8px);
-    margin:0 auto; /* sentrer blokka i kolonnen */
-  }
+  table thead th:first-child, table tbody td:first-child{ text-align:center; padding-left:6px; }
+  .name-cell{ display:grid; grid-template-columns:26px 1fr; align-items:center; column-gap:6px; width:var(--name-col-width); max-width:calc(100% - 8px); margin:0 auto; }
 
   /* Filterknapp: vis kun favoritter (stjerne uten tekst) */
-  .fav-filter{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:32px; height:32px; border-radius:999px; border:1px solid #d1d5db;
-    background:#fff; cursor:pointer; user-select:none;
-  }
+  .fav-filter{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; user-select:none; }
   .fav-filter::before{ content:"☆"; font-size:18px; line-height:1; }
   .fav-filter[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-filter[aria-pressed="true"]::before{ content:"★"; }
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
-  /* Litt smalere på mobil */
-  @media (max-width:780px){
-    :root{ --name-col-width:200px; }
+  /* --- Nye visuelle grep for filterbaren --- */
+  .filterbar .divider { width:1px; height:22px; background:#e5e7eb; }
+  html.dark .filterbar .divider { background:#1f2a44; }
+  .filter-heading{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:4px 10px; border-radius:999px;
+    background:#f8fafc; border:1px solid #e5e7eb; color:#0f172a;
+    font-weight:600; white-space:nowrap;
   }
+  html.dark .filter-heading{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
+  .badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:22px; height:22px; padding:0 6px; border-radius:999px;
+    background:#e5f0ff; border:1px solid #bfdbfe; font-size:.8rem; font-weight:700;
+  }
+  html.dark .badge{ background:#0f1c36; border-color:#26497a; }
+  /* outline vs fylt chips (ny stil justert over eksisterende) */
+  .chip { background:#fff; border:1px solid #d1d5db; color:#0f172a; }
+  .chip[aria-pressed="true"]{ background:#e5effe; border-color:#93c5fd; color:#0c4a6e; }
+  html.dark .chip{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
+  html.dark .chip[aria-pressed="true"]{ background:#1f263a; border-color:#334155; color:#cfe1ff; }
+  .price-compact .pill{
+    display:inline-flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e5e7eb;
+    padding:2px 8px; border-radius:999px; font-variant-numeric: tabular-nums;
+  }
+  html.dark .price-compact .pill{ background:#0b1325; border-color:#1f2a44; }
+  .reset-link{ color:#64748b; text-decoration:underline; cursor:pointer; font-size:.9rem; }
+  .reset-link:hover{ color:#0c4a6e; }
 </style>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BTGNR2NXT"></script>
 <script>
@@ -288,34 +275,49 @@
   </div>
 </section>
 
-<!-- KONTROLLER (kompakt filterbar) -->
+<!-- FILTERBAR (NY layout) -->
 <section id="filters" class="filterbar">
+  <!-- Rad 1: primærfiltre -->
   <div class="filterbar-row">
-    <span class="pill kpi-mini"><strong>Spillere:</strong> <span id="kpi-count-mini">–</span></span>
+    <!-- Favorittfilter-ikon -->
+    <button id="favFilter" class="fav-filter" title="Vis kun favoritter" aria-pressed="false"></button>
+
+    <!-- Søk -->
     <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
-    <div class="gap"></div>
+
+    <span class="divider"></span>
+
+    <!-- Posisjoner -->
     <span class="label">Posisjoner</span>
     <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
     <div id="pos-chips" class="row microgap" style="margin:0;"></div>
-    <div class="gap"></div>
+
+    <span class="divider"></span>
+
+    <!-- Klubb -->
     <span class="label" id="clubLabel">Klubb</span>
     <select id="clubSelect"><option value="">Alle</option></select>
-    <div class="gap"></div>
+
+    <span class="divider"></span>
+
+    <!-- Pris -->
     <span class="label">Pris ≤</span>
     <div id="price-compact" class="price-compact" style="display:none;">
       <input id="priceCapRange" type="range" step="0.1" />
-      <span class="muted" id="priceCapLabel"></span>
+      <span class="pill"><span id="priceCapLabel"></span></span>
     </div>
+
+    <!-- Nullstill (automatisk synlighet) -->
+    <span id="resetFilters" class="reset-link" style="margin-left:auto; display:none;">Nullstill</span>
   </div>
 
-  <!-- Rundevelger til TOTALT + “Skjul ekskluderte” -->
-  <div class="filterbar-row" style="margin-top:6px; grid-auto-flow:row; grid-template-columns: auto 1fr auto;">
-    <span class="label">I totalen</span>
+  <!-- Rad 2: runde-chips for TOTALT -->
+  <div class="filterbar-row" style="margin-top:6px; grid-auto-flow:row; grid-template-columns: auto 1fr;">
+    <span class="filter-heading" title="TOTALT summerer kun valgte runder">
+      <span>🧮 I totalen</span>
+      <span id="roundCountBadge" class="badge">6/6</span>
+    </span>
     <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
-    <label id="hideExcludedWrap" class="row" style="justify-self:end; gap:8px; align-items:center;">
-      <input id="hideExcluded" type="checkbox" />
-      <span class="muted">Skjul ekskluderte kolonner</span>
-    </label>
   </div>
 </section>
 
@@ -348,7 +350,7 @@ const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
 /* Betinget formatering */
 const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"]; // felles skala (midtpunkt 3)
-const TOTAL_COLUMN  = "TOTALT";                               // NY: erstatter «NESTE 6»
+const TOTAL_COLUMN  = "TOTALT";                               // erstatter «NESTE 6»
 
 /* ======== ELEMENTER ======== */
 const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
@@ -358,7 +360,8 @@ const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=docu
 const clubSelect=document.getElementById('clubSelect'), clubLabel=document.getElementById('clubLabel');
 const miniKPI=document.getElementById('kpi-count-mini');
 const totalChipsWrap=document.getElementById('totalChipsWrap');
-const hideExcluded=document.getElementById('hideExcluded');
+const roundCountBadge=document.getElementById('roundCountBadge');
+const resetFiltersEl=document.getElementById('resetFilters');
 
 /* ======== STATE ======== */
 let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
@@ -367,13 +370,12 @@ let activePositions=new Set();
 let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClubCol="", detectedXMinCol="";
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
+let favoritesOnly = false;
 
 /* TOTALT-innstillinger */
 const TOTAL_KEY = 'eh_total_cols_v1';
-const HIDE_EXCLUDED_KEY = 'eh_hide_excluded_v1';
 let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
 if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS); // default: alle
-let HIDE_EXCLUDED = localStorage.getItem(HIDE_EXCLUDED_KEY) === '1';
 
 /* ======== FAVORITTER ======== */
 const FAVORITES_KEY = 'eh_favorites_v1';
@@ -390,36 +392,6 @@ function toggleFavKey(key){
   localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES]));
 }
 
-/* ======== FAVORITT-FILTER ======== */
-const FAVFILTER_KEY = 'eh_favorites_filter_v1';
-let favoritesOnly = localStorage.getItem(FAVFILTER_KEY) === '1';
-
-function setFavoritesOnly(on){
-  favoritesOnly = !!on;
-  localStorage.setItem(FAVFILTER_KEY, favoritesOnly ? '1' : '0');
-  const btn = document.getElementById('favFilter');
-  if (btn) btn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
-  render();
-}
-function ensureFavFilterButton(){
-  let btn = document.getElementById('favFilter');
-  if (!btn){
-    const row = document.querySelector('.filterbar-row');
-    if (!row) return;
-    btn = document.createElement('button');
-    btn.id = 'favFilter';
-    btn.className = 'fav-filter';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', 'Vis kun favoritter');
-    btn.title = 'Vis kun favoritter';
-    btn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
-    row.insertBefore(btn, row.firstChild);
-    btn.addEventListener('click', () => setFavoritesOnly(!(btn.getAttribute('aria-pressed') === 'true')));
-  } else {
-    btn.addEventListener('click', () => setFavoritesOnly(!(btn.getAttribute('aria-pressed') === 'true')));
-  }
-}
-
 /* ======== UTILS ======== */
 function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
 function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
@@ -433,77 +405,22 @@ const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFra
 
 /* Fargeskala (magenta→hvit→grønn; midt=3) */
 const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
-function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
-function rgbToCss(r){return `rgb(${r[0]}, ${r[1]}, ${r[2]})`;}
-function lerp(a,b,t){return a+(b-a)*t;}
-function lerpRgb(c1,c2,t){
-  return [
-    Math.round(lerp(c1[0], c2[0], t)),
-    Math.round(lerp(c1[1], c2[1], t)),
-    Math.round(lerp(c2[2], c1[2], 0)) // dummy to keep structurally same (unused)
-  ];
-}
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
-
-/* Header */
-function renderHeader(){
-  const tr=document.createElement('tr');
-  VISIBLE_COLUMNS.forEach(col=>{
-    const th=document.createElement('th');
-    const btn=document.createElement('button');
-    btn.textContent=col;
-    btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
-    th.appendChild(btn);
-    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
-    tr.appendChild(th);
-  });
-  thead.innerHTML=''; thead.appendChild(tr);
-}
-
-/* Filtrering */
-function rowMatches(row){
-  const query=(q.value||'').toLowerCase();
-  if (query){
-    const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
-    if(!hit)return false;
-  }
-  if (detectedPositionCol && activePositions.size>0){
-    const pv=String(row[detectedPositionCol]??'').trim();
-    if (!activePositions.has(pv)) return false;
-  }
-  if (detectedClubCol && selectedClub){
-    const cv=String(row[detectedClubCol]??'').trim();
-    if (cv !== selectedClub) return false;
-  }
-  if (detectedPriceCol && priceCapVal!=null){
-    const v=row[detectedPriceCol];
-    if(!isNumericLike(v))return false;
-    if(toNumber(v)>priceCapVal)return false;
-  }
-  // Kun favoritter når filteret er på
-  if (favoritesOnly){
-    const key = favKeyFromRow(row);
-    if (!isFavKey(key)) return false;
-  }
-  return true;
-}
-
-/* Betinget formatering */
 function colorGroup(val, min, max){
   if(!isNumericLike(val))return '';
   const x=toNumber(val);
   if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
   const mid=3;
-  let rgb;
+  let r,g,b;
   if (x<=mid){
     const t=(x-min)/(mid-min);
-    rgb=[210 + (255-210)*t, 37 + (255-37)*t, 93 + (255-93)*t].map(Math.round);
+    r=Math.round(0xd2 + (0xff-0xd2)*t); g=Math.round(0x25 + (0xff-0x25)*t); b=Math.round(0x5d + (0xff-0x5d)*t);
   } else {
     const t=(x-mid)/(max-mid);
-    rgb=[255 + (4-255)*t, 255 + (177-255)*t, 255 + (85-255)*t].map(Math.round);
+    r=Math.round(0xff + (0x04-0xff)*t); g=Math.round(0xff + (0xb1-0xff)*t); b=Math.round(0xff + (0x55-0xff)*t);
   }
-  const text=luminance(rgb)<0.55?'#fff':'#000';
-  return `background:rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}) !important;color:${text} !important;`;
+  const text=luminance([r,g,b])<0.55?'#fff':'#000';
+  return `background:rgb(${r}, ${g}, ${b}) !important;color:${text} !important;`;
 }
 function colorTotalBlue(val,min,max){
   if(!isNumericLike(val))return '';
@@ -609,8 +526,9 @@ function computePriceRange(rows,col){
   return any?{min,max}:null;
 }
 function setupPriceCompact(){
-  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
-  if(!detectedPriceCol){priceCompactWrap.style.display='none';return;}
+  const detected = detectPriceColumn(RAW_COLUMNS);
+  if(!detected){priceCompactWrap.style.display='none';return;}
+  detectedPriceCol = detected;
   const r = computePriceRange(DATA, detectedPriceCol);
   if(!r){priceCompactWrap.style.display='none';return;}
 
@@ -633,8 +551,13 @@ function setupPriceCompact(){
 }
 
 /* TOTALT UI */
+function updateRoundCountBadge(){
+  if (!roundCountBadge) return;
+  const total = GROUP_COLUMNS.length;
+  const on = INCLUDED_IN_TOTAL.size;
+  roundCountBadge.textContent = `${on}/${total}`;
+}
 function buildTotalChips(){
-  // Bygg knappene R25–R30
   totalChipsWrap.innerHTML = '';
   for (const col of GROUP_COLUMNS){
     const btn = document.createElement('button');
@@ -647,32 +570,19 @@ function buildTotalChips(){
     btn.title = on ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
 
     btn.addEventListener('click', ()=>{
-      // Toggle inkludert/ekskludert
       if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col);
       else INCLUDED_IN_TOTAL.add(col);
 
-      // Husk valget
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
-
-      // Rebuild UI + totals + kolonner og render
       buildTotalChips();
       computeTotalsForData();
-      rebuildVisibleColumns();
+      rebuildVisibleColumns();   // <- skjul/vis kolonner umiddelbart
       render();
     });
 
     totalChipsWrap.appendChild(btn);
   }
-
-  // Skjul den gamle bryteren (siden ekskluderte runder nå ALLTID skjules)
-  const hideWrap = document.getElementById('hideExcludedWrap');
-  if (hideWrap) hideWrap.style.display = 'none';
-
-  // (Valgfritt) Du kan fortsatt synkronisere checkboxens verdi i tilfelle den finnes, men den er skjult uansett:
-  if (hideExcluded) {
-    hideExcluded.checked = true;
-    hideExcluded.onchange = null; // ingen effekt lenger
-  }
+  updateRoundCountBadge();
 }
 
 /* TOTALT beregning */
@@ -698,11 +608,10 @@ function rebuildVisibleColumns(){
   // Fjern «NESTE 6» hvis det finnes i CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
-// Skjul ekskluderte gruppekolonner ALLTID
-let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
+  // Skjul ekskluderte R25–R30 ALLTID
+  let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
 
   // Legg inn TOTALT rett til høyre for xMin (case-insensitivt) hvis finnes; ellers på slutten
-  // Detekter xMin og fjern evt. tidligere TOTALT
   cols = cols.filter(c => c !== TOTAL_COLUMN);
   const xMinCol = detectedXMinCol;
   const insertAfterIndex = xMinCol ? cols.indexOf(xMinCol) : -1;
@@ -717,10 +626,53 @@ let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.ha
   VISIBLE_COLUMNS = cols;
 }
 
+/* Filter-tilstand → vis/skim Nullstill-lenke */
+function updateResetLinkVisibility(){
+  if (!resetFiltersEl) return;
+  const somethingFiltered =
+    (q.value || '') !== '' ||
+    activePositions.size > 0 ||
+    (selectedClub || '') !== '' ||
+    (priceCapVal != null && priceGlobalMax != null && priceCapVal < priceGlobalMax) ||
+    (INCLUDED_IN_TOTAL.size > 0 && INCLUDED_IN_TOTAL.size < GROUP_COLUMNS.length) ||
+    favoritesOnly;
+  resetFiltersEl.style.display = somethingFiltered ? 'inline' : 'none';
+}
+
 /* Render */
 function render(){
   renderHeader();
-  let rows=DATA.filter(rowMatches);
+  let rows=DATA.filter(row=>{
+    // tekstsøk
+    const query=(q.value||'').toLowerCase();
+    if (query){
+      const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
+      if(!hit)return false;
+    }
+    // posisjon
+    if (detectedPositionCol && activePositions.size>0){
+      const pv=String(row[detectedPositionCol]??'').trim();
+      if (!activePositions.has(pv)) return false;
+    }
+    // klubb
+    if (detectedClubCol && selectedClub){
+      const cv=String(row[detectedClubCol]??'').trim();
+      if (cv !== selectedClub) return false;
+    }
+    // pris
+    if (detectedPriceCol && priceCapVal!=null){
+      const v=row[detectedPriceCol];
+      if(!isNumericLike(v))return false;
+      if(toNumber(v)>priceCapVal)return false;
+    }
+    // favoritter
+    if (favoritesOnly){
+      const key = favKeyFromRow(row);
+      if (!isFavKey(key)) return false;
+    }
+    return true;
+  });
+
   if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
   const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
@@ -770,6 +722,8 @@ function render(){
   }
   tbody.appendChild(frag);
   updateKPIs(rows);
+  updateRoundCountBadge();
+  updateResetLinkVisibility();
 }
 
 /* Klikk på stjerna i tabellen (event delegation) */
@@ -800,18 +754,27 @@ Papa.parse(CSV_URL,{
 
     DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
-    // Første beregning av TOTALT
-    computeTotalsForData();
+    // Favorittfilter-knapp (koble til)
+    const favBtn = document.getElementById('favFilter');
+    if (favBtn){
+      favoritesOnly = favBtn.getAttribute('aria-pressed') === 'true';
+      favBtn.addEventListener('click', ()=>{
+        favoritesOnly = !(favBtn.getAttribute('aria-pressed') === 'true');
+        favBtn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
+        render();
+      });
+    }
 
-    // Sett opp synlige kolonner (inkludert TOTALT og evt. skjul ekskluderte)
+    // TOTALT
+    computeTotalsForData();
     rebuildVisibleColumns();
 
+    // UI
     buildPositionChips(DATA, detectedPositionCol);
     buildClubSelect(DATA, detectedClubCol);
     setupPriceCompact();
     buildTotalChips();
 
-    ensureFavFilterButton(); // legg inn stjernefilter i UI
     render();
   },
   error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
@@ -819,6 +782,28 @@ Papa.parse(CSV_URL,{
 
 /* Interaksjon */
 q.addEventListener('input', render);
+clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
+
+/* Nullstill */
+resetFiltersEl?.addEventListener('click', ()=>{
+  q.value = '';
+  activePositions.clear();
+  selectedClub = '';
+  if (detectedPriceCol && priceGlobalMax != null){
+    priceCapVal = priceGlobalMax;
+    priceCapRange.value = priceGlobalMax.toFixed(1);
+    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+  }
+  favoritesOnly = false;
+  document.getElementById('favFilter')?.setAttribute('aria-pressed','false');
+
+  INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
+  localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
+  buildTotalChips();
+  computeTotalsForData();
+  rebuildVisibleColumns();
+  render();
+});
 
 /* Mørk modus – husk valg */
 (function(){
@@ -832,16 +817,6 @@ q.addEventListener('input', render);
     document.documentElement.classList.toggle('dark', tgl.checked);
     localStorage.setItem(key, tgl.checked ? '1':'0');
     render();
-  });
-})();
-
-/* Failsafe: fjern gammel KPI-seksjon om den skulle dukke opp via cache */
-(function removeLegacyKpiCard(){
-  document.querySelectorAll('section.cards, .cards, .cards .card').forEach(el => el.remove());
-  document.querySelectorAll('h3').forEach(h=>{
-    if(h.textContent.trim().toLowerCase() === 'spillere vist'){
-      const sec = h.closest('section'); (sec || h.parentElement).remove();
-    }
   });
 })();
 </script>
