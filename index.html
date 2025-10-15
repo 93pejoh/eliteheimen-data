@@ -62,13 +62,23 @@
   }
   .filterbar .label{ color:#64748b; font-size:.85rem; white-space:nowrap; }
   .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .chip{border:1px solid #d1d5db;border-radius:999px;padding:2px 8px;background:#fff;cursor:pointer;user-select:none;color:#0f172a}
+  .chip{border:1px solid #d1d5db;border-radius:999px;padding:2px 8px;background:#fff;cursor:pointer;user-select:none;color:#0f172a; display:inline-flex; align-items:center; gap:6px; }
   .chip[aria-pressed="true"]{background:#e5effe;border-color:#93c5fd;color:#0c4a6e}
+  .chip .tick{ width:1.2em; text-align:center; font-weight:700; opacity:.9; }
+  .chip[aria-pressed="false"] .tick{ opacity:.25; }
+  .chip[aria-pressed="false"] .tick::before{ content:"•"; }
+  .chip[aria-pressed="true"]  .tick::before{ content:"✓"; }
+
   .filterbar input[type="search"]{ height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;width:100%; }
   .filterbar select{ height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff; }
 
-  .price-compact{display:inline-flex;align-items:center;gap:6px}
-  .price-compact input[type="range"]{width:150px;height:3px}
+  /* Pris – kompakt + stabil layout */
+  .price-compact{display:inline-flex;align-items:center;gap:8px}
+  .price-compact input[type="range"]{width:170px;height:3px;flex:0 0 auto}
+  #priceCapLabel{
+    display:inline-block; min-width:4.2ch; text-align:right;
+    font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1; white-space:nowrap;
+  }
   .muted{color:#666;font-size:.82rem}
   .filterbar .divider { width:1px; height:22px; background:#e5e7eb; }
   html.dark .filterbar .divider { background:#1f2a44; }
@@ -99,6 +109,7 @@
   html.dark .filterbar select{background:#0b1325;color:#e5e7eb;border-color:#1f2a44}
   html.dark .chip{background:#0b1325;border-color:#1f2a44;color:#e5e7eb}
   html.dark .chip[aria-pressed="true"]{background:#1f263a;border-color:#334155;color:#cfe1ff}
+  html.dark .chip[aria-pressed="false"] .tick{ opacity:.35; }
   html.dark .table-wrap{border-color:#1f2a44;background:#0f172a}
   html.dark thead th{background:#0b1325 !important;color:#f1f5f9 !important;border-bottom-color:#223356 !important;box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
   html.dark thead th:first-child{background:#0b1325 !important;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
@@ -404,26 +415,31 @@ function rowMatches(row){
   return true;
 }
 
-/* TOTALT UI */
+/* TOTALT UI – med visuell av/på ✓ */
 function buildTotalChips(){
   totalChipsWrap.innerHTML = '';
   for (const col of GROUP_COLUMNS){
     const btn = document.createElement('button');
     btn.className = 'chip';
     btn.type = 'button';
-    btn.textContent = col;
-
     const on = INCLUDED_IN_TOTAL.has(col);
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.setAttribute('data-col', col);
     btn.title = on ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
+    btn.innerHTML = `<span class="tick" aria-hidden="true"></span><span>${col}</span>`;
 
     btn.addEventListener('click', ()=>{
-      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col);
-      else INCLUDED_IN_TOTAL.add(col);
-
+      const wasOn = INCLUDED_IN_TOTAL.has(col);
+      if (wasOn) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
+
+      // Oppdater visuell state uten å bygge alt på nytt
+      const nowOn = INCLUDED_IN_TOTAL.has(col);
+      btn.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
+      btn.title = nowOn ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
+
       computeTotalsForData();
-      rebuildVisibleColumns();   // skjul/vis kolonner umiddelbart
+      rebuildVisibleColumns();   // skjul/vis kolonner live
       render();
     });
 
@@ -559,7 +575,7 @@ Papa.parse(CSV_URL,{
       });
     }
 
-    // Bygg UI
+    // UI
     buildPositionChips(DATA, detectedPositionCol);
     buildClubSelect(DATA, detectedClubCol);
 
