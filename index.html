@@ -685,8 +685,8 @@ function rebuildVisibleColumns(){
   // Fjern «NESTE 6» hvis det finnes i CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
-  // Skjul ekskluderte gruppekolonner ved behov
-  let cols = base.filter(c=> !(HIDE_EXCLUDED && GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)) );
+// Skjul ekskluderte gruppekolonner ALLTID
+let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
 
   // Legg inn TOTALT rett til høyre for xMin (case-insensitivt) hvis finnes; ellers på slutten
   // Detekter xMin og fjern evt. tidligere TOTALT
