@@ -176,7 +176,7 @@
     }
     .pill.kpi-mini{ grid-column:1 / 2; }
     #q{ grid-column:2 / 3; }
-    #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact{ grid-column:1 / -1; }
+    #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact, #totalChipsWrap, #hideExcludedWrap{ grid-column:1 / -1; }
     .price-compact input[type="range"]{ width:100%; height:3px; }
     table{ font-size:.9rem; }
     thead th{ padding:6px; }
@@ -260,7 +260,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BTGNR2NXT"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){dataLayer.push(arguments);} 
     gtag('js', new Date());
     gtag('config', 'G-7BTGNR2NXT');
   </script>
@@ -308,6 +308,14 @@
       <span class="muted" id="priceCapLabel"></span>
     </div>
   </div>
+  <div class="filterbar-row" style="margin-top:6px; grid-auto-flow:row; grid-template-columns: auto 1fr auto;">
+    <span class="label">I totalen</span>
+    <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
+    <label id="hideExcludedWrap" class="row" style="justify-self:end; gap:8px; align-items:center;">
+      <input id="hideExcluded" type="checkbox" />
+      <span class="muted">Skjul ekskluderte kolonner</span>
+    </label>
+  </div>
 </section>
 
 <!-- TABELL -->
@@ -339,7 +347,7 @@ const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
 /* Betinget formatering */
 const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"]; // felles skala (midtpunkt 3)
-const NESTE6_COLUMN = "NESTE 6";                              // egen blå skala
+const TOTAL_COLUMN  = "TOTALT";                                      // NY: erstatter «NESTE 6»
 
 /* ======== ELEMENTER ======== */
 const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
@@ -348,6 +356,8 @@ const priceCompactWrap=document.getElementById('price-compact');
 const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
 const clubSelect=document.getElementById('clubSelect'), clubLabel=document.getElementById('clubLabel');
 const miniKPI=document.getElementById('kpi-count-mini');
+const totalChipsWrap=document.getElementById('totalChipsWrap');
+const hideExcluded=document.getElementById('hideExcluded');
 
 /* ======== STATE ======== */
 let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
@@ -356,6 +366,13 @@ let activePositions=new Set();
 let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClubCol="";
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
+
+/* TOTALT-innstillinger */
+const TOTAL_KEY = 'eh_total_cols_v1';
+const HIDE_EXCLUDED_KEY = 'eh_hide_excluded_v1';
+let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
+if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS); // default: alle
+let HIDE_EXCLUDED = localStorage.getItem(HIDE_EXCLUDED_KEY) === '1';
 
 /* ======== FAVORITTER ======== */
 const FAVORITES_KEY = 'eh_favorites_v1';
@@ -406,7 +423,7 @@ function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return 
   if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
   return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));}
 function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
-function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
+function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});} 
 function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
 const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 
@@ -433,7 +450,7 @@ function renderHeader(){
     btn.textContent=col;
     btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
     th.appendChild(btn);
-    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
+    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);} 
     tr.appendChild(th);
   });
   thead.innerHTML=''; thead.appendChild(tr);
@@ -485,7 +502,7 @@ function colorGroup(val, min, max){
   /* !important sikrer at zebra/hover ikke overstyrer */
   return `background:${rgbToCss(rgb)} !important;color:${text} !important;`;
 }
-function colorNeste6(val,min,max){
+function colorTotalBlue(val,min,max){
   if(!isNumericLike(val))return '';
   const x=toNumber(val);
   if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
@@ -612,6 +629,81 @@ function setupPriceCompact(){
   });
 }
 
+/* TOTALT UI */
+function buildTotalChips(){
+  totalChipsWrap.innerHTML = '';
+  for (const col of GROUP_COLUMNS){
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.type = 'button';
+    btn.textContent = col;
+    const on = INCLUDED_IN_TOTAL.has(col);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.title = on ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
+    btn.addEventListener('click', ()=>{
+      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
+      localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
+      buildTotalChips();
+      computeTotalsForData();
+      rebuildVisibleColumns();
+      render();
+    });
+    totalChipsWrap.appendChild(btn);
+  }
+  // hide-excluded checkbox
+  hideExcluded.checked = HIDE_EXCLUDED;
+  hideExcluded.addEventListener('change', ()=>{
+    HIDE_EXCLUDED = !!hideExcluded.checked;
+    localStorage.setItem(HIDE_EXCLUDED_KEY, HIDE_EXCLUDED ? '1' : '0');
+    rebuildVisibleColumns();
+    render();
+  });
+}
+
+/* TOTALT beregning */
+function computeTotalForRow(row){
+  let sum = 0; let any=false;
+  INCLUDED_IN_TOTAL.forEach(c=>{
+    const v = row[c];
+    if (isNumericLike(v)){ sum += toNumber(v); any=true; }
+  });
+  return any ? sum : '';
+}
+function computeTotalsForData(){
+  for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); }
+}
+
+/* Kolonneoppsett (synlige) */
+function rebuildVisibleColumns(){
+  // Start fra original rekkefølge, minus skjulte via bokstaver
+  const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
+  const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
+
+  // Fjern gammel «NESTE 6» hvis det finnes i CSV
+  const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
+
+  // Skjul ekskluderte gruppekolonner ved behov
+  let cols = base.filter(c=> !(HIDE_EXCLUDED && GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)) );
+
+  // Legg inn TOTALT etter siste av R25..R30 som faktisk finnes i datasettet
+  let insertAfterIndex = -1;
+  for (const g of GROUP_COLUMNS){
+    const i = cols.indexOf(g);
+    if (i > insertAfterIndex) insertAfterIndex = i;
+  }
+  // Fjern eventuell tidligere TOTALT
+  cols = cols.filter(c => c !== TOTAL_COLUMN);
+  if (insertAfterIndex >= 0){ cols.splice(insertAfterIndex+1, 0, TOTAL_COLUMN); }
+  else { cols.push(TOTAL_COLUMN); }
+
+  // Flytt NAVN først (sticky)
+  if (detectedNameCol){
+    const i=cols.indexOf(detectedNameCol);
+    if(i>0){ cols.splice(i,1); cols.unshift(detectedNameCol); }
+  }
+  VISIBLE_COLUMNS = cols;
+}
+
 /* Render */
 function render(){
   renderHeader();
@@ -619,7 +711,7 @@ function render(){
   if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
   const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
-  const neste6Range = VISIBLE_COLUMNS.includes(NESTE6_COLUMN) ? computeSingleRange(rows, NESTE6_COLUMN) : null;
+  const totalRange  = VISIBLE_COLUMNS.includes(TOTAL_COLUMN) ? computeSingleRange(rows, TOTAL_COLUMN) : null;
 
   tbody.innerHTML='';
   const frag=document.createDocumentFragment();
@@ -629,8 +721,8 @@ function render(){
       let style='';
       if (GROUP_COLUMNS.includes(c) && groupRange){
         style = colorGroup(row[c], groupRange.min, groupRange.max);
-      } else if (c === NESTE6_COLUMN && neste6Range){
-        style = colorNeste6(row[c], neste6Range.min, neste6Range.max);
+      } else if (c === TOTAL_COLUMN && totalRange){
+        style = colorTotalBlue(row[c], totalRange.min, totalRange.max);
       }
       let val = row[c] ?? '';
 
@@ -641,12 +733,12 @@ function render(){
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
 
-      // NESTE 6 i bold
-      if (c === NESTE6_COLUMN){
+      // TOTALT i bold
+      if (c === TOTAL_COLUMN){
         val = `<strong>${val}</strong>`;
       }
 
-      // Navn med favoritt-stjerne, i sentrert fast-bredde blokk
+      // Navn med favoritt-stjerne
       if (detectedNameCol && c === detectedNameCol){
         const key = favKeyFromRow(row);
         const pressed = isFavKey(key);
@@ -686,26 +778,23 @@ Papa.parse(CSV_URL,{
   complete:(res)=>{
     const data=res.data||[];
     RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
-    // synlige kolonner (skjul etter bokstav)
-    const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
-    VISIBLE_COLUMNS=[];
-    RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) VISIBLE_COLUMNS.push(c); });
 
     detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
     detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
     detectedClubCol=detectClubColumn(RAW_COLUMNS);
 
-    // Flytt NAVN først (gir sticky første kolonne)
-    if (detectedNameCol){
-      const i=VISIBLE_COLUMNS.indexOf(detectedNameCol);
-      if(i>0){ VISIBLE_COLUMNS.splice(i,1); VISIBLE_COLUMNS.unshift(detectedNameCol); }
-    }
-
     DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
+
+    // Første beregning av TOTALT
+    computeTotalsForData();
+
+    // Sett opp synlige kolonner (inkludert TOTALT og evt. skjul ekskluderte)
+    rebuildVisibleColumns();
 
     buildPositionChips(DATA, detectedPositionCol);
     buildClubSelect(DATA, detectedClubCol);
     setupPriceCompact();
+    buildTotalChips();
 
     ensureFavFilterButton(); // legg inn stjernefilter i UI
     render();
