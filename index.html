@@ -363,7 +363,7 @@ const hideExcluded=document.getElementById('hideExcluded');
 let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
 let sortCol=null, sortDir=1;
 let activePositions=new Set();
-let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClubCol="";
+let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClubCol="", detectedXMinCol="";
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 
@@ -426,6 +426,7 @@ function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().re
 function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});} 
 function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
 const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
+const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 
 /* Fargeskala (magenta→hvit→grønn; midt=3) */
 const GROUP_LOW="#d2255d", GROUP_MID="#ffffff", GROUP_HIGH="#04b155";
@@ -667,6 +668,9 @@ function computeTotalForRow(row){
     const v = row[c];
     if (isNumericLike(v)){ sum += toNumber(v); any=true; }
   });
+  return any ? Math.round(sum*100)/100 : '';
+}
+  });
   return any ? sum : '';
 }
 function computeTotalsForData(){
@@ -685,11 +689,10 @@ function rebuildVisibleColumns(){
   // Skjul ekskluderte gruppekolonner ved behov
   let cols = base.filter(c=> !(HIDE_EXCLUDED && GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)) );
 
-  // Legg inn TOTALT etter siste av R25..R30 som faktisk finnes i datasettet
+  // Legg inn TOTALT rett til høyre for xMin hvis den finnes; ellers på slutten
   let insertAfterIndex = -1;
-  for (const g of GROUP_COLUMNS){
-    const i = cols.indexOf(g);
-    if (i > insertAfterIndex) insertAfterIndex = i;
+  if (detectedXMinCol) {
+    insertAfterIndex = cols.indexOf(detectedXMinCol);
   }
   // Fjern eventuell tidligere TOTALT
   cols = cols.filter(c => c !== TOTAL_COLUMN);
@@ -733,9 +736,11 @@ function render(){
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
 
-      // TOTALT i bold
+      // TOTALT i bold med to desimaler
       if (c === TOTAL_COLUMN){
-        val = `<strong>${val}</strong>`;
+        const num = isNumericLike(val) ? toNumber(val) : null;
+        val = `<strong>${(num!=null && isFinite(num)) ? fmt2(num) : ''}</strong>`;
+      }</strong>`;
       }
 
       // Navn med favoritt-stjerne
@@ -782,6 +787,7 @@ Papa.parse(CSV_URL,{
     detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
     detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
     detectedClubCol=detectClubColumn(RAW_COLUMNS);
+    detectedXMinCol=detectInsensitive(RAW_COLUMNS,"xmin");
 
     DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
