@@ -634,32 +634,45 @@ function setupPriceCompact(){
 
 /* TOTALT UI */
 function buildTotalChips(){
+  // Bygg knappene R25–R30
   totalChipsWrap.innerHTML = '';
   for (const col of GROUP_COLUMNS){
     const btn = document.createElement('button');
     btn.className = 'chip';
     btn.type = 'button';
     btn.textContent = col;
+
     const on = INCLUDED_IN_TOTAL.has(col);
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     btn.title = on ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
+
     btn.addEventListener('click', ()=>{
-      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
+      // Toggle inkludert/ekskludert
+      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col);
+      else INCLUDED_IN_TOTAL.add(col);
+
+      // Husk valget
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
+
+      // Rebuild UI + totals + kolonner og render
       buildTotalChips();
       computeTotalsForData();
       rebuildVisibleColumns();
       render();
     });
+
     totalChipsWrap.appendChild(btn);
   }
-  hideExcluded.checked = HIDE_EXCLUDED;
-  hideExcluded.onchange = ()=>{
-    HIDE_EXCLUDED = !!hideExcluded.checked;
-    localStorage.setItem(HIDE_EXCLUDED_KEY, HIDE_EXCLUDED ? '1' : '0');
-    rebuildVisibleColumns();
-    render();
-  };
+
+  // Skjul den gamle bryteren (siden ekskluderte runder nå ALLTID skjules)
+  const hideWrap = document.getElementById('hideExcludedWrap');
+  if (hideWrap) hideWrap.style.display = 'none';
+
+  // (Valgfritt) Du kan fortsatt synkronisere checkboxens verdi i tilfelle den finnes, men den er skjult uansett:
+  if (hideExcluded) {
+    hideExcluded.checked = true;
+    hideExcluded.onchange = null; // ingen effekt lenger
+  }
 }
 
 /* TOTALT beregning */
