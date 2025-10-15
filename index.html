@@ -238,9 +238,26 @@
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
-  /* Venstrestill første kolonne (header + celler) for stjerne/tekst */
-  table thead th:first-child,
-  table tbody td:first-child{ text-align:left; }
+  /* Sentrer innholdet i første kolonne */
+table tbody td:first-child{ text-align:center; }
+
+/* Wrapper som sentrerer "stjerne + navn" i cella */
+.name-col{
+  display:flex; 
+  justify-content:center; /* sentrer hele blokka i kolonnen */
+}
+
+/* Selve raden med stjerne + navn er venstrejustert inni den sentrerte blokka */
+.name-cell{
+  display:flex; 
+  align-items:center; 
+  justify-content:flex-start; 
+  gap:6px;
+}
+
+/* Behold fast bredde på stjerna for perfekt vertikal linje */
+.fav-btn{ flex:0 0 26px; }
+
 </style>
 </head>
 <body>
@@ -632,7 +649,7 @@ function render(){
         const starBtn = `<button class="fav-btn" type="button" aria-label="${label}" aria-pressed="${pressed}" data-favkey="${key}">
                            <span class="star" aria-hidden="true"></span>
                          </button>`;
-        val = `<div class="name-cell">${starBtn}<strong>${row[c] ?? ''}</strong></div>`;
+        val = `<div class="name-col"><div class="name-cell">${starBtn}<strong>${row[c] ?? ''}</strong></div></div>`;
       }
 
       const cellStyle = style ? ` style="${style}"` : "";
