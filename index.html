@@ -32,10 +32,8 @@
     border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:8px 12px}
   .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff}
   .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
-  /* Tittel + småknapper på samme rad */
   .brand-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .brand-links{display:inline-flex;gap:6px;flex-wrap:wrap}
-
   @media (max-width:780px){
     .brand h1{ font-size:1.1rem; }
   }
@@ -108,7 +106,6 @@
   .filterbar input[type="search"]{
     height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;width:100%;
   }
-  /* Klubb-dropdown */
   .filterbar select{
     height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff;
   }
@@ -151,7 +148,6 @@
   html.dark thead th{background:#0b1325 !important;color:#f1f5f9 !important;border-bottom-color:#223356 !important;box-shadow:0 2px 0 #0b1325,0 1px 0 #223356;z-index:3}
   html.dark thead th:first-child{background:#0b1325 !important;box-shadow:1px 0 0 #1f2a44,0 2px 0 #0b1325,0 1px 0 #223356}
   html.dark tbody td{border-top-color:#1a2743;background:transparent}
-  /* Dark zebra/hover – ikke overstyr celler med egen bakgrunn */
   html.dark tbody tr:nth-child(even) td:not([style*="background"]) { background:#0e172a; }
   html.dark tbody tr:hover td:not([style*="background"])            { background:#122038; }
   html.dark tbody td:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
@@ -176,16 +172,14 @@
     }
     .pill.kpi-mini{ grid-column:1 / 2; }
     #q{ grid-column:2 / 3; }
-    #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact, #totalChipsWrap, #hideExcludedWrap{ grid-column:1 / -1; }
+    #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact, #totalChipsWrap{ grid-column:1 / -1; }
     .price-compact input[type="range"]{ width:100%; height:3px; }
     table{ font-size:.9rem; }
     thead th{ padding:6px; }
     tbody td{ padding:4px 6px; }
   }
 
-  /* Fjern eventuell gammel KPI-seksjon hvis den skulle dukke opp */
   .cards, section.cards, .cards .card { display:none !important;height:0 !important;margin:0 !important;padding:0 !important;border:0 !important; }
-
   html.dark .pill.kpi-mini { color: #000 !important; background: #fff !important; }
 
   /* Sist oppdatert */
@@ -193,59 +187,37 @@
   #last-updated::before { content: "⏱️"; font-size: 1rem; opacity: 0.9; }
 
   /* Favorittstjerne i navnecella */
-  .fav-btn{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; margin-right:0; border-radius:999px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; vertical-align:middle; flex:0 0 26px; }
+  .fav-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; margin-right:0;
+    border-radius:999px; border:1px solid #e5e7eb; background:#fff;
+    cursor:pointer; vertical-align:middle;
+    flex:0 0 26px;
+  }
   .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
   .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-btn[aria-pressed="true"] .star::before{ content:"★"; }
   html.dark .fav-btn{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-btn[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
-  /* Navne-blokk: fast bredde, sentrert i cella; grid = stjerne + navn */
   table thead th:first-child, table tbody td:first-child{ text-align:center; padding-left:6px; }
   .name-cell{ display:grid; grid-template-columns:26px 1fr; align-items:center; column-gap:6px; width:var(--name-col-width); max-width:calc(100% - 8px); margin:0 auto; }
 
-  /* Filterknapp: vis kun favoritter (stjerne uten tekst) */
-  .fav-filter{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; user-select:none; }
+  /* Favorittfilter-knapp (stjerne uten tekst) */
+  .fav-filter{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:32px; height:32px; border-radius:999px; border:1px solid #d1d5db;
+    background:#fff; cursor:pointer; user-select:none;
+  }
   .fav-filter::before{ content:"☆"; font-size:18px; line-height:1; }
   .fav-filter[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-filter[aria-pressed="true"]::before{ content:"★"; }
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
-  /* --- Nye visuelle grep for filterbaren --- */
+  /* Delere og runde-chips rad uten teller */
   .filterbar .divider { width:1px; height:22px; background:#e5e7eb; }
   html.dark .filterbar .divider { background:#1f2a44; }
-  .filter-heading{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:4px 10px; border-radius:999px;
-    background:#f8fafc; border:1px solid #e5e7eb; color:#0f172a;
-    font-weight:600; white-space:nowrap;
-  }
-  html.dark .filter-heading{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
-  .badge{
-    display:inline-flex; align-items:center; justify-content:center;
-    min-width:22px; height:22px; padding:0 6px; border-radius:999px;
-    background:#e5f0ff; border:1px solid #bfdbfe; font-size:.8rem; font-weight:700;
-  }
-  html.dark .badge{ background:#0f1c36; border-color:#26497a; }
-  /* outline vs fylt chips (ny stil justert over eksisterende) */
-  .chip { background:#fff; border:1px solid #d1d5db; color:#0f172a; }
-  .chip[aria-pressed="true"]{ background:#e5effe; border-color:#93c5fd; color:#0c4a6e; }
-  html.dark .chip{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
-  html.dark .chip[aria-pressed="true"]{ background:#1f263a; border-color:#334155; color:#cfe1ff; }
-  .price-compact .pill{
-    display:inline-flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #e5e7eb;
-    padding:2px 8px; border-radius:999px; font-variant-numeric: tabular-nums;
-  }
-  html.dark .price-compact .pill{ background:#0b1325; border-color:#1f2a44; }
-  .reset-link{ color:#64748b; text-decoration:underline; cursor:pointer; font-size:.9rem; }
-  .reset-link:hover{ color:#0c4a6e; }
-  
-  /* gjør sliders mer stabile på touch */
-.price-compact input[type="range"] {
-  touch-action: none;
-}
-  #resetFilters{ display:none !important; }
 </style>
 
 <!-- Google tag (gtag.js) -->
@@ -281,7 +253,7 @@
   </div>
 </section>
 
-<!-- FILTERBAR (NY layout) -->
+<!-- FILTERBAR -->
 <section id="filters" class="filterbar">
   <!-- Rad 1: primærfiltre -->
   <div class="filterbar-row">
@@ -310,17 +282,14 @@
     <span class="label">Pris ≤</span>
     <div id="price-compact" class="price-compact" style="display:none;">
       <input id="priceCapRange" type="range" step="0.1" />
-      <span class="pill"><span id="priceCapLabel"></span></span>
+      <span class="muted" id="priceCapLabel"></span>
     </div>
-
-    <!-- Nullstill (automatisk synlighet) -->
-    <span id="resetFilters" class="reset-link" style="margin-left:auto; display:none;">Nullstill</span>
   </div>
 
-  <!-- Rad 2: runde-chips for TOTALT -->
+  <!-- Rad 2: runde-chips for TOTALT (ingen teller-boks) -->
   <div class="filterbar-row" style="margin-top:6px;">
-  <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
-</div>
+    <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
+  </div>
 </section>
 
 <!-- TABELL -->
@@ -343,31 +312,27 @@
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-/* ================== KONFIG ================== */
+/* ======== KONFIG ======== */
 const CSV_URL = "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv";
 window.CSV_URL = CSV_URL;
 
-/* Skjul kolonner etter Excel-bokstav (indeksbasert) */
+/* Skjul kolonner etter Excel-bokstav: */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
-/* Runde-kolonner og TOTALT */
+/* Betinget formatering / grupper */
 const GROUP_COLUMNS = ["R25","R26","R27","R28","R29","R30"];
 const TOTAL_COLUMN  = "TOTALT";
 
-/* ================== ELEMENTER ================== */
+/* ======== ELEMENTER ======== */
 const thead=document.getElementById('thead'), tbody=document.getElementById('tbody');
-const q=document.getElementById('q');
-const posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
+const q=document.getElementById('q'), posChipsWrap=document.getElementById('pos-chips'), posAllBtn=document.getElementById('pos-all');
 const priceCompactWrap=document.getElementById('price-compact');
 const priceCapRange=document.getElementById('priceCapRange'), priceCapLabel=document.getElementById('priceCapLabel');
 const clubSelect=document.getElementById('clubSelect'), clubLabel=document.getElementById('clubLabel');
-const miniKPI=document.getElementById('kpi-count-mini');
 const totalChipsWrap=document.getElementById('totalChipsWrap');
-const roundCountBadge=document.getElementById('roundCountBadge');
-const resetFiltersEl=document.getElementById('resetFilters');
 const favFilterBtn=document.getElementById('favFilter');
 
-/* ================== STATE ================== */
+/* ======== STATE ======== */
 let RAW_COLUMNS=[], VISIBLE_COLUMNS=[], DATA=[];
 let sortCol=null, sortDir=1;
 let activePositions=new Set();
@@ -376,7 +341,7 @@ let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 let favoritesOnly = false;
 
-/* TOTALT-innstillinger (persist) */
+/* Persist for TOTALT (hvilke runder teller) */
 const TOTAL_KEY = 'eh_total_cols_v1';
 let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
 if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
@@ -385,7 +350,7 @@ if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
 const FAVORITES_KEY = 'eh_favorites_v1';
 let FAVORITES = new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'));
 
-/* ================== UTILS ================== */
+/* ======== UTILS ======== */
 function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
 function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
   if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
@@ -396,31 +361,73 @@ function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCa
 const fmtInt=n=>new Intl.NumberFormat('no-NO',{maximumFractionDigits:0}).format(n);
 const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 
-/* Favoritter */
+/* Navn/posisjon/klubb deteksjon */
+function detectNameColumn(columns){
+  const cands = ["navn","name","spiller","player","full name","fullname"];
+  const lower = columns.map(c => String(c||"").toLowerCase());
+  for (let i=0;i<lower.length;i++){
+    if (cands.includes(lower[i])) return columns[i];
+  }
+  return columns[0] || "";
+}
+function detectPositionColumn(columns){
+  const cands=["posisjon","position","pos","rolle","role"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
+  return "";
+}
+function detectPriceColumn(columns){
+  const prefs=["pris","price","kostnad","cost"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
+  return "";
+}
+function detectClubColumn(columns){
+  const cands=["klubb","lag","team","club"];
+  const lower=columns.map(c=>c.toLowerCase());
+  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
+  return "";
+}
+
+/* Favorittnøkler */
 function favKeyFromRow(row){
   const name = detectedNameCol ? String(row[detectedNameCol] ?? '') : '';
   const club = detectedClubCol ? String(row[detectedClubCol] ?? '') : '';
-  return `${name}::${club}`;
+  return club ? `${name}::${club}` : name;
 }
-function isFavKey(k){ return FAVORITES.has(k); }
-function toggleFavKey(k){ if(FAVORITES.has(k)) FAVORITES.delete(k); else FAVORITES.add(k);
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES])); }
+function isFavKey(key){ return FAVORITES.has(key); }
+function toggleFavKey(key){
+  if (FAVORITES.has(key)) FAVORITES.delete(key); else FAVORITES.add(key);
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...FAVORITES]));
+}
 
-/* Fargeskala */
+/* Farger */
 function luminance(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
-function colorGroup(val,min,max){
+function colorGroup(val, min, max){
   if(!isNumericLike(val))return '';
-  const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  const x=toNumber(val);
+  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
   const mid=3; let r,g,b;
-  if (x<=mid){ const t=(x-min)/(mid-min); r=Math.round(0xd2+(0xff-0xd2)*t); g=Math.round(0x25+(0xff-0x25)*t); b=Math.round(0x5d+(0xff-0x5d)*t); }
-  else        { const t=(x-mid)/(max-mid); r=Math.round(0xff+(0x04-0xff)*t); g=Math.round(0xff+(0xb1-0xff)*t); b=Math.round(0xff+(0x55-0xff)*t); }
+  if (x<=mid){
+    const t=(x-min)/(mid-min);
+    r=Math.round(0xd2 + (0xff-0xd2)*t);
+    g=Math.round(0x25 + (0xff-0x25)*t);
+    b=Math.round(0x5d + (0xff-0x5d)*t);
+  } else {
+    const t=(x-mid)/(max-mid);
+    r=Math.round(0xff + (0x04-0xff)*t);
+    g=Math.round(0xff + (0xb1-0xff)*t);
+    b=Math.round(0xff + (0x55-0xff)*t);
+  }
   const text=luminance([r,g,b])<0.55?'#fff':'#000';
   return `background:rgb(${r}, ${g}, ${b}) !important;color:${text} !important;`;
 }
 function colorTotalBlue(val,min,max){
   if(!isNumericLike(val))return '';
-  const x=toNumber(val); if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
-  const t=(x-min)/(max-min); const hue=210, sat=90, light=92 - t*32;
+  const x=toNumber(val);
+  if(!isFinite(x)||!isFinite(min)||!isFinite(max)||max<=min)return '';
+  let t=(x-min)/(max-min);
+  const hue=210, sat=90, light=92 - t*32;
   return `background:hsl(${hue} ${sat}% ${light}% ) !important;color:#000 !important;`;
 }
 function computeGroupRange(rows, cols){
@@ -438,7 +445,7 @@ function computeSingleRange(rows, col){
   return any && max>min ? {min,max} : null;
 }
 
-/* ================== UI BYGG ================== */
+/* Header */
 function renderHeader(){
   const tr=document.createElement('tr');
   VISIBLE_COLUMNS.forEach(col=>{
@@ -453,106 +460,35 @@ function renderHeader(){
   thead.innerHTML=''; thead.appendChild(tr);
 }
 
-function buildPositionChips(data, col){
-  posChipsWrap.innerHTML='';
-  posAllBtn.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false');
-  if(!col){posAllBtn.disabled=true;return;} posAllBtn.disabled=false;
-
-  const seen=new Set(), values=[];
-  for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
-  const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
-  values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);
-    if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1;
-    return a.localeCompare(b,'no',{numeric:true});});
-
-  for(const val of values){
-    const btn=document.createElement('button');
-    btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-    btn.addEventListener('click',()=>{
-      posAllBtn.setAttribute('aria-pressed','false');
-      if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-      if(activePositions.size===0) posAllBtn.setAttribute('aria-pressed','true');
-      btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-      render();
-    });
-    posChipsWrap.appendChild(btn);
+/* Filtrering av rader */
+function rowMatches(row){
+  const query=(q.value||'').toLowerCase();
+  if (query){
+    const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
+    if(!hit)return false;
   }
-  posAllBtn.onclick=()=>{
-    activePositions.clear();
-    posAllBtn.setAttribute('aria-pressed','true');
-    [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
-    render();
-  };
-}
-
-function buildClubSelect(data, col){
-  if (!clubSelect || !clubLabel) return;
-  if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
-
-  const seen=new Set(), values=[];
-  for (const r of data){
-    const v=String(r[col]??'').trim();
-    if (v && !seen.has(v)){ seen.add(v); values.push(v); }
+  if (detectedPositionCol && activePositions.size>0){
+    const pv=String(row[detectedPositionCol]??'').trim();
+    if (!activePositions.has(pv)) return false;
   }
-  values.sort((a,b)=> a.localeCompare(b,'no',{numeric:true,sensitivity:'base'}));
-  clubSelect.innerHTML = `<option value="">Alle</option>` + values.map(v=>`<option value="${v}">${v}</option>`).join('');
-  clubSelect.onchange = ()=>{ selectedClub = clubSelect.value || ""; render(); };
-}
-
-/* KPI */
-function updateKPIs(rows){
-  if (miniKPI) miniKPI.textContent = `${fmtInt(rows.length)} spillere`;
-}
-
-/* Pris */
-function computePriceRange(rows,col){
-  let min=Infinity,max=-Infinity,any=false;
-  for(const r of rows){const v=r[col];
-    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
+  if (detectedClubCol && selectedClub){
+    const cv=String(row[detectedClubCol]??'').trim();
+    if (cv !== selectedClub) return false;
   }
-  return any?{min,max}:null;
-}
-  
-function setupPriceCompact(){
-  detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
-  if(!detectedPriceCol){
-    priceCompactWrap.style.display = 'none';
-    return;
+  if (detectedPriceCol && priceCapVal!=null){
+    const v=row[detectedPriceCol];
+    if(!isNumericLike(v))return false;
+    if(toNumber(v)>priceCapVal)return false;
   }
-
-  const r = computePriceRange(DATA, detectedPriceCol);
-  if(!r){
-    priceCompactWrap.style.display = 'none';
-    return;
+  if (favoritesOnly){
+    const key = favKeyFromRow(row);
+    if (!isFavKey(key)) return false;
   }
-
-  priceGlobalMin = r.min;
-  priceGlobalMax = r.max;
-  priceCapVal    = priceGlobalMax;
-
-  priceCapRange.min  = priceGlobalMin.toFixed(1);
-  priceCapRange.max  = priceGlobalMax.toFixed(1);
-  priceCapRange.step = 0.1;
-  priceCapRange.value = priceCapVal.toFixed(1);
-  priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
-
-  priceCompactWrap.style.display = 'inline-flex';
-
-  // ← original adferd: oppdater og render for hvert input
-  priceCapRange.addEventListener('input', () => {
-    priceCapVal = Number(priceCapRange.value);
-    priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
-    render();
-  });
+  return true;
 }
 
-/* ================== TOTALT ================== */
-function updateRoundCountBadge(){
-  if (!roundCountBadge) return;
-  roundCountBadge.textContent = `${INCLUDED_IN_TOTAL.size}/${GROUP_COLUMNS.length}`;
-}
+/* TOTALT */
 function buildTotalChips(){
-  if (!totalChipsWrap) return;
   totalChipsWrap.innerHTML = '';
   for (const col of GROUP_COLUMNS){
     const btn = document.createElement('button');
@@ -569,15 +505,13 @@ function buildTotalChips(){
       else INCLUDED_IN_TOTAL.add(col);
 
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
-      buildTotalChips();
       computeTotalsForData();
-      rebuildVisibleColumns();   // <- skjul/vis kolonner umiddelbart
+      rebuildVisibleColumns();   // skjul/vis kolonner umiddelbart
       render();
     });
 
     totalChipsWrap.appendChild(btn);
   }
-  updateRoundCountBadge();
 }
 
 function computeTotalForRow(row){
@@ -588,7 +522,9 @@ function computeTotalForRow(row){
   });
   return any ? Math.round(sum*100)/100 : '';
 }
-function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); } }
+function computeTotalsForData(){
+  for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); }
+}
 
 /* Synlige kolonner */
 function rebuildVisibleColumns(){
@@ -615,38 +551,10 @@ function rebuildVisibleColumns(){
   VISIBLE_COLUMNS = cols;
 }
 
-/* Nullstill-lenke synlighet */
-function updateResetLinkVisibility(){ /* deaktivert */ }
-
-/* ================== RENDER ================== */
+/* Render tabell */
 function render(){
   renderHeader();
-  let rows=DATA.filter(row=>{
-    const query=(q?.value||'').toLowerCase();
-    if (query){
-      const hit=VISIBLE_COLUMNS.some(c=>String(row[c]??'').toLowerCase().includes(query));
-      if(!hit)return false;
-    }
-    if (detectedPositionCol && activePositions.size>0){
-      const pv=String(row[detectedPositionCol]??'').trim();
-      if (!activePositions.has(pv)) return false;
-    }
-    if (detectedClubCol && selectedClub){
-      const cv=String(row[detectedClubCol]??'').trim();
-      if (cv !== selectedClub) return false;
-    }
-    if (detectedPriceCol && priceCapVal!=null){
-      const v=row[detectedPriceCol];
-      if(!isNumericLike(v))return false;
-      if(toNumber(v)>priceCapVal)return false;
-    }
-    if (favoritesOnly){
-      const key = favKeyFromRow(row);
-      if (!isFavKey(key)) return false;
-    }
-    return true;
-  });
-
+  let rows=DATA.filter(rowMatches);
   if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
   const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
@@ -695,82 +603,103 @@ function render(){
     frag.appendChild(tr);
   }
   tbody.appendChild(frag);
-  updateKPIs(rows);
-  updateRoundCountBadge();
-  updateResetLinkVisibility();
 }
 
-/* ================== INIT ================== */
-function detectPositionColumn(columns){
-  const cands=["posisjon","position","pos","rolle","role"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
-  return "";
-}
-function detectPriceColumn(columns){
-  const prefs=["pris","price","kostnad","cost"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(prefs.includes(lower[i])) return columns[i];
-  return "";
-}
-function detectClubColumn(columns){
-  const cands=["klubb","lag","team","club"];
-  const lower=columns.map(c=>c.toLowerCase());
-  for(let i=0;i<lower.length;i++) if(cands.includes(lower[i])) return columns[i];
-  return "";
-}
+/* Klikk på stjerna (delegation på tbody) */
+tbody.addEventListener('click', (e) => {
+  const btn = e.target.closest('.fav-btn');
+  if (!btn) return;
+  const key = btn.getAttribute('data-favkey') || btn.dataset.favkey;
+  if (!key) return;
 
-(function start(){
-  // Favorittfilter-knapp
-  if (favFilterBtn){
-    favFilterBtn.addEventListener('click', ()=>{
-      favoritesOnly = !(favFilterBtn.getAttribute('aria-pressed') === 'true');
-      favFilterBtn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
-      render();
-    });
-  }
+  const nowPressed = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', nowPressed ? 'true' : 'false');
+  btn.setAttribute('aria-label', nowPressed ? 'Fjern favoritt' : 'Marker som favoritt');
 
-  q?.addEventListener('input', render);
+  toggleFavKey(key);
+  if (favoritesOnly) render();
+});
 
-  Papa.parse(CSV_URL,{
-    download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
-    complete:(res)=>{
-      try{
-        const data=res.data||[];
-        RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
-        if (!RAW_COLUMNS || RAW_COLUMNS.length===0) throw new Error("Fant ingen kolonner i CSV");
+/* INIT */
+Papa.parse(CSV_URL,{
+  download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
+  complete:(res)=>{
+    const data=res.data||[];
+    RAW_COLUMNS=(res.meta && res.meta.fields && res.meta.fields.length)?res.meta.fields:(data[0]?Object.keys(data[0]):[]);
+    detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
+    detectedNameCol=detectNameColumn(RAW_COLUMNS);
+    detectedClubCol=detectClubColumn(RAW_COLUMNS);
+    detectedXMinCol=detectInsensitive(RAW_COLUMNS,"xmin");
 
-        detectedPositionCol=detectPositionColumn(RAW_COLUMNS);
-        detectedNameCol=detectInsensitive(RAW_COLUMNS,"navn");
-        detectedClubCol=detectClubColumn(RAW_COLUMNS);
-        detectedXMinCol=detectInsensitive(RAW_COLUMNS,"xmin");
+    DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
-        DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
-
-        buildPositionChips(DATA, detectedPositionCol);
-        buildClubSelect(DATA, detectedClubCol);
-        setupPriceCompact();
-
-        computeTotalsForData();
-        rebuildVisibleColumns();
-        buildTotalChips();
-
+    // Favorittfilter-ikon toggle
+    if (favFilterBtn){
+      favoritesOnly = favFilterBtn.getAttribute('aria-pressed') === 'true';
+      favFilterBtn.addEventListener('click', ()=>{
+        favoritesOnly = !(favFilterBtn.getAttribute('aria-pressed') === 'true');
+        favFilterBtn.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
         render();
-      }catch(err){
-        console.error(err);
-        thead.innerHTML='<tr><th class="error">Feil i data/JS</th></tr>';
-        tbody.innerHTML=`<tr><td>Kunne ikke bygge tabell: ${String(err.message||err)}</td></tr>`;
-      }
-    },
-    error:(err)=>{
-      console.error(err);
-      thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>';
-      tbody.innerHTML='<tr><td>Sjekk at CSV_URL er tilgjengelig.</td></tr>';
+      });
     }
+
+    buildPositionChips(DATA, detectedPositionCol);
+    buildClubSelect(DATA, detectedClubCol);
+
+    // Pris (original adferd: render on input)
+    setupPriceCompact();
+    function setupPriceCompact(){
+      detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
+      if(!detectedPriceCol){ priceCompactWrap.style.display='none'; return; }
+      const r = computePriceRange(DATA, detectedPriceCol);
+      if(!r){ priceCompactWrap.style.display='none'; return; }
+
+      priceGlobalMin = r.min;
+      priceGlobalMax = r.max;
+      priceCapVal    = priceGlobalMax;
+
+      priceCapRange.min  = priceGlobalMin.toFixed(1);
+      priceCapRange.max  = priceGlobalMax.toFixed(1);
+      priceCapRange.step = 0.1;
+      priceCapRange.value = priceCapVal.toFixed(1);
+      priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+
+      priceCompactWrap.style.display = 'inline-flex';
+      priceCapRange.addEventListener('input', () => {
+        priceCapVal = Number(priceCapRange.value);
+        priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
+        render();
+      });
+    }
+
+    // TOTALT
+    computeTotalsForData();
+    rebuildVisibleColumns();
+    buildTotalChips();
+
+    render();
+  },
+  error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
+});
+
+/* Interaksjon */
+q.addEventListener('input', render);
+
+/* Mørk modus – husk valg */
+(function(){
+  const key='eh_dark2';
+  const tgl=document.getElementById('darkToggle');
+  if(!tgl)return;
+  const saved=localStorage.getItem(key);
+  if(saved==='1') document.documentElement.classList.add('dark');
+  tgl.checked=(saved==='1');
+  tgl.addEventListener('change',()=>{
+    document.documentElement.classList.toggle('dark', tgl.checked);
+    localStorage.setItem(key, tgl.checked ? '1':'0');
+    render();
   });
 })();
 </script>
-
 
 <!-- EGEN SCRIPT FOR "SIST OPPDATERT" -->
 <script>
@@ -804,13 +733,12 @@ function detectClubColumn(columns){
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'data.csv'; // lokalt filnavn
+      a.download = 'data.csv';
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      // Fallback: åpne rålenken hvis fetch feiler
       window.open(window.CSV_URL || "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv", '_blank');
     } finally {
       btn.textContent = "⬇️ Last ned CSV";
@@ -819,7 +747,7 @@ function detectClubColumn(columns){
   }
 
   btn.addEventListener('click', (e) => {
-    e.preventDefault(); // ikke naviger
+    e.preventDefault();
     downloadCsv();
   });
 })();
