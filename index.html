@@ -377,12 +377,20 @@ function computeSingleRange(rows, col){
   }
   return any && max>min ? {min,max} : null;
 }
-function computePriceRange(rows,col){
-  let min=Infinity,max=-Infinity,any=false;
-  for(const r of rows){const v=r[col];
-    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=max<n?max:n;}}
+function computePriceRange(rows, col){
+  let min = Infinity, max = -Infinity, any = false;
+  for (const r of rows){
+    const v = r[col];
+    if (isNumericLike(v)){
+      const n = toNumber(v);
+      if (isFinite(n)){
+        any = true;
+        if (n < min) min = n;
+        if (n > max) max = n;   // <- riktig linje
+      }
+    }
   }
-  return any?{min,max}:null;
+  return any ? { min, max } : null;
 }
 
 /* TOTALT beregning */
