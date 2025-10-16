@@ -160,17 +160,6 @@
   .fav-filter[aria-pressed="true"]::before{ content:"★"; }
   html.dark .fav-filter{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
   html.dark .fav-filter[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
-
-  /* xMin input + reset-knapp */
-  .xmin-wrap{ display:flex; align-items:center; gap:6px; justify-content:center; }
-  .xmin-input{ width:80px; text-align:right; }
-  .xmin-reset{
-    display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px;
-    border:1px solid #d1d5db; background:#fff; cursor:pointer; font-size:.8rem;
-  }
-  .xmin-reset:hover{ background:#f1f5f9; }
-  html.dark .xmin-reset{ background:#0b1325; border-color:#1f2a44; color:#e5e7eb; }
-  html.dark .xmin-reset:hover{ background:#111c34; }
 </style>
 
 <!-- Google tag (gtag.js) -->
@@ -305,7 +294,7 @@ function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return 
   return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));} 
 function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
 function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});} 
-function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>String(c||"").toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
+function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
 const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 
 /* Navn/posisjon/klubb deteksjon */
@@ -377,191 +366,12 @@ function computeSingleRange(rows, col){
   }
   return any && max>min ? {min,max} : null;
 }
-function computePriceRange(rows, col){
-  let min = Infinity, max = -Infinity, any = false;
-  for (const r of rows){
-    const v = r[col];
-    if (isNumericLike(v)){
-      const n = toNumber(v);
-      if (isFinite(n)){
-        any = true;
-        if (n < min) min = n;
-        if (n > max) max = n;   // <- riktig linje
-      }
-    }
+function computePriceRange(rows,col){
+  let min=Infinity,max=-Infinity,any=false;
+  for(const r of rows){const v=r[col];
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
   }
-  return any ? { min, max } : null;
-}
-
-/* TOTALT beregning */
-function computeTotalForRow(row){
-  let sum = 0; let any=false;
-  INCLUDED_IN_TOTAL.forEach(c=>{
-    const v = row[c];
-    if (isNumericLike(v)){ sum += toNumber(v); any=true; }
-  });
-  return any ? Math.round(sum*100)/100 : '';
-}
-function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); } }
-
-/* TOTALT UI – med visuell av/på ✓ */
-function buildTotalChips(){
-  totalChipsWrap.innerHTML = '';
-  for (const col of GROUP_COLUMNS){
-    const btn = document.createElement('button');
-    btn.className = 'chip';
-    btn.type = 'button';
-    const on = INCLUDED_IN_TOTAL.has(col);
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.setAttribute('data-col', col);
-    btn.title = on ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
-    btn.innerHTML = `<span class="tick" aria-hidden="true"></span><span>${col}</span>`;
-
-    btn.addEventListener('click', ()=>{
-      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
-      localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
-      computeTotalsForData();
-      rebuildVisibleColumns();
-      render();
-    });
-
-    totalChipsWrap.appendChild(btn);
-  }
-}
-
-/* Synlige kolonner */
-function rebuildVisibleColumns(){
-  const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
-  const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
-
-  // Fjern evt. "NESTE 6" fra CSV
-  const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
-
-  // Skjul ekskluderte runder ALLTID
-  let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
-
-  // Sett inn TOTALT rett etter xMin (case-insensitivt), ellers på slutten
-  cols = cols.filter(c => c !== TOTAL_COLUMN);
-  const xMinCol = detectedXMinCol;
-  const insertAfterIndex = xMinCol ? cols.indexOf(xMinCol) : -1;
-  if (insertAfterIndex >= 0){ cols.splice(insertAfterIndex+1, 0, TOTAL_COLUMN); }
-  else { cols.push(TOTAL_COLUMN); }
-
-  // Flytt NAVN først
-  if (detectedNameCol){
-    const i=cols.indexOf(detectedNameCol);
-    if(i>0){ cols.splice(i,1); cols.unshift(detectedNameCol); }
-  }
-  VISIBLE_COLUMNS = cols;
-}
-
-/* ========== 📌 xMin-justering + tilbakestill ========== */
-
-/** Justér rad når xMin endres: legg delta på R25–R30 og oppdater TOTALT */
-function adjustRowWithXMinChange(row, newVal){
-  if (!detectedXMinCol) return;
-  const oldRaw = row[detectedXMinCol];
-  if (!isNumericLike(oldRaw)) return;
-
-  const old = toNumber(oldRaw);
-  const x = Number(newVal);
-  if (!isFinite(x)) return;
-
-  const delta = x - old;
-
-  // Sett xMin til ny verdi
-  row[detectedXMinCol] = x;
-
-  // Legg på samme delta i R25–R30
-  for (const c of GROUP_COLUMNS){
-    const v = row[c];
-    if (isNumericLike(v)){
-      const n = toNumber(v);
-      const next = n + delta;
-      row[c] = Math.round(next * 100) / 100;
-    }
-  }
-
-  row[TOTAL_COLUMN] = computeTotalForRow(row);
-}
-
-/** Tilbakestill hele raden (xMin + R25–R30) til originalverdier fra CSV */
-function resetRowToOriginal(row){
-  if (!row.__orig) return;
-  if (detectedXMinCol){ row[detectedXMinCol] = row.__orig.xMin; }
-  for (const c of GROUP_COLUMNS){
-    if (c in row.__orig.rounds) row[c] = row.__orig.rounds[c];
-  }
-  row[TOTAL_COLUMN] = computeTotalForRow(row);
-}
-
-/* ======== RENDER ======== */
-function render(){
-  renderHeader();
-  let rows=DATA.filter(rowMatches);
-  if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
-
-  // BRUK global range for R25–R30 slik at farger ikke hopper ved filtrering
-  const groupRange  = GLOBAL_GROUP_RANGE;
-  const totalRange  = VISIBLE_COLUMNS.includes(TOTAL_COLUMN) ? computeSingleRange(rows, TOTAL_COLUMN) : null;
-
-  tbody.innerHTML='';
-  const frag=document.createDocumentFragment();
-  for (const row of rows){
-    const tr=document.createElement('tr');
-    tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
-      let style='';
-      if (GROUP_COLUMNS.includes(c) && groupRange){
-        style = colorGroup(row[c], groupRange.min, groupRange.max);
-      } else if (c === TOTAL_COLUMN && totalRange){
-        style = colorTotalBlue(row[c], totalRange.min, totalRange.max);
-      }
-
-      let val = row[c] ?? '';
-
-      // Posisjons-badge
-      if (detectedPositionCol && c === detectedPositionCol){
-        const pos = String(val);
-        const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
-        val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
-      }
-
-      // TOTALT i bold 2 desimaler
-      if (c === TOTAL_COLUMN){
-        const num = isNumericLike(val) ? toNumber(val) : null;
-        val = `<strong>${(num!=null && isFinite(num)) ? fmt2(num) : ''}</strong>`;
-      }
-
-      // Navn med favoritt-stjerne
-      if (detectedNameCol && c === detectedNameCol){
-        const key = favKeyFromRow(row);
-        const pressed = isFavKey(key);
-        const label = pressed ? 'Fjern favoritt' : 'Marker som favoritt';
-        const starBtn = `<button class="fav-btn" type="button" aria-label="${label}" aria-pressed="${pressed}" data-favkey="${key}">
-                           <span class="star" aria-hidden="true"></span>
-                         </button>`;
-        val = `<div class="name-cell">${starBtn}<strong>${row[c] ?? ''}</strong></div>`;
-      }
-
-      // xMin – redigerbar + tilbakestill
-      if (detectedXMinCol && c === detectedXMinCol){
-        const current = isNumericLike(row[c]) ? String(toNumber(row[c])) : '';
-        val = `<div class="xmin-wrap">
-                 <input class="xmin-input" type="number" step="1" inputmode="numeric"
-                        value="${current}"
-                        data-rowid="${row.__id}">
-                 <button class="xmin-reset" type="button" data-rowid="${row.__id}" title="Tilbakestill denne raden">
-                   ↩︎ Tilbakestill
-                 </button>
-               </div>`;
-      }
-
-      const cellStyle = style ? ` style="${style}"` : "";
-      return `<td${cellStyle}>${val}</td>`;
-    }).join('');
-    frag.appendChild(tr);
-  }
-  tbody.appendChild(frag);
+  return any?{min,max}:null;
 }
 
 /* Header */
@@ -606,55 +416,128 @@ function rowMatches(row){
   return true;
 }
 
-/* Søkelytter */
-q.addEventListener('input', render);
+/* TOTALT UI – med visuell av/på ✓ */
+function buildTotalChips(){
+  totalChipsWrap.innerHTML = '';
+  for (const col of GROUP_COLUMNS){
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.type = 'button';
+    const on = INCLUDED_IN_TOTAL.has(col);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.setAttribute('data-col', col);
+    btn.title = on ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
+    btn.innerHTML = `<span class="tick" aria-hidden="true"></span><span>${col}</span>`;
 
-/* Posisjon/klubb helpers */
-function buildPositionChips(data, col){
-  posChipsWrap.innerHTML='';
-  const posAllBtnEl = posAllBtn;
-  if(!col){ if (posAllBtnEl) posAllBtnEl.disabled=true; return; }
-  if (posAllBtnEl) { posAllBtnEl.disabled=false; posAllBtnEl.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false'); }
+    btn.addEventListener('click', ()=>{
+      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
+      localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
 
-  const seen=new Set(), values=[];
-  for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
-  const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
-  values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b); if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1; return a.localeCompare(b,'no',{numeric:true});});
+      // Oppdater knappens visuelle state
+      const nowOn = INCLUDED_IN_TOTAL.has(col);
+      btn.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
+      btn.title = nowOn ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
 
-  for(const val of values){
-    const btn=document.createElement('button');
-    btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
-    btn.addEventListener('click',()=>{
-      if (posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','false');
-      if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
-      if(activePositions.size===0 && posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','true');
-      btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+      // Reberegn TOTALT og oppdater visning
+      computeTotalsForData();
+      rebuildVisibleColumns(); // skjul/vis kolonner live
       render();
     });
-    posChipsWrap.appendChild(btn);
-  }
-  if (posAllBtnEl){
-    posAllBtnEl.onclick=()=>{
-      activePositions.clear();
-      posAllBtnEl.setAttribute('aria-pressed','true');
-      [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
-      render();
-    };
+
+    totalChipsWrap.appendChild(btn);
   }
 }
 
-function buildClubSelect(data, col){
-  if (!clubSelect || !clubLabel) return;
-  if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
+/* TOTALT beregning */
+function computeTotalForRow(row){
+  let sum = 0; let any=false;
+  INCLUDED_IN_TOTAL.forEach(c=>{
+    const v = row[c];
+    if (isNumericLike(v)){ sum += toNumber(v); any=true; }
+  });
+  return any ? Math.round(sum*100)/100 : '';
+}
+function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = computeTotalForRow(r); } }
 
-  const seen=new Set(), values=[];
-  for (const r of data){
-    const v=String(r[col]??'').trim();
-    if (v && !seen.has(v)){ seen.add(v); values.push(v); }
+/* Synlige kolonner */
+function rebuildVisibleColumns(){
+  const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
+  const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
+
+  // Fjern evt. "NESTE 6" fra CSV
+  const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
+
+  // Skjul ekskluderte runder ALLTID
+  let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
+
+  // Sett inn TOTALT rett etter xMin (case-insensitivt), ellers på slutten
+  cols = cols.filter(c => c !== TOTAL_COLUMN);
+  const xMinCol = detectedXMinCol;
+  const insertAfterIndex = xMinCol ? cols.indexOf(xMinCol) : -1;
+  if (insertAfterIndex >= 0){ cols.splice(insertAfterIndex+1, 0, TOTAL_COLUMN); }
+  else { cols.push(TOTAL_COLUMN); }
+
+  // Flytt NAVN først
+  if (detectedNameCol){
+    const i=cols.indexOf(detectedNameCol);
+    if(i>0){ cols.splice(i,1); cols.unshift(detectedNameCol); }
   }
-  values.sort((a,b)=> a.localeCompare(b,'no',{numeric:true,sensitivity:'base'}));
-  clubSelect.innerHTML = `<option value="">Alle</option>` + values.map(v=>`<option value="${v}">${v}</option>`).join('');
-  clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
+  VISIBLE_COLUMNS = cols;
+}
+
+/* Render */
+function render(){
+  renderHeader();
+  let rows=DATA.filter(rowMatches);
+  if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
+
+  // BRUK global range for R25–R30 slik at farger ikke hopper ved filtrering
+  const groupRange  = GLOBAL_GROUP_RANGE;
+  const totalRange  = VISIBLE_COLUMNS.includes(TOTAL_COLUMN) ? computeSingleRange(rows, TOTAL_COLUMN) : null;
+
+  tbody.innerHTML='';
+  const frag=document.createDocumentFragment();
+  for (const row of rows){
+    const tr=document.createElement('tr');
+    tr.innerHTML = VISIBLE_COLUMNS.map(c=>{
+      let style='';
+      if (GROUP_COLUMNS.includes(c) && groupRange){
+        style = colorGroup(row[c], groupRange.min, groupRange.max);
+      } else if (c === TOTAL_COLUMN && totalRange){
+        style = colorTotalBlue(row[c], totalRange.min, totalRange.max);
+      }
+      let val = row[c] ?? '';
+
+      // Posisjons-badge
+      if (detectedPositionCol && c === detectedPositionCol){
+        const pos = String(val);
+        const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
+        val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
+      }
+
+      // TOTALT i bold 2 desimaler
+      if (c === TOTAL_COLUMN){
+        const num = isNumericLike(val) ? toNumber(val) : null;
+        val = `<strong>${(num!=null && isFinite(num)) ? fmt2(num) : ''}</strong>`;
+      }
+
+      // Navn med favoritt-stjerne
+      if (detectedNameCol && c === detectedNameCol){
+        const key = favKeyFromRow(row);
+        const pressed = isFavKey(key);
+        const label = pressed ? 'Fjern favoritt' : 'Marker som favoritt';
+        const starBtn = `<button class="fav-btn" type="button" aria-label="${label}" aria-pressed="${pressed}" data-favkey="${key}">
+                           <span class="star" aria-hidden="true"></span>
+                         </button>`;
+        val = `<div class="name-cell">${starBtn}<strong>${row[c] ?? ''}</strong></div>`;
+      }
+
+      const cellStyle = style ? ` style="${style}"` : "";
+      return `<td${cellStyle}>${val}</td>`;
+    }).join('');
+    frag.appendChild(tr);
+  }
+  tbody.appendChild(frag);
 }
 
 /* Klikk på stjerna (delegation) */
@@ -671,40 +554,6 @@ tbody.addEventListener('click', (e) => {
   if (favoritesOnly) render();
 });
 
-/* xMin: endring skal dytte R25–R30 med samme delta */
-tbody.addEventListener('change', (e) => {
-  const el = e.target;
-  if (!el.classList || !el.classList.contains('xmin-input')) return;
-  const id = Number(el.getAttribute('data-rowid'));
-  const row = DATA.find(r => r.__id === id);
-  if (!row) return;
-
-  adjustRowWithXMinChange(row, el.value);
-  render();
-});
-
-/* Enter i xMin skal trigge change */
-tbody.addEventListener('keydown', (e) => {
-  const el = e.target;
-  if (!el.classList || !el.classList.contains('xmin-input')) return;
-  if (e.key === 'Enter'){
-    e.preventDefault();
-    el.blur(); // trigge change
-  }
-});
-
-/* Tilbakestill-knapp pr rad */
-tbody.addEventListener('click', (e) => {
-  const btn = e.target.closest('.xmin-reset');
-  if (!btn) return;
-  const id = Number(btn.getAttribute('data-rowid'));
-  const row = DATA.find(r => r.__id === id);
-  if (!row) return;
-
-  resetRowToOriginal(row);
-  render();
-});
-
 /* INIT */
 Papa.parse(CSV_URL,{
   download:true,header:true,dynamicTyping:true,skipEmptyLines:'greedy',
@@ -716,19 +565,7 @@ Papa.parse(CSV_URL,{
     detectedClubCol=detectClubColumn(RAW_COLUMNS);
     detectedXMinCol=detectInsensitive(RAW_COLUMNS,"xmin");
 
-    // Bygg DATA + originalbuffer for xMin og R25–R30 + stabil id
-    DATA = data.map((r, i) => {
-      const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' );
-      o.__id = i;
-      o.__orig = {
-        xMin: detectedXMinCol ? (isNumericLike(r[detectedXMinCol]) ? toNumber(r[detectedXMinCol]) : r[detectedXMinCol]) : null,
-        rounds: {}
-      };
-      for (const c of GROUP_COLUMNS){
-        o.__orig.rounds[c] = isNumericLike(r[c]) ? toNumber(r[c]) : r[c];
-      }
-      return o;
-    });
+    DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
     // Favorittfilter-ikon toggle
     if (favFilterBtn){
@@ -784,6 +621,57 @@ Papa.parse(CSV_URL,{
   error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
 });
 
+/* Søkelytter */
+q.addEventListener('input', render);
+
+/* Posisjon/klubb helpers */
+function buildPositionChips(data, col){
+  posChipsWrap.innerHTML='';
+  const posAllBtnEl = posAllBtn;
+  if(!col){ if (posAllBtnEl) posAllBtnEl.disabled=true; return; }
+  if (posAllBtnEl) { posAllBtnEl.disabled=false; posAllBtnEl.setAttribute('aria-pressed', activePositions.size===0 ? 'true' : 'false'); }
+
+  const seen=new Set(), values=[];
+  for(const r of data){const v=String(r[col]??'').trim(); if(v && !seen.has(v)){seen.add(v);values.push(v);}}
+  const order=["K","F","M","A","GK","DEF","MID","FWD","Keeper","Forsvar","Midtbane","Angrep"];
+  values.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b); if(ia!==-1&&ib!==-1)return ia-ib; if(ia!==-1)return -1; if(ib!==-1)return 1; return a.localeCompare(b,'no',{numeric:true});});
+
+  for(const val of values){
+    const btn=document.createElement('button');
+    btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+    btn.addEventListener('click',()=>{
+      if (posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','false');
+      if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
+      if(activePositions.size===0 && posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','true');
+      btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+      render();
+    });
+    posChipsWrap.appendChild(btn);
+  }
+  if (posAllBtnEl){
+    posAllBtnEl.onclick=()=>{
+      activePositions.clear();
+      posAllBtnEl.setAttribute('aria-pressed','true');
+      [...posChipsWrap.querySelectorAll('.chip')].forEach(ch=>ch.setAttribute('aria-pressed','false'));
+      render();
+    };
+  }
+}
+
+function buildClubSelect(data, col){
+  if (!clubSelect || !clubLabel) return;
+  if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
+
+  const seen=new Set(), values=[];
+  for (const r of data){
+    const v=String(r[col]??'').trim();
+    if (v && !seen.has(v)){ seen.add(v); values.push(v); }
+  }
+  values.sort((a,b)=> a.localeCompare(b,'no',{numeric:true,sensitivity:'base'}));
+  clubSelect.innerHTML = `<option value="">Alle</option>` + values.map(v=>`<option value="${v}">${v}</option>`).join('');
+  clubSelect.addEventListener('change', ()=>{ selectedClub = clubSelect.value || ""; render(); });
+}
+
 /* Mørk modus – husk valg */
 (function(){
   const key='eh_dark2';
@@ -798,9 +686,11 @@ Papa.parse(CSV_URL,{
     render();
   });
 })();
+</script>
 
-/* "Sist oppdatert" fra <meta> */
-(function(){
+<!-- "Sist oppdatert" -->
+<script>
+(() => {
   const meta = document.querySelector('meta[name="data-last-updated"]');
   let last = meta?.content ? new Date(meta.content) : new Date(document.lastModified);
   const fmt = new Intl.DateTimeFormat('nb-NO', { dateStyle:'long', timeStyle:'short' });
