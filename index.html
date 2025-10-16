@@ -276,6 +276,7 @@ let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClu
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 let favoritesOnly = false;
+let GLOBAL_GROUP_RANGE = null; // låst min/max for R25–R30 uavhengig av filter
 
 /* Persist for TOTALT */
 const TOTAL_KEY = 'eh_total_cols_v1';
@@ -439,6 +440,11 @@ function buildTotalChips(){
       btn.title = nowOn ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
 
       computeTotalsForData();
+      computeTotalsForData();
+      GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS); // <- NY
+      rebuildVisibleColumns();
+      buildTotalChips();
+      render();
       rebuildVisibleColumns();   // skjul/vis kolonner live
       render();
     });
@@ -490,7 +496,12 @@ function render(){
   let rows=DATA.filter(rowMatches);
   if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
-  const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
+  // Før:
+const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
+
+// Etter:
+const groupRange  = GLOBAL_GROUP_RANGE;
+
   const totalRange  = VISIBLE_COLUMNS.includes(TOTAL_COLUMN) ? computeSingleRange(rows, TOTAL_COLUMN) : null;
 
   tbody.innerHTML='';
