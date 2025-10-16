@@ -166,7 +166,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BTGNR2NXT"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){dataLayer.push(arguments);} 
   gtag('js', new Date());
   gtag('config', 'G-7BTGNR2NXT');
 </script>
@@ -291,9 +291,9 @@ let FAVORITES = new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'))
 function letterToIndex(letter){const s=letter.trim().toUpperCase();let n=0;for(let i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);return n-1;}
 function isNumericLike(v){if(v==null)return false;if(typeof v==="number")return true;const t=String(v).trim();if(t==='')return false;
   if(t.endsWith('%'))return !isNaN(Number(t.slice(0,-1).replace(',','.')));
-  return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));}
+  return !isNaN(Number(t.replace(/\s/g,'').replace(/kr/i,'').replace(',','.')));} 
 function toNumber(v){if(typeof v==="number")return v;const t=String(v).trim().replace(/\s/g,'').replace(/kr/i,'');if(t.endsWith('%'))return Number(t.slice(0,-1).replace(',','.'));return Number(t.replace(',','.'));}
-function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});}
+function cmp(a,b){const an=isNumericLike(a),bn=isNumericLike(b);if(an&&bn)return toNumber(a)-toNumber(b);return String(a).localeCompare(String(b),'no',{numeric:true,sensitivity:'base'});} 
 function detectInsensitive(cols,wantedLower){const lower=cols.map(c=>c.toLowerCase());const i=lower.indexOf(wantedLower);return i>=0?cols[i]:"";}
 const fmt2=n=>new Intl.NumberFormat('no-NO',{minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
 
@@ -383,7 +383,7 @@ function renderHeader(){
     btn.textContent=col;
     btn.addEventListener('click',()=>{if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();});
     th.appendChild(btn);
-    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'▲':'▼';th.appendChild(s);}
+    if (sortCol===col){const s=document.createElement('span');s.className='sort-ind';s.textContent=sortDir===1?'\u25B2':'\u25BC';th.appendChild(s);} 
     tr.appendChild(th);
   });
   thead.innerHTML=''; thead.appendChild(tr);
@@ -430,22 +430,17 @@ function buildTotalChips(){
     btn.innerHTML = `<span class="tick" aria-hidden="true"></span><span>${col}</span>`;
 
     btn.addEventListener('click', ()=>{
-      const wasOn = INCLUDED_IN_TOTAL.has(col);
-      if (wasOn) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
+      if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
 
-      // Oppdater visuell state uten å bygge alt på nytt
+      // Oppdater knappens visuelle state
       const nowOn = INCLUDED_IN_TOTAL.has(col);
       btn.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
       btn.title = nowOn ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
 
+      // Reberegn TOTALT og oppdater visning
       computeTotalsForData();
-      computeTotalsForData();
-      GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS); // <- NY
-      rebuildVisibleColumns();
-      buildTotalChips();
-      render();
-      rebuildVisibleColumns();   // skjul/vis kolonner live
+      rebuildVisibleColumns(); // skjul/vis kolonner live
       render();
     });
 
@@ -496,12 +491,8 @@ function render(){
   let rows=DATA.filter(rowMatches);
   if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
 
-  // Før:
-const groupRange  = computeGroupRange(rows, GROUP_COLUMNS);
-
-// Etter:
-const groupRange  = GLOBAL_GROUP_RANGE;
-
+  // BRUK global range for R25–R30 slik at farger ikke hopper ved filtrering
+  const groupRange  = GLOBAL_GROUP_RANGE;
   const totalRange  = VISIBLE_COLUMNS.includes(TOTAL_COLUMN) ? computeSingleRange(rows, TOTAL_COLUMN) : null;
 
   tbody.innerHTML='';
@@ -618,6 +609,10 @@ Papa.parse(CSV_URL,{
 
     // TOTALT
     computeTotalsForData();
+
+    // Sett GLOBAL_GROUP_RANGE EN GANG (på hele datasettet) – stabil fargelegging for R25–R30
+    GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS);
+
     rebuildVisibleColumns();
     buildTotalChips();
 
