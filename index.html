@@ -18,7 +18,7 @@
   table, th, td { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1; }
  
   /* Hero */
-  .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:6px;color:#fff;
+  .hero{position:relative;overflow:hidden;border-radius:12px;padding:10px;margin-bottom:10px;color:#fff;
     background:radial-gradient(80% 120% at 10% -10%,rgba(14,165,233,.25),transparent 40%),
                radial-gradient(80% 120% at 110% 10%,rgba(34,197,94,.25),transparent 40%),
                linear-gradient(180deg,#0b1220,#111827);
@@ -30,73 +30,76 @@
   .brand h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.2px}
   .brand-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .brand-links{display:inline-flex;gap:6px;flex-wrap:wrap}
-  @media (max-width:780px){ .brand h1{ font-size:1.1rem; } }
+  @media (max-width:780px){ .brand h1{ font-size:1.05rem; } }
 
-  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #3b4152;
     background:rgba(255,255,255,.06);color:#e5e7eb;user-select:none}
 
-  .download-btn {
-    display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #d1d5db; border-radius: 999px;
-    color: #0f172a; padding: 6px 12px; font-weight: 600; text-decoration: none; transition: background .2s, border-color .2s, color .2s;
-  }
+  .download-btn { display:inline-flex; align-items:center; gap:6px; background:#f8fafc; border:1px solid #d1d5db; border-radius:999px;
+    color:#0f172a; padding:6px 12px; font-weight:600; text-decoration:none; transition:background .2s, border-color .2s, color .2s; }
   .download-btn:hover { background:#e0f2fe; border-color:#93c5fd; color:#0c4a6e; }
   html.dark .download-btn { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); color: #f8fafc; }
   html.dark .download-btn:hover { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.6); color: #fff; }
 
-  .nav-link{
-    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+  .nav-link{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.2); color:#e5e7eb; font-weight:600; text-decoration:none;
-    transition:background .2s, border-color .2s, color .2s; white-space:nowrap;
-  }
+    transition:background .2s, border-color .2s, color .2s; white-space:nowrap; }
   .nav-link:hover{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.45); color:#fff; }
 
-  /* Filterbar */
-  .filterbar{
-    position:sticky; top:0; z-index:5; background:#fff; border:1px solid #e5e7eb; border-radius:10px;
-    box-shadow:0 6px 20px rgba(2,8,23,.06); padding:6px 8px; margin:6px 0;
-  }
-  .filterbar-row{
-    display:grid; align-items:center; grid-auto-flow:column; grid-template-columns:auto 1fr auto auto auto auto auto auto;
-    gap:8px;
-  }
-  .filterbar .label{ color:#64748b; font-size:.85rem; white-space:nowrap; }
-  .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .chip{border:1px solid #d1d5db;border-radius:999px;padding:2px 8px;background:#fff;cursor:pointer;user-select:none;color:#0f172a; display:inline-flex; align-items:center; gap:6px; }
+  /* Filterbar – gjort ikke-sticky + bedre mobilopplevelse */
+  .filterbar{ position:static; top:auto; z-index:auto; background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+    box-shadow:0 6px 20px rgba(2,8,23,.06); padding:8px; margin:10px 0; }
+
+  /* Bruk <details> for mobil-collapsible filtrering */
+  .filters{ border-radius:10px; }
+  .filters > summary{ list-style:none; cursor:pointer; display:none; align-items:center; justify-content:space-between;
+    padding:8px 10px; border-radius:10px; border:1px solid #e5e7eb; background:#f8fafc; font-weight:600; }
+  .filters > summary::marker{ content:""; }
+  .filters > summary::after{ content:"▼"; font-size:.85rem; opacity:.7; }
+  .filters[open] > summary::after{ content:"▲"; }
+
+  .filterbar-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .filterbar .label{ color:#64748b; font-size:.9rem; white-space:nowrap; }
+  .row{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+
+  /* Horizontal rulling for chips/select på smale skjermer */
+  .scroll-x{ overflow:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+  .scroll-x::-webkit-scrollbar{ height:6px; }
+
+  .chip{ border:1px solid #d1d5db;border-radius:999px;padding:8px 10px;background:#fff;cursor:pointer;user-select:none;color:#0f172a;
+    display:inline-flex; align-items:center; gap:6px; min-height:36px; }
   .chip[aria-pressed="true"]{background:#e5effe;border-color:#93c5fd;color:#0c4a6e}
   .chip .tick{ width:1.2em; text-align:center; font-weight:700; opacity:.9; }
   .chip[aria-pressed="false"] .tick{ opacity:.25; }
   .chip[aria-pressed="false"] .tick::before{ content:"•"; }
   .chip[aria-pressed="true"]  .tick::before{ content:"✓"; }
 
-  .filterbar input[type="search"]{ height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;width:100%; }
-  .filterbar select{ height:32px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff; }
+  .filterbar input[type="search"]{ height:40px;border:1px solid #d1d5db;border-radius:10px;padding:0 12px;width:100%; }
+  .filterbar select{ height:40px;border:1px solid #d1d5db;border-radius:10px;padding:0 10px;background:#fff; }
 
   /* Pris – kompakt + stabil layout */
   .price-compact{display:inline-flex;align-items:center;gap:8px}
-  .price-compact input[type="range"]{width:170px;height:3px;flex:0 0 auto}
-  #priceCapLabel{
-    display:inline-block; min-width:4.2ch; text-align:right;
-    font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1; white-space:nowrap;
-  }
-  .muted{color:#666;font-size:.82rem}
+  .price-compact input[type="range"]{width:170px;height:4px;flex:0 0 auto}
+  #priceCapLabel{ display:inline-block; min-width:4.2ch; text-align:right; font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1; white-space:nowrap; }
+  .muted{color:#666;font-size:.87rem}
   .filterbar .divider { width:1px; height:22px; background:#e5e7eb; }
   html.dark .filterbar .divider { background:#1f2a44; }
 
   /* Tabell */
-  .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #e5e5e5;border-radius:10px;background:#fff;position:relative;margin-top:6px}
-  table{border-collapse:collapse;width:100%;font-size:.92rem;line-height:1.25}
-  thead th{position:sticky;top:0;background:#fafafa;border-bottom:1px solid #e5e5e5;padding:6px;white-space:nowrap;text-align:center;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#0f172a;z-index:2}
+  .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #e5e5e5;border-radius:12px;background:#fff;position:relative;margin-top:10px}
+  table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.25}
+  thead th{position:sticky;top:0;background:#fafafa;border-bottom:1px solid #e5e5e5;padding:10px;white-space:nowrap;text-align:center;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#0f172a;z-index:2}
   thead th button{background:transparent;border:none;font:inherit;cursor:pointer;color:inherit}
   thead th button:hover{text-decoration:underline}
   .sort-ind{opacity:1;font-size:.9em;margin-left:6px;color:#475569}
-  tbody td{border-top:1px solid #f0f0f0;padding:4px 6px;white-space:nowrap;text-align:center}
+  tbody td{border-top:1px solid #f0f0f0;padding:8px 10px;white-space:nowrap;text-align:center}
 
   tbody tr:nth-child(even) td:not([style*="background"]) { background:#fcfcfc; }
   tbody tr:hover td:not([style*="background"])            { background:#f3f7ff; }
 
   tbody td:first-child, thead th:first-child{position:sticky;left:0;z-index:3;background:#fff;box-shadow:1px 0 0 #eee}
-  .pos-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;color:#111827}
+  .pos-badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;color:#111827}
 
   .footer-wrap{margin-top:12px;padding-top:8px;border-top:1px solid #e5e7eb;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   .footer-wrap a{color:#64748b;text-decoration:none}
@@ -118,15 +121,30 @@
   html.dark tbody tr:hover td:not([style*="background"])            { background:#122038; }
   html.dark tbody td:first-child{background:#0f172a;box-shadow:1px 0 0 #1f2a44}
 
+  /* Mobilforbedringer */
   @media (max-width: 780px){
     body{ margin:10px; }
-    .filterbar-row{ grid-template-columns:1fr 1fr; grid-auto-flow:row; gap:8px; }
-    #q{ grid-column:1 / -1; }
-    #pos-all, #pos-chips, #clubLabel, #clubSelect, .price-compact, #totalChipsWrap{ grid-column:1 / -1; }
-    .price-compact input[type="range"]{ width:100%; height:3px; }
+
+    /* Vis collapsible header for filtre på mobil */
+    .filters > summary{ display:flex; }
+
+    .filterbar{ padding:10px; }
+    .filterbar-row{ gap:6px; }
+
+    /* Gjør chips/valg horisontalt rullbare for bedre plassbruk */
+    .row.scroll-x, #totalChipsWrap{ gap:6px; }
+    #pos-chips, #totalChipsWrap{ width:100%; }
+
+    #q{ width:100%; }
+    .filterbar .divider{ display:none; }
+
+    /* Strammere typografi i tabell */
     table{ font-size:.9rem; }
-    thead th{ padding:6px; }
-    tbody td{ padding:4px 6px; }
+    thead th{ padding:8px; }
+    tbody td{ padding:6px 8px; }
+
+    /* Navnkolonne: smalere på mobil */
+    :root{ --name-col-width: 200px; }
   }
 
   /* Sist oppdatert */
@@ -134,12 +152,7 @@
   #last-updated::before { content: "⏱️"; font-size: 1rem; opacity: 0.9; }
 
   /* Favorittstjerne i navnecella */
-  .fav-btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:26px; height:26px; margin-right:0;
-    border-radius:999px; border:1px solid #e5e7eb; background:#fff;
-    cursor:pointer; vertical-align:middle; flex:0 0 26px;
-  }
+  .fav-btn{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; margin-right:0; border-radius:999px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; vertical-align:middle; flex:0 0 28px; }
   .fav-btn .star::before{ content:"☆"; font-size:16px; line-height:1; }
   .fav-btn[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-btn[aria-pressed="true"] .star::before{ content:"★"; }
@@ -147,14 +160,10 @@
   html.dark .fav-btn[aria-pressed="true"]{ background:#3a2a00; border-color:#f59e0b; color:#fcd34d; }
 
   table thead th:first-child, table tbody td:first-child{ text-align:center; padding-left:6px; }
-  .name-cell{ display:grid; grid-template-columns:26px 1fr; align-items:center; column-gap:6px; width:var(--name-col-width); max-width:calc(100% - 8px); margin:0 auto; }
+  .name-cell{ display:grid; grid-template-columns:28px 1fr; align-items:center; column-gap:6px; width:var(--name-col-width); max-width:calc(100% - 8px); margin:0 auto; }
 
-  /* Favorittfilter-knapp (stjerne uten tekst) */
-  .fav-filter{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:32px; height:32px; border-radius:999px; border:1px solid #d1d5db;
-    background:#fff; cursor:pointer; user-select:none;
-  }
+  /* Favorittfilter-ikon (stjerne uten tekst) */
+  .fav-filter{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; user-select:none; }
   .fav-filter::before{ content:"☆"; font-size:18px; line-height:1; }
   .fav-filter[aria-pressed="true"]{ background:#fef3c7; border-color:#f59e0b; }
   .fav-filter[aria-pressed="true"]::before{ content:"★"; }
@@ -181,7 +190,6 @@
       <div class="brand-title-row">
         <h1>Eliteheimen Fantasy</h1>
         <div class="brand-links">
-          <!-- UPDATED LINK: text, href and aria-label -->
           <a class="nav-link" href="https://www.eliteheimen.no/forside/" aria-label="Forsiden">Forsiden</a>
           <a class="nav-link" href="https://patreon.com/Eliteheimen" target="_blank" rel="noopener" aria-label="Støtt på Patreon">Patreon</a>
         </div>
@@ -198,35 +206,32 @@
 
 <!-- FILTERBAR -->
 <section id="filters" class="filterbar">
-  <div class="filterbar-row">
-    <button id="favFilter" class="fav-filter" title="Vis kun favoritter" aria-pressed="false"></button>
+  <!-- Collapsible på mobil via <details> -->
+  <details class="filters" open>
+    <summary>Filtre</summary>
 
-    <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
-
-    <span class="divider"></span>
-
-    <span class="label">Posisjoner</span>
-    <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
-    <div id="pos-chips" class="row" style="margin:0;"></div>
-
-    <span class="divider"></span>
-
-    <span class="label" id="clubLabel">Klubb</span>
-    <select id="clubSelect"><option value="">Alle</option></select>
-
-    <span class="divider"></span>
-
-    <span class="label">Pris ≤</span>
-    <div id="price-compact" class="price-compact" style="display:none;">
-      <input id="priceCapRange" type="range" step="0.1" />
-      <span class="muted" id="priceCapLabel"></span>
+    <div class="filterbar-row">
+      <button id="favFilter" class="fav-filter" title="Vis kun favoritter" aria-pressed="false"></button>
+      <input id="q" type="search" placeholder="Søk i spillere…" aria-label="Globalt søk" />
+      <span class="divider"></span>
+      <span class="label">Posisjoner</span>
+      <button class="chip" id="pos-all" aria-pressed="true">Alle</button>
+      <div id="pos-chips" class="row scroll-x" style="margin:0;max-width:100%"></div>
+      <span class="divider"></span>
+      <span class="label" id="clubLabel">Klubb</span>
+      <select id="clubSelect"><option value="">Alle</option></select>
+      <span class="divider"></span>
+      <span class="label">Pris ≤</span>
+      <div id="price-compact" class="price-compact" style="display:none;">
+        <input id="priceCapRange" type="range" step="0.1" />
+        <span class="muted" id="priceCapLabel"></span>
+      </div>
     </div>
-  </div>
 
-  <!-- Runde-chips for TOTALT -->
-  <div class="filterbar-row" style="margin-top:6px;">
-    <div id="totalChipsWrap" class="row" aria-label="Velg runder som skal inngå i TOTALT"></div>
-  </div>
+    <div class="filterbar-row" style="margin-top:6px;">
+      <div id="totalChipsWrap" class="row scroll-x" aria-label="Velg runder som skal inngå i TOTALT" style="max-width:100%"></div>
+    </div>
+  </details>
 </section>
 
 <!-- TABELL -->
@@ -276,7 +281,7 @@ let activePositions=new Set();
 let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClubCol="", detectedXMinCol="";
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
-let favoritesOnly = false;
+favoritesOnly = false;
 let GLOBAL_GROUP_RANGE = null; // låst min/max for R25–R30 uavhengig av filter
 
 /* Persist for TOTALT */
@@ -370,8 +375,7 @@ function computeSingleRange(rows, col){
 function computePriceRange(rows,col){
   let min=Infinity,max=-Infinity,any=false;
   for(const r of rows){const v=r[col];
-    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}
-  }
+    if(isNumericLike(v)){const n=toNumber(v);if(isFinite(n)){any=true;if(n<min)min=n;if(n>max)max=n;}}}
   return any?{min,max}:null;
 }
 
@@ -433,15 +437,11 @@ function buildTotalChips(){
     btn.addEventListener('click', ()=>{
       if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
-
-      // Oppdater knappens visuelle state
       const nowOn = INCLUDED_IN_TOTAL.has(col);
       btn.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
       btn.title = nowOn ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
-
-      // Reberegn TOTALT og oppdater visning
       computeTotalsForData();
-      rebuildVisibleColumns(); // skjul/vis kolonner live
+      rebuildVisibleColumns();
       render();
     });
 
@@ -464,21 +464,13 @@ function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = comput
 function rebuildVisibleColumns(){
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
   const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
-
-  // Fjern evt. "NESTE 6" fra CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
-
-  // Skjul ekskluderte runder ALLTID
   let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
-
-  // Sett inn TOTALT rett etter xMin (case-insensitivt), ellers på slutten
   cols = cols.filter(c => c !== TOTAL_COLUMN);
   const xMinCol = detectedXMinCol;
   const insertAfterIndex = xMinCol ? cols.indexOf(xMinCol) : -1;
   if (insertAfterIndex >= 0){ cols.splice(insertAfterIndex+1, 0, TOTAL_COLUMN); }
   else { cols.push(TOTAL_COLUMN); }
-
-  // Flytt NAVN først
   if (detectedNameCol){
     const i=cols.indexOf(detectedNameCol);
     if(i>0){ cols.splice(i,1); cols.unshift(detectedNameCol); }
@@ -491,11 +483,8 @@ function render(){
   renderHeader();
   let rows=DATA.filter(rowMatches);
   if (sortCol) rows.sort((a,b)=>sortDir*cmp(a[sortCol], b[sortCol]));
-
-  // BRUK global range for R25–R30 slik at farger ikke hopper ved filtrering
   const groupRange  = GLOBAL_GROUP_RANGE;
   const totalRange  = VISIBLE_COLUMNS.includes(TOTAL_COLUMN) ? computeSingleRange(rows, TOTAL_COLUMN) : null;
-
   tbody.innerHTML='';
   const frag=document.createDocumentFragment();
   for (const row of rows){
@@ -509,20 +498,17 @@ function render(){
       }
       let val = row[c] ?? '';
 
-      // Posisjons-badge
       if (detectedPositionCol && c === detectedPositionCol){
         const pos = String(val);
         const bg = pos==="K"?"#E0F2FE":pos==="F"?"#DCFCE7":pos==="M"?"#FEF9C3":pos==="A"?"#FFE4E6":"#F2F4F7";
         val = `<span class="pos-badge" style="background:${bg};">${pos}</span>`;
       }
 
-      // TOTALT i bold 2 desimaler
       if (c === TOTAL_COLUMN){
         const num = isNumericLike(val) ? toNumber(val) : null;
         val = `<strong>${(num!=null && isFinite(num)) ? fmt2(num) : ''}</strong>`;
       }
 
-      // Navn med favoritt-stjerne
       if (detectedNameCol && c === detectedNameCol){
         const key = favKeyFromRow(row);
         const pressed = isFavKey(key);
@@ -541,13 +527,11 @@ function render(){
   tbody.appendChild(frag);
 }
 
-/* Klikk på stjerna (delegation) */
 tbody.addEventListener('click', (e) => {
   const btn = e.target.closest('.fav-btn');
   if (!btn) return;
   const key = btn.getAttribute('data-favkey') || btn.dataset.favkey;
   if (!key) return;
-
   const nowPressed = btn.getAttribute('aria-pressed') !== 'true';
   btn.setAttribute('aria-pressed', nowPressed ? 'true' : 'false');
   btn.setAttribute('aria-label', nowPressed ? 'Fjern favoritt' : 'Marker som favoritt');
@@ -568,7 +552,6 @@ Papa.parse(CSV_URL,{
 
     DATA=data.map(r=>{const o={}; RAW_COLUMNS.forEach(c=>o[c]=r[c]??'' ); return o;});
 
-    // Favorittfilter-ikon toggle
     if (favFilterBtn){
       favoritesOnly = favFilterBtn.getAttribute('aria-pressed') === 'true';
       favFilterBtn.addEventListener('click', ()=>{
@@ -578,28 +561,21 @@ Papa.parse(CSV_URL,{
       });
     }
 
-    // UI
     buildPositionChips(DATA, detectedPositionCol);
     buildClubSelect(DATA, detectedClubCol);
 
-    // Pris (original adferd: render on input)
     setupPriceCompact();
     function setupPriceCompact(){
       detectedPriceCol = detectPriceColumn(RAW_COLUMNS);
       if(!detectedPriceCol){ priceCompactWrap.style.display='none'; return; }
       const r = computePriceRange(DATA, detectedPriceCol);
       if(!r){ priceCompactWrap.style.display='none'; return; }
-
-      priceGlobalMin = r.min;
-      priceGlobalMax = r.max;
-      priceCapVal    = priceGlobalMax;
-
+      priceGlobalMin = r.min; priceGlobalMax = r.max; priceCapVal = priceGlobalMax;
       priceCapRange.min  = priceGlobalMin.toFixed(1);
       priceCapRange.max  = priceGlobalMax.toFixed(1);
       priceCapRange.step = 0.1;
       priceCapRange.value = priceCapVal.toFixed(1);
       priceCapLabel.textContent = priceCapVal.toFixed(1).replace('.', ',');
-
       priceCompactWrap.style.display = 'inline-flex';
       priceCapRange.addEventListener('input', () => {
         priceCapVal = Number(priceCapRange.value);
@@ -608,24 +584,17 @@ Papa.parse(CSV_URL,{
       });
     }
 
-    // TOTALT
     computeTotalsForData();
-
-    // Sett GLOBAL_GROUP_RANGE EN GANG (på hele datasettet) – stabil fargelegging for R25–R30
     GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS);
-
     rebuildVisibleColumns();
     buildTotalChips();
-
     render();
   },
   error:(err)=>{ console.error(err); thead.innerHTML='<tr><th class="error">Feil: kunne ikke laste CSV</th></tr>'; }
 });
 
-/* Søkelytter */
 q.addEventListener('input', render);
 
-/* Posisjon/klubb helpers */
 function buildPositionChips(data, col){
   posChipsWrap.innerHTML='';
   const posAllBtnEl = posAllBtn;
@@ -639,7 +608,7 @@ function buildPositionChips(data, col){
 
   for(const val of values){
     const btn=document.createElement('button');
-    btn.className='chip'; btn.textContent=val; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
+    btn.className='chip'; btn.innerHTML=`<span class="tick" aria-hidden="true"></span><span>${val}</span>`; btn.setAttribute('aria-pressed', activePositions.has(val)?'true':'false');
     btn.addEventListener('click',()=>{
       if (posAllBtnEl) posAllBtnEl.setAttribute('aria-pressed','false');
       if(activePositions.has(val)) activePositions.delete(val); else activePositions.add(val);
@@ -662,7 +631,6 @@ function buildPositionChips(data, col){
 function buildClubSelect(data, col){
   if (!clubSelect || !clubLabel) return;
   if (!col){ clubSelect.style.display="none"; clubLabel.style.display="none"; return; }
-
   const seen=new Set(), values=[];
   for (const r of data){
     const v=String(r[col]??'').trim();
@@ -710,11 +678,9 @@ function buildClubSelect(data, col){
     try {
       btn.textContent = "Laster ned…";
       btn.setAttribute('aria-busy', 'true');
-
       const res = await fetch(window.CSV_URL || "https://raw.githubusercontent.com/93pejoh/eliteheimen-data/refs/heads/main/data.csv", { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
-
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
