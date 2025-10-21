@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=0.9, minimum-scale=0.9, user-scalable=yes" />
 <title>Eliteheimen Fantasy</title>
 <meta name="description" content="Eliteheimen – et sted for deg som liker Eliteserien Fantasy." />
 <meta name="data-last-updated" content="2025-10-19T09:35:00+02:00">
@@ -179,6 +179,18 @@
   gtag('js', new Date());
   gtag('config', 'G-7BTGNR2NXT');
 </script>
+<!-- DENSITET-TOGGLE (kompakt visning) -->
+<style>
+  body.compact { font-size: 0.93rem; }
+  body.compact .chip{ min-height: 34px; padding:6px 8px; }
+  body.compact .filterbar input[type="search"],
+  body.compact .filterbar select{ height: 36px; }
+  body.compact thead th{ padding:8px; }
+  body.compact tbody td{ padding:5px 8px; }
+  @media (max-width: 480px){
+    :root{ --name-col-width: 188px; }
+  }
+</style>
 </head>
 <body>
 
@@ -204,6 +216,35 @@
   </div>
 </section>
 
+<script>
+  // Slå på kompakt visning automatisk for veldig smale mobiler første gang + knapp for å bytte
+  (function(){
+    try{
+      const KEY='eh_compact_pref_v1';
+      const saved = localStorage.getItem(KEY);
+      if (saved === '1') document.body.classList.add('compact');
+      else if (saved === null && window.matchMedia('(max-width: 400px)').matches){
+        document.body.classList.add('compact');
+        localStorage.setItem(KEY,'1');
+      }
+      const bar = document.querySelector('.toolbar');
+      if (bar){
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.textContent = document.body.classList.contains('compact') ? 'Normal visning' : 'Kompakt visning';
+        btn.className='download-btn';
+        btn.style.marginLeft='4px';
+        btn.addEventListener('click',()=>{
+          document.body.classList.toggle('compact');
+          const on = document.body.classList.contains('compact');
+          btn.textContent = on ? 'Normal visning' : 'Kompakt visning';
+          localStorage.setItem(KEY, on ? '1':'0');
+        });
+        bar.appendChild(btn);
+      }
+    }catch(e){}
+  })();
+</script>
 <!-- FILTERBAR -->
 <section id="filters" class="filterbar">
   <!-- Collapsible på mobil via <details> -->
