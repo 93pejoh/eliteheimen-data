@@ -181,7 +181,6 @@
       <div class="brand-title-row">
         <h1>Eliteheimen Fantasy</h1>
         <div class="brand-links">
-          <!-- UPDATED LINK: text, href and aria-label -->
           <a class="nav-link" href="https://www.eliteheimen.no/forside/" aria-label="Forsiden">Forsiden</a>
           <a class="nav-link" href="https://patreon.com/Eliteheimen" target="_blank" rel="noopener" aria-label="Støtt på Patreon">Patreon</a>
         </div>
@@ -256,8 +255,11 @@ window.CSV_URL = CSV_URL;
 /* Skjul kolonner etter Excel-bokstav: */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
-/* Runde-kolonner og TOTALT */
-const GROUP_COLUMNS = ["R26","R27","R28","R29","R30"];
+/* Skjul kolonner etter navn (fjern R26 helt): */
+const EXCLUDE_BY_NAME = new Set(["R26"]);
+
+/* Runde-kolonner og TOTALT (start på R27) */
+const GROUP_COLUMNS = ["R27","R28","R29","R30"];
 const TOTAL_COLUMN  = "TOTALT";
 
 /* ======== ELEMENTER ======== */
@@ -277,12 +279,14 @@ let detectedPositionCol="", detectedNameCol="", detectedPriceCol="", detectedClu
 let priceGlobalMin=null, priceGlobalMax=null, priceCapVal=null;
 let selectedClub="";
 let favoritesOnly = false;
-let GLOBAL_GROUP_RANGE = null; // låst min/max for R25–R30 uavhengig av filter
+let GLOBAL_GROUP_RANGE = null; // låst min/max for runde-kolonnene uavhengig av filter
 
 /* Persist for TOTALT */
 const TOTAL_KEY = 'eh_total_cols_v1';
 let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
 if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
+/* Sikkerhetsnett: fjern ev. gammel R26 fra lagring */
+INCLUDED_IN_TOTAL.delete("R26");
 
 /* Favoritter (persist) */
 const FAVORITES_KEY = 'eh_favorites_v1';
@@ -433,12 +437,10 @@ function buildTotalChips(){
       if (INCLUDED_IN_TOTAL.has(col)) INCLUDED_IN_TOTAL.delete(col); else INCLUDED_IN_TOTAL.add(col);
       localStorage.setItem(TOTAL_KEY, JSON.stringify([...INCLUDED_IN_TOTAL]));
 
-      // Oppdater knappens visuelle state
       const nowOn = INCLUDED_IN_TOTAL.has(col);
       btn.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
       btn.title = nowOn ? 'Klikk for å ekskludere fra TOTALT' : 'Klikk for å inkludere i TOTALT';
 
-      // Reberegn TOTALT og oppdater visning
       computeTotalsForData();
       rebuildVisibleColumns();
       render();
@@ -462,12 +464,17 @@ function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = comput
 /* Synlige kolonner */
 function rebuildVisibleColumns(){
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
-  const base=[]; RAW_COLUMNS.forEach((c,i)=>{ if(!hideIdx.has(i)) base.push(c); });
+
+  /* bygg base og filtrer ut ekskluderte kolonnenavn (f.eks. R26) */
+  const base=[]; 
+  RAW_COLUMNS.forEach((c,i)=>{ 
+    if (!hideIdx.has(i) && !EXCLUDE_BY_NAME.has(c)) base.push(c); 
+  });
 
   // Fjern evt. "NESTE 6" fra CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
-  // Skjul ekskluderte runder ALLTID
+  // Skjul ekskluderte runder ALLTID (også om de lå i GROUP_COLUMNS)
   let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
 
   // Sett inn TOTALT rett etter xMin (case-insensitivt), ellers på slutten
@@ -609,7 +616,7 @@ Papa.parse(CSV_URL,{
     // TOTALT
     computeTotalsForData();
 
-    // Sett GLOBAL_GROUP_RANGE EN GANG (på hele datasettet) – stabil fargelegging for R25–R30
+    // Lås fargespekter for runde-kolonner (nå R27–R30) på hele datasettet
     GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS);
 
     rebuildVisibleColumns();
