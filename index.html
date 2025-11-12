@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Eliteheimen Fantasy</title>
 <meta name="description" content="Eliteheimen – et sted for deg som liker Eliteserien Fantasy." />
-<meta name="data-last-updated" content="2025-11-07T12:16:00+01:00">
+<meta name="data-last-updated" content="2025-11-12T12:28:00+01:00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="icon" href="logo.png">
@@ -466,7 +466,7 @@ function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = comput
 function rebuildVisibleColumns(){
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
 
-  /* bygg base og filtrer ut ekskluderte kolonnenavn (f.eks. R26) */
+  /* bygg base og filtrer ut ekskluderte kolonnenavn (f.eks. R26/R27) */
   const base=[]; 
   RAW_COLUMNS.forEach((c,i)=>{ 
     if (!hideIdx.has(i) && !EXCLUDE_BY_NAME.has(c)) base.push(c); 
@@ -475,7 +475,7 @@ function rebuildVisibleColumns(){
   // Fjern evt. "NESTE 6" fra CSV
   const idxN6 = base.indexOf('NESTE 6'); if (idxN6 !== -1) base.splice(idxN6,1);
 
-  // Skjul ekskluderte runder ALLTID (også om de lå i GROUP_COLUMNS)
+  // Skjul runde-kolonner som ikke er valgt i TOTALT
   let cols = base.filter(c => !(GROUP_COLUMNS.includes(c) && !INCLUDED_IN_TOTAL.has(c)));
 
   // Sett inn TOTALT rett etter xMin (case-insensitivt), ellers på slutten
@@ -617,7 +617,7 @@ Papa.parse(CSV_URL,{
     // TOTALT
     computeTotalsForData();
 
-    // Lås fargespekter for runde-kolonner (nå R27–R30) på hele datasettet
+    // Lås fargespekter for runde-kolonner (R28–R30) på hele datasettet
     GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS);
 
     rebuildVisibleColumns();
