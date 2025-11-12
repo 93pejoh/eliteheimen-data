@@ -258,8 +258,8 @@ const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 /* Skjul kolonner etter navn (fjern R26/R27 helt): */
 const EXCLUDE_BY_NAME = new Set(["R26","R27"]);
 
-/* Runde-kolonner og TOTALT (start på R28) */
-const GROUP_COLUMNS = ["R28","R29","R30"];
+/* Runde-kolonner og TOTALT (start på R29) */
+const GROUP_COLUMNS = ["R29","R30"];
 const TOTAL_COLUMN  = "TOTALT";
 
 /* ======== ELEMENTER ======== */
@@ -617,7 +617,7 @@ Papa.parse(CSV_URL,{
     // TOTALT
     computeTotalsForData();
 
-    // Lås fargespekter for runde-kolonner (R28–R30) på hele datasettet
+    // Lås fargespekter for runde-kolonner (R29–R30) på hele datasettet
     GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS);
 
     rebuildVisibleColumns();
