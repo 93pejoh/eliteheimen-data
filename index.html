@@ -255,11 +255,11 @@ window.CSV_URL = CSV_URL;
 /* Skjul kolonner etter Excel-bokstav: */
 const HIDE_BY_LETTER = ["F","H","J","L","N","P","R"];
 
-/* Skjul kolonner etter navn (fjern R26/R27 helt): */
-const EXCLUDE_BY_NAME = new Set(["R26","R27"]);
+/* Skjul kolonner etter navn (fjern R26/R27/R29 helt): */
+const EXCLUDE_BY_NAME = new Set(["R26","R27","R29"]);
 
-/* Runde-kolonner og TOTALT (start på R29) */
-const GROUP_COLUMNS = ["R29","R30"];
+/* Runde-kolonner og TOTALT (start på R30) */
+const GROUP_COLUMNS = ["R30"];
 const TOTAL_COLUMN  = "TOTALT";
 
 /* ======== ELEMENTER ======== */
@@ -285,9 +285,10 @@ let GLOBAL_GROUP_RANGE = null; // låst min/max for runde-kolonnene uavhengig av
 const TOTAL_KEY = 'eh_total_cols_v1';
 let INCLUDED_IN_TOTAL = new Set(JSON.parse(localStorage.getItem(TOTAL_KEY) || '[]'));
 if (INCLUDED_IN_TOTAL.size === 0) INCLUDED_IN_TOTAL = new Set(GROUP_COLUMNS);
-/* Sikkerhetsnett: fjern ev. gammel R26/R27 fra lagring */
+/* Sikkerhetsnett: fjern ev. gammel R26/R27/R29 fra lagring */
 INCLUDED_IN_TOTAL.delete("R26");
-INCLUDED_IN_TOTAL.delete("R27");  
+INCLUDED_IN_TOTAL.delete("R27");
+INCLUDED_IN_TOTAL.delete("R29");
 
 /* Favoritter (persist) */
 const FAVORITES_KEY = 'eh_favorites_v1';
@@ -466,7 +467,7 @@ function computeTotalsForData(){ for (const r of DATA){ r[TOTAL_COLUMN] = comput
 function rebuildVisibleColumns(){
   const hideIdx=new Set(HIDE_BY_LETTER.map(letterToIndex));
 
-  /* bygg base og filtrer ut ekskluderte kolonnenavn (f.eks. R26/R27) */
+  /* bygg base og filtrer ut ekskluderte kolonnenavn (f.eks. R26/R27/R29) */
   const base=[]; 
   RAW_COLUMNS.forEach((c,i)=>{ 
     if (!hideIdx.has(i) && !EXCLUDE_BY_NAME.has(c)) base.push(c); 
@@ -617,7 +618,7 @@ Papa.parse(CSV_URL,{
     // TOTALT
     computeTotalsForData();
 
-    // Lås fargespekter for runde-kolonner (R29–R30) på hele datasettet
+    // Lås fargespekter for runde-kolonnene (R30) på hele datasettet
     GLOBAL_GROUP_RANGE = computeGroupRange(DATA, GROUP_COLUMNS);
 
     rebuildVisibleColumns();
